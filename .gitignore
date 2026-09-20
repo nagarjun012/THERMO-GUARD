@@ -1,0 +1,42 @@
+# Node & Vite
+node_modules/
+dist/
+.env.local
+.env.*.local
+*.tsbuildinfo
+
+# Test & Browser Automation
+.playwright-mcp/
+scratch/
+*.png
+*.jpg
+*.webp
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.env
+*.egg-info/
+build/
+*.egg
+
+# IDE & OS
+.agents/
+.gemini/
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Database & Cache
+*.db
+*.sqlite3
+*.pkl
+*.joblib
+!backend/app/ml/models/.gitkeep

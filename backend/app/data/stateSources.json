@@ -1,0 +1,176 @@
+{
+  "Tamil Nadu": {
+    "hospitalSources": ["TN Health Portal", "ABDM HFR", "GCC Emergency Feed"],
+    "coolingCentreSources": ["Coimbatore Municipal Corp HAP", "GCC Chennai Urban Cooling"],
+    "healthPortal": "https://tnhealth.tn.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Karnataka": {
+    "hospitalSources": ["Suvarna Arogya Suraksha Trust", "ABDM HFR", "BBMP Health"],
+    "coolingCentreSources": ["BBMP Climate Action Plan"],
+    "healthPortal": "https://arogya.karnataka.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Maharashtra": {
+    "hospitalSources": ["Arogya Maharashtra", "BMC Disaster Management", "ABDM HFR"],
+    "coolingCentreSources": ["BMC Heat Action Plan Shelters"],
+    "healthPortal": "https://arogya.maharashtra.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Delhi": {
+    "hospitalSources": ["DGHS Delhi", "Delhi Corona/Emergency Portal", "ABDM HFR"],
+    "coolingCentreSources": ["MCD Heat Action Plan Facilities"],
+    "healthPortal": "https://dghs.delhi.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Telangana": {
+    "hospitalSources": ["Arogyasri Trust", "GHMC Emergency Registry", "ABDM HFR"],
+    "coolingCentreSources": ["GHMC Cooling Shelters"],
+    "healthPortal": "https://health.telangana.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "West Bengal": {
+    "hospitalSources": ["Swasthya Bhawan", "ABDM HFR", "KMC Health"],
+    "coolingCentreSources": ["KMC Relief Shelters"],
+    "healthPortal": "https://wbhealth.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Gujarat": {
+    "hospitalSources": ["Gujarat Health Portal", "AMC Ahmedabad HAP Feed", "ABDM HFR"],
+    "coolingCentreSources": ["Ahmedabad Heat Action Plan Cooling Centres"],
+    "healthPortal": "https://guihealth.gujarat.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Kerala": {
+    "hospitalSources": ["eHealth Kerala", "ABDM HFR"],
+    "coolingCentreSources": ["KSDMA Water & Cooling Kiosks"],
+    "healthPortal": "https://dhs.kerala.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Andhra Pradesh": {
+    "hospitalSources": ["YSRAHCT Portal", "ABDM HFR"],
+    "coolingCentreSources": ["APSDMA Heatwave Relief Shelters"],
+    "healthPortal": "https://hmfw.ap.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Rajasthan": {
+    "hospitalSources": ["Swasthya Portal Rajasthan", "ABDM HFR"],
+    "coolingCentreSources": ["Jaipur Municipal Corp Cooling Kiosks"],
+    "healthPortal": "https://rajhealth.rajasthan.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Uttar Pradesh": {
+    "hospitalSources": ["UP Health Portal", "ABDM HFR"],
+    "coolingCentreSources": ["UPSDMA Emergency Kiosks"],
+    "healthPortal": "https://uphealth.up.nic.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Bihar": {
+    "hospitalSources": ["State Health Society Bihar", "ABDM HFR"],
+    "coolingCentreSources": ["BSDMA Heatwave Shelters"],
+    "healthPortal": "https://shsb.bihar.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Madhya Pradesh": {
+    "hospitalSources": ["MP Health Services", "ABDM HFR"],
+    "coolingCentreSources": ["Bhopal/Indore Municipal Cooling Hubs"],
+    "healthPortal": "https://health.mp.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Punjab": {
+    "hospitalSources": ["Punjab Health Portal", "ABDM HFR"],
+    "coolingCentreSources": ["District Relief Centres"],
+    "healthPortal": "https://pbhealth.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Haryana": {
+    "hospitalSources": ["Haryana Health Services", "ABDM HFR"],
+    "coolingCentreSources": ["Gurugram/Faridabad Municipal Kiosks"],
+    "healthPortal": "https://haryanahealth.nic.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Odisha": {
+    "hospitalSources": ["Odisha Health Portal", "ABDM HFR"],
+    "coolingCentreSources": ["OSDMA Heatwave Drinking Water Kiosks"],
+    "healthPortal": "https://health.odisha.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Assam": {
+    "hospitalSources": ["National Health Mission Assam", "ABDM HFR"],
+    "coolingCentreSources": ["ASDMA Relief Shelters"],
+    "healthPortal": "https://nhm.assam.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Jharkhand": {
+    "hospitalSources": ["Jharkhand Health Portal", "ABDM HFR"],
+    "coolingCentreSources": ["Ranchi Municipal Heat Shelters"],
+    "healthPortal": "https://jharkhandhealth.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Chhattisgarh": {
+    "hospitalSources": ["CG Health Portal", "ABDM HFR"],
+    "coolingCentreSources": ["Raipur Municipal Kiosks"],
+    "healthPortal": "https://cghealth.nic.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Uttarakhand": {
+    "hospitalSources": ["Uttarakhand Health Services", "ABDM HFR"],
+    "coolingCentreSources": ["USDMA Cooling Shelters"],
+    "healthPortal": "https://health.uk.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Himachal Pradesh": {
+    "hospitalSources": ["HP Health Department", "ABDM HFR"],
+    "coolingCentreSources": ["HPSDMA Transit Kiosks"],
+    "healthPortal": "https://hphealth.nic.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Goa": {
+    "hospitalSources": ["Goa Health Services", "ABDM HFR"],
+    "coolingCentreSources": ["Panaji Municipal Cooling Points"],
+    "healthPortal": "https://dhs.goa.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Jammu and Kashmir": {
+    "hospitalSources": ["JK Health & Medical Education", "ABDM HFR"],
+    "coolingCentreSources": ["JKSDMA Relief Points"],
+    "healthPortal": "https://jkhealth.org",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Ladakh": {
+    "hospitalSources": ["Health Department Ladakh", "ABDM HFR"],
+    "coolingCentreSources": ["Leh Transit Centres"],
+    "healthPortal": "https://health.ladakh.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Puducherry": {
+    "hospitalSources": ["Puducherry Health Services", "ABDM HFR"],
+    "coolingCentreSources": ["Puducherry Municipal Kiosks"],
+    "healthPortal": "https://health.py.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Chandigarh": {
+    "hospitalSources": ["Chandigarh Health Department", "ABDM HFR"],
+    "coolingCentreSources": ["MCC Heat Kiosks"],
+    "healthPortal": "https://chdhealth.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Andaman and Nicobar Islands": {
+    "hospitalSources": ["DHS A&N Islands", "ABDM HFR"],
+    "coolingCentreSources": ["Port Blair Municipal Shelters"],
+    "healthPortal": "https://dhs.andaman.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Dadra and Nagar Haveli and Daman and Diu": {
+    "hospitalSources": ["DNH & DD Health Services", "ABDM HFR"],
+    "coolingCentreSources": ["Silvassa Municipal Kiosks"],
+    "healthPortal": "https://dnh.gov.in/health",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  },
+  "Lakshadweep": {
+    "hospitalSources": ["Lakshadweep Health Services", "ABDM HFR"],
+    "coolingCentreSources": ["Kavaratti Community Kiosks"],
+    "healthPortal": "https://lakshadweep.gov.in",
+    "lastChecked": "2026-09-15T11:00:00Z"
+  }
+}

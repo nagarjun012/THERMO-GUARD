@@ -1,0 +1,34 @@
+{
+  "crons": [
+    {
+      "path": "/api/refresh",
+      "schedule": "0 */3 * * *"
+    }
+  ],
+  "functions": {
+    "api/refresh.ts": {
+      "maxDuration": 60
+    },
+    "api/htss.ts": {
+      "maxDuration": 10
+    },
+    "api/weather.ts": {
+      "maxDuration": 15
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/$1"
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" }
+      ]
+    }
+  ]
+}
