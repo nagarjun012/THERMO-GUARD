@@ -276,7 +276,7 @@ class GovHtssService {
    */
   private async queryOpenMeteoBatch(
     items: { lat: number; lon: number }[],
-    retries = 2
+    retries = 4
   ): Promise<(any | null)[]> {
     const lats = items.map((p) => p.lat).join(',');
     const lons = items.map((p) => p.lon).join(',');
@@ -290,12 +290,14 @@ class GovHtssService {
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         const controller = new AbortController();
-        const timer = setTimeout(() => controller.abort(), 12000);
+        const timer = setTimeout(() => controller.abort(), 15000);
         const res = await fetch(url, { signal: controller.signal });
         clearTimeout(timer);
 
         if (res.status === 429) {
-          await new Promise((r) => setTimeout(r, 1500 * (attempt + 1)));
+          const waitTime = (attempt + 1) * 7000;
+          console.warn(`[Open-Meteo Rate Limit 429] Waiting ${waitTime / 1000}s for sliding window reset... (Attempt ${attempt + 1}/${retries})`);
+          await new Promise((r) => setTimeout(r, waitTime));
           continue;
         }
 
@@ -306,7 +308,7 @@ class GovHtssService {
         return items.map((_, idx) => dataArr[idx]?.current ?? null);
       } catch (err) {
         if (attempt < retries) {
-          await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+          await new Promise((r) => setTimeout(r, 1000 * (attempt + 1)));
         }
       }
     }
@@ -477,7 +479,7 @@ class GovHtssService {
     }
     const total = currentDistricts.length;
 
-    const CHUNK_SIZE = 35;
+    const CHUNK_SIZE = 40;
     const now = new Date().toISOString();
 
     for (let i = 0; i < currentDistricts.length; i += CHUNK_SIZE) {
@@ -527,15 +529,72 @@ class GovHtssService {
 
       const loaded = Math.min(i + CHUNK_SIZE, total);
       const intermediate = this.recalculatePipeline(currentDistricts, true);
+      this.saveCaches(intermediate);
       onProgress?.(loaded, total, intermediate);
 
       // Brief pacing pause between chunks to keep Open-Meteo happy
       if (i + CHUNK_SIZE < currentDistricts.length) {
-        await new Promise((r) => setTimeout(r, 200));
+        await new Promise((r) => setTimeout(r, 250));
       }
     }
 
-    return this.recalculatePipeline(currentDistricts, true);
+    // Second-chance retry pass for any districts that were rate-limited or timed out
+    const stillFailed = currentDistricts.filter((d) => d.status === 'FAILED' || !d.isLive);
+    if (stillFailed.length > 0 && stillFailed.length < total) {
+      console.info(`[GovHtssService] Running second-chance pass for ${stillFailed.length} remaining unsynced districts...`);
+      for (let i = 0; i < stillFailed.length; i += CHUNK_SIZE) {
+        const retryChunk = stillFailed.slice(i, i + CHUNK_SIZE);
+        const retryResults = await this.queryOpenMeteoBatch(retryChunk, 4);
+
+        retryChunk.forEach((d, idx) => {
+          const curr = retryResults[idx];
+          if (curr && curr.temperature_2m !== undefined && curr.temperature_2m !== null) {
+            const temp = Number(curr.temperature_2m);
+            const rh = Number(curr.relative_humidity_2m ?? 50);
+            const wind = Number(curr.wind_speed_10m ?? 10);
+            const solar = Number(curr.shortwave_radiation ?? 0);
+
+            const calculatedHi = calculateHeatIndex(temp, rh);
+            const hi = curr.apparent_temperature !== undefined && curr.apparent_temperature !== null
+              ? Number(curr.apparent_temperature)
+              : calculatedHi;
+
+            const twb = calculateWetBulb(temp, rh);
+            const wbgt = calculateOutdoorWBGT(temp, rh, solar);
+            const utci = calculateUTCI(temp, rh, wind, solar);
+            const risk = computeRealThermalRisk(temp, rh, wind, solar);
+
+            d.temperature = Math.round(temp * 10) / 10;
+            d.humidity = Math.round(rh * 10) / 10;
+            d.windSpeed = Math.round(wind * 10) / 10;
+            d.solarRadiation = Math.round(solar * 10) / 10;
+            d.heatIndex = Math.round(hi * 10) / 10;
+            d.apparent_temperature = d.heatIndex;
+            d.twb = Math.round(twb * 10) / 10;
+            d.wbgt = wbgt;
+            d.utci = utci;
+            d.htss = risk.htss;
+            d.riskCategory = (risk.level.toUpperCase() as any) || 'LOW';
+            d.status = 'SUCCESS';
+            d.calculatedAt = now;
+            d.source = 'Live Open-Meteo Batch Pipeline';
+            d.isLive = true;
+          }
+        });
+
+        const intermediate = this.recalculatePipeline(currentDistricts, true);
+        this.saveCaches(intermediate);
+        onProgress?.(total, total, intermediate);
+
+        if (i + CHUNK_SIZE < stillFailed.length) {
+          await new Promise((r) => setTimeout(r, 400));
+        }
+      }
+    }
+
+    const finalResult = this.recalculatePipeline(currentDistricts, true);
+    this.saveCaches(finalResult);
+    return finalResult;
   }
 
   /**
