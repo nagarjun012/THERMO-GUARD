@@ -180,13 +180,3 @@ npm run build
 5. **NDMA India**: *National Guidelines for Preparation of Action Plan - Prevention and Management of Heat Wave*. National Disaster Management Authority, Government of India.
 
 ---
-
-## 📄 License
-
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
-
----
-
-<div align="center">
-Built with ❤️ for climate resilience and heat defense across India.
-</div>
