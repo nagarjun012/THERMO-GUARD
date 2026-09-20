@@ -12,8 +12,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { LIVE_DISTRICT_TELEMETRY } from '../src/data/liveDistrictTelemetry';
-import { BASELINE_DISTRICT_TELEMETRY } from '../src/data/baselineDistrictTelemetry';
+import { LIVE_DISTRICT_TELEMETRY } from '../src/data/liveDistrictTelemetry.ts';
+import { BASELINE_DISTRICT_TELEMETRY } from '../src/data/baselineDistrictTelemetry.ts';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -29,6 +29,34 @@ function buildSupabaseClient() {
   } catch (e) {
     return null;
   }
+}
+
+function calculateHeatIndex(tempC: number, rh: number): number {
+  const T = (tempC * 9) / 5 + 32;
+  const RH = Math.min(100, Math.max(0, rh));
+  if (T < 68) return Math.round(tempC * 10) / 10;
+
+  let hiF = 0.5 * (T + 61.0 + (T - 68.0) * 1.2 + RH * 0.094);
+  if (hiF >= 80) {
+    hiF =
+      -42.379 +
+      2.04901523 * T +
+      10.14333127 * RH -
+      0.22475541 * T * RH -
+      0.00683783 * T * T -
+      0.05481717 * RH * RH +
+      0.00122874 * T * T * RH +
+      0.00085282 * T * RH * RH -
+      0.00000199 * T * T * RH * RH;
+
+    if (RH < 13 && T >= 80 && T <= 112) {
+      hiF -= ((13 - RH) / 4) * Math.sqrt((17 - Math.abs(T - 95)) / 17);
+    } else if (RH > 85 && T >= 80 && T <= 87) {
+      hiF += ((RH - 85) / 10) * ((87 - T) / 5);
+    }
+  }
+  const hiC = ((hiF - 32) * 5) / 9;
+  return Math.round(Math.max(tempC, hiC) * 10) / 10;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -61,34 +89,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         ? LIVE_DISTRICT_TELEMETRY
         : BASELINE_DISTRICT_TELEMETRY;
     }
-
-function calculateHeatIndex(tempC: number, rh: number): number {
-  const T = (tempC * 9) / 5 + 32;
-  const RH = Math.min(100, Math.max(0, rh));
-  if (T < 68) return Math.round(tempC * 10) / 10;
-
-  let hiF = 0.5 * (T + 61.0 + (T - 68.0) * 1.2 + RH * 0.094);
-  if (hiF >= 80) {
-    hiF =
-      -42.379 +
-      2.04901523 * T +
-      10.14333127 * RH -
-      0.22475541 * T * RH -
-      0.00683783 * T * T -
-      0.05481717 * RH * RH +
-      0.00122874 * T * T * RH +
-      0.00085282 * T * RH * RH -
-      0.00000199 * T * T * RH * RH;
-
-    if (RH < 13 && T >= 80 && T <= 112) {
-      hiF -= ((13 - RH) / 4) * Math.sqrt((17 - Math.abs(T - 95)) / 17);
-    } else if (RH > 85 && T >= 80 && T <= 87) {
-      hiF += ((RH - 85) / 10) * ((87 - T) / 5);
-    }
-  }
-  const hiC = ((hiF - 32) * 5) / 9;
-  return Math.round(Math.max(tempC, hiC) * 10) / 10;
-}
 
     // Build district list (already sorted by htss DESC)
     const districts = rawRows.map((row: any, index: number) => {

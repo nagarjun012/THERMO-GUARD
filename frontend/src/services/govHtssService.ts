@@ -423,7 +423,32 @@ class GovHtssService {
   ): Promise<GovPortalPipelineResult> {
     const current = this.getCachedResult();
     let currentDistricts = baseDistricts && baseDistricts.length > 0 ? baseDistricts : (current?.districts || []);
-    const total = currentDistricts.length || ALL_INDIA_DISTRICTS.length;
+    if (currentDistricts.length === 0) {
+      currentDistricts = ALL_INDIA_DISTRICTS.map((d, idx) => ({
+        id: d.id,
+        rank: idx + 1,
+        district: d.district,
+        state: d.state,
+        lat: d.lat,
+        lon: d.lon,
+        temperature: null,
+        humidity: null,
+        windSpeed: null,
+        solarRadiation: null,
+        heatIndex: null,
+        apparent_temperature: null,
+        twb: null,
+        wbgt: null,
+        utci: null,
+        htss: null,
+        riskCategory: 'DATA UNAVAILABLE',
+        status: 'LOADING',
+        calculatedAt: null,
+        source: 'Live Open-Meteo Batch Pipeline',
+        isLive: false,
+      }));
+    }
+    const total = currentDistricts.length;
 
     const CHUNK_SIZE = 35;
     const now = new Date().toISOString();
@@ -466,7 +491,7 @@ class GovHtssService {
           d.source = 'Live Open-Meteo Batch Pipeline';
           d.isLive = true;
         } else {
-          // API failed for this district — do NOT mark as live
+          // API failed for this district — mark accurately as failed/unavailable
           d.status = 'FAILED';
           d.calculatedAt = now;
           d.isLive = false;
@@ -495,10 +520,10 @@ class GovHtssService {
     // 1. Check in-memory / cache if not force refresh
     if (!forceRefresh) {
       const cached = this.getCachedResult();
-      if (cached) return cached;
+      if (cached && cached.districts && cached.districts.length > 0) return cached;
     }
 
-    if (this.isProcessing && this.inMemoryResult) {
+    if (this.isProcessing && this.inMemoryResult && this.inMemoryResult.districts.length > 0) {
       return this.inMemoryResult;
     }
     this.isProcessing = true;
@@ -508,91 +533,129 @@ class GovHtssService {
       onProgress?.(0, 788);
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 15000);
+      const timer = setTimeout(() => controller.abort(), 12000);
 
-      let apiRes: Response;
+      let apiRes: Response | null = null;
       try {
         apiRes = await fetch('/api/htss', { signal: controller.signal });
+      } catch (fetchErr) {
+        console.warn('[/api/htss] Direct fetch failed, will fallback to Open-Meteo live sync:', fetchErr);
       } finally {
         clearTimeout(timer);
       }
 
-      if (!apiRes.ok) {
-        throw new Error(`/api/htss responded with HTTP ${apiRes.status}`);
-      }
+      if (apiRes && apiRes.ok) {
+        const serverData = await apiRes.json();
+        if (serverData?.districts && serverData.districts.length > 0) {
+          onProgress?.(788, 788);
 
-      const serverData = await apiRes.json();
-      onProgress?.(788, 788);
-
-      // Check if local storage already has valid, non-expired live data
-      const liveStored = localStorage.getItem(LOCAL_STORAGE_LIVE_KEY);
-      if (liveStored && !forceRefresh) {
-        try {
-          const parsed = JSON.parse(liveStored);
-          const age = Date.now() - new Date(parsed.lastFetchedAt).getTime();
-          if (age < CACHE_TTL_MS && parsed?.districts?.length > 0) {
-            this.inMemoryResult = parsed;
-            return parsed;
+          // Check if local storage already has valid, non-expired live data
+          const liveStored = localStorage.getItem(LOCAL_STORAGE_LIVE_KEY);
+          if (liveStored && !forceRefresh) {
+            try {
+              const parsed = JSON.parse(liveStored);
+              const age = Date.now() - new Date(parsed.lastFetchedAt).getTime();
+              if (age < CACHE_TTL_MS && parsed?.districts?.length > 0) {
+                this.inMemoryResult = parsed;
+                return parsed;
+              }
+            } catch (e) {
+              // ignore
+            }
           }
-        } catch (e) {
-          // ignore
+
+          const result: GovPortalPipelineResult = {
+            status: 'ok',
+            districts: serverData.districts ?? [],
+            states: serverData.states ?? [],
+            counters: serverData.counters ?? {
+              totalDistricts: serverData.districts?.length ?? 0,
+              successfulCount: 0,
+              failedCount: 0,
+              extremeCount: 0,
+              highCount: 0,
+              moderateCount: 0,
+              lowCount: 0,
+              statesAffectedCount: 0,
+              affectedPopulation: 0,
+            },
+            lastFetchedAt: serverData.lastFetchedAt ?? new Date().toISOString(),
+            isCached: serverData.isCached ?? false,
+            isLive: serverData.isLive ?? true,
+          };
+
+          this.saveCaches(result);
+
+          // If forceRefresh requested, execute live Open-Meteo refresh
+          if (forceRefresh) {
+            return await this.refreshAllLive(onProgress, result.districts);
+          }
+
+          return result;
         }
       }
 
-      const result: GovPortalPipelineResult = {
-        status: 'ok',
-        districts: serverData.districts ?? [],
-        states: serverData.states ?? [],
-        counters: serverData.counters ?? {
-          totalDistricts: serverData.districts?.length ?? 0,
-          successfulCount: 0,
-          failedCount: 0,
-          extremeCount: 0,
-          highCount: 0,
-          moderateCount: 0,
-          lowCount: 0,
-          statesAffectedCount: 0,
-          affectedPopulation: 0,
-        },
-        lastFetchedAt: serverData.lastFetchedAt ?? new Date().toISOString(),
-        isCached: serverData.isCached ?? false,
-        isLive: serverData.isLive ?? true,
-      };
+      // 3. Fallback: If /api/htss is unavailable or returns no districts,
+      // load all 788 districts and run live Open-Meteo batch pipeline directly
+      console.info('[GovHtssService] Launching direct live Open-Meteo batch queries for 788 districts...');
+      const fallbackDistricts: ProcessedDistrict[] = ALL_INDIA_DISTRICTS.map((d, idx) => ({
+        id: d.id,
+        rank: idx + 1,
+        district: d.district,
+        state: d.state,
+        lat: d.lat,
+        lon: d.lon,
+        temperature: null,
+        humidity: null,
+        windSpeed: null,
+        solarRadiation: null,
+        heatIndex: null,
+        apparent_temperature: null,
+        twb: null,
+        wbgt: null,
+        utci: null,
+        htss: null,
+        riskCategory: 'DATA UNAVAILABLE',
+        status: 'LOADING',
+        calculatedAt: null,
+        source: 'Live Open-Meteo Batch Pipeline',
+        isLive: false,
+      }));
 
-      this.saveCaches(result);
-
-      // If forceRefresh requested, execute live Open-Meteo refresh
-      if (forceRefresh) {
-        return await this.refreshAllLive(onProgress, result.districts);
-      }
-
-      return result;
+      return await this.refreshAllLive(onProgress, fallbackDistricts);
     } catch (err: any) {
       console.error('[GovHtssService] Pipeline failed:', err?.message ?? err);
 
-      if (this.inMemoryResult) {
+      if (this.inMemoryResult && this.inMemoryResult.districts.length > 0) {
         return { ...this.inMemoryResult, isCached: true };
       }
 
-      return {
-        status: 'error',
-        message: 'Live data currently unavailable. Please try again shortly.',
-        districts: [],
-        states: [],
-        counters: {
-          totalDistricts: 788,
-          successfulCount: 0,
-          failedCount: 788,
-          extremeCount: 0,
-          highCount: 0,
-          moderateCount: 0,
-          lowCount: 0,
-          statesAffectedCount: 0,
-          affectedPopulation: 0,
-        },
-        lastFetchedAt: new Date().toISOString(),
-        isCached: false,
-      };
+      // Construct a valid 788-district fallback list rather than empty []
+      const fallbackDistricts: ProcessedDistrict[] = ALL_INDIA_DISTRICTS.map((d, idx) => ({
+        id: d.id,
+        rank: idx + 1,
+        district: d.district,
+        state: d.state,
+        lat: d.lat,
+        lon: d.lon,
+        temperature: null,
+        humidity: null,
+        windSpeed: null,
+        solarRadiation: null,
+        heatIndex: null,
+        apparent_temperature: null,
+        twb: null,
+        wbgt: null,
+        utci: null,
+        htss: null,
+        riskCategory: 'DATA UNAVAILABLE',
+        status: 'FAILED',
+        calculatedAt: null,
+        source: 'Live Open-Meteo Batch Pipeline',
+        isLive: false,
+      }));
+
+      return this.recalculatePipeline(fallbackDistricts, false);
     } finally {
       this.isProcessing = false;
     }
