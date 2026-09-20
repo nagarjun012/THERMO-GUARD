@@ -170,26 +170,6 @@ npm run build
 
 ---
 
-## 🌐 Deployment
-
-THERMO-GUARD is optimized for **Vercel** serverless deployment with automated cron synchronization.
-
-### Option 1: Deploy via GitHub (Recommended)
-1. Push this repository to your GitHub account:
-   ```bash
-   git push origin main
-   ```
-2. Open [Vercel](https://vercel.com) and click **"Add New Project"**.
-3. Select your `THERMO-GUARD` repository.
-4. Click **"Deploy"** — the root [`vercel.json`](vercel.json) handles all build commands and serverless function routing automatically!
-
-### Option 2: Deploy via Vercel CLI
-```bash
-# From repository root:
-npx vercel --prod
-```
-
----
 
 ## 📜 Scientific References & Standards
 
