@@ -17,17 +17,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onSuccess,
 }) => {
   const navigate = useNavigate();
-  const { setUserRole } = useAppStore();
+  const { loginAs } = useAppStore();
   const [activeTab, setActiveTab] = useState<AuthRole>(initialRole);
 
   // Form states
   const [userName, setUserName] = useState('');
-  const [govId, setGovId] = useState('NDMA-HQ-882');
-  const [department, setDepartment] = useState('National Disaster Management Authority');
+  const [govId, setGovId] = useState('');
+  const [department, setDepartment] = useState('');
+  const [govError, setGovError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setActiveTab(initialRole);
+      setGovError('');
     }
   }, [isOpen, initialRole]);
 
@@ -35,7 +37,15 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setUserRole(activeTab);
+
+    // Gov login requires non-empty Officer ID
+    if (activeTab === 'gov' && govId.trim().length === 0) {
+      setGovError('Officer ID is required for Government access');
+      return;
+    }
+
+    setGovError('');
+    loginAs(activeTab);
     if (onSuccess) {
       onSuccess(activeTab);
     } else {
@@ -174,12 +184,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   <input
                     type="text"
                     value={govId}
-                    onChange={(e) => setGovId(e.target.value)}
+                    onChange={(e) => { setGovId(e.target.value); setGovError(''); }}
                     required
-                    className="w-full px-4 py-3 rounded-xl bg-dark-950/80 border border-white/10 text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-500 transition-colors"
+                    placeholder="e.g. NDMA-HQ-882"
+                    className={`w-full px-4 py-3 rounded-xl bg-dark-950/80 border text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-500 transition-colors ${
+                      govError ? 'border-red-500/50' : 'border-white/10'
+                    }`}
                   />
                   <Lock className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
                 </div>
+                {govError && (
+                  <p className="text-red-400 text-[10px] font-mono mt-1">{govError}</p>
+                )}
               </div>
 
               <div>

@@ -307,7 +307,6 @@ class GovHtssService {
 
     const BATCH_SIZE = 40;
     const now = new Date().toISOString();
-    const localHour = new Date().getHours();
 
     for (let i = 0; i < stateDistricts.length; i += BATCH_SIZE) {
       const slice = stateDistricts.slice(i, i + BATCH_SIZE);
@@ -319,10 +318,7 @@ class GovHtssService {
           const temp = Number(curr.temperature_2m);
           const rh = Number(curr.relative_humidity_2m ?? 50);
           const wind = Number(curr.wind_speed_10m ?? 10);
-          let solar = Number(curr.shortwave_radiation ?? 0);
-          if (solar <= 5 && localHour >= 6 && localHour <= 18) {
-            solar = Math.max(120, Math.round(750 * Math.sin((Math.PI * (localHour - 6)) / 12)));
-          }
+          const solar = Number(curr.shortwave_radiation ?? 0);
 
           const calculatedHi = calculateHeatIndex(temp, rh);
           const hi = curr.apparent_temperature !== undefined && curr.apparent_temperature !== null
@@ -369,11 +365,7 @@ class GovHtssService {
         const temp = Number(curr.temperature_2m);
         const rh = Number(curr.relative_humidity_2m ?? 50);
         const wind = Number(curr.wind_speed_10m ?? 10);
-        let solar = Number(curr.shortwave_radiation ?? 0);
-        const localHour = new Date().getHours();
-        if (solar <= 5 && localHour >= 6 && localHour <= 18) {
-          solar = Math.max(120, Math.round(750 * Math.sin((Math.PI * (localHour - 6)) / 12)));
-        }
+        const solar = Number(curr.shortwave_radiation ?? 0);
 
         const calculatedHi = calculateHeatIndex(temp, rh);
         const hi = curr.apparent_temperature !== undefined && curr.apparent_temperature !== null
@@ -435,7 +427,6 @@ class GovHtssService {
 
     const CHUNK_SIZE = 35;
     const now = new Date().toISOString();
-    const localHour = new Date().getHours();
 
     for (let i = 0; i < currentDistricts.length; i += CHUNK_SIZE) {
       const chunk = currentDistricts.slice(i, i + CHUNK_SIZE);
@@ -447,10 +438,7 @@ class GovHtssService {
           const temp = Number(curr.temperature_2m);
           const rh = Number(curr.relative_humidity_2m ?? 50);
           const wind = Number(curr.wind_speed_10m ?? 10);
-          let solar = Number(curr.shortwave_radiation ?? 0);
-          if (solar <= 5 && localHour >= 6 && localHour <= 18) {
-            solar = Math.max(120, Math.round(750 * Math.sin((Math.PI * (localHour - 6)) / 12)));
-          }
+          const solar = Number(curr.shortwave_radiation ?? 0);
 
           const calculatedHi = calculateHeatIndex(temp, rh);
           const hi = curr.apparent_temperature !== undefined && curr.apparent_temperature !== null
@@ -478,8 +466,10 @@ class GovHtssService {
           d.source = 'Live Open-Meteo Batch Pipeline';
           d.isLive = true;
         } else {
+          // API failed for this district — do NOT mark as live
+          d.status = 'FAILED';
           d.calculatedAt = now;
-          d.isLive = true;
+          d.isLive = false;
         }
       });
 

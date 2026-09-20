@@ -155,15 +155,29 @@ async function fetchCurrentWeather(lat: number, lon: number) {
       if (res.ok) {
         const data = await res.json();
         const curr = data?.current ?? {};
-        const temp = Number(curr.temperature_2m ?? 0);
-        const rh = Number(curr.relative_humidity_2m ?? 0);
+        if (
+          curr.temperature_2m === undefined ||
+          curr.temperature_2m === null ||
+          curr.relative_humidity_2m === undefined ||
+          curr.relative_humidity_2m === null
+        ) {
+          throw new Error('Incomplete weather telemetry: missing temperature or humidity');
+        }
+
+        const temp = Number(curr.temperature_2m);
+        const rh = Number(curr.relative_humidity_2m);
+
+        if (isNaN(temp) || isNaN(rh) || temp < -60 || temp > 60 || rh < 0 || rh > 100) {
+          throw new Error('Physically implausible weather telemetry received');
+        }
+
         const wind = Number(curr.wind_speed_10m ?? 0);
         const windDir = Number(curr.wind_direction_10m ?? 0);
-        const solar = Number(curr.shortwave_radiation ?? 0);
+        const solar = Math.max(0, Number(curr.shortwave_radiation ?? 0));
         const pressure = Number(curr.pressure_msl ?? 1013.25);
         const dewPoint = Number(curr.dew_point_2m ?? 0);
         const apparentTemp = Number(curr.apparent_temperature ?? temp);
-        const uvIndex = Number(curr.uv_index ?? 0);
+        const uvIndex = Math.max(0, Number(curr.uv_index ?? 0));
         const cloudCover = Number(curr.cloud_cover ?? 0);
         const apiTime = curr.time || new Date().toISOString();
 
@@ -402,6 +416,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       isLive: false,
       detail: err?.message ?? 'Open-Meteo request failed',
       dataSource: 'DATA UNAVAILABLE',
+      lastSuccessfulUpdate: null,
+      timestamp: new Date().toISOString(),
     });
   }
 }

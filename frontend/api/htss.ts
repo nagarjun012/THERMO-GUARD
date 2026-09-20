@@ -91,7 +91,6 @@ function calculateHeatIndex(tempC: number, rh: number): number {
 }
 
     // Build district list (already sorted by htss DESC)
-    const localHour = new Date().getHours();
     const districts = rawRows.map((row: any, index: number) => {
       const levelRaw = (row.risk_category ?? row.level ?? 'LOW').toUpperCase();
       let riskCategory: 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW' | 'DATA UNAVAILABLE' = 'LOW';
@@ -103,10 +102,7 @@ function calculateHeatIndex(tempC: number, rh: number): number {
 
       const temp = row.temperature ?? row.temp ?? null;
       const rh = row.humidity ?? row.rh ?? null;
-      let solar = row.solar_rad ?? row.solar ?? null;
-      if ((solar === null || solar <= 5) && localHour >= 6 && localHour <= 18) {
-        solar = Math.max(120, Math.round(750 * Math.sin((Math.PI * (localHour - 6)) / 12)));
-      }
+      const solar = row.solar_rad ?? row.solar ?? null;
       const heatIndex =
         row.heat_index ??
         (temp !== null && rh !== null ? calculateHeatIndex(temp, rh) : null);

@@ -20,8 +20,9 @@ import { LoginModal } from '../auth/LoginModal';
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [switchTargetRole, setSwitchTargetRole] = useState<'user' | 'gov'>('user');
   const navigate = useNavigate();
-  const { userRole, setUserRole, logout } = useAppStore();
+  const { userRole, logout } = useAppStore();
 
   // Filter navigation links based on user role:
   // - USER LOGIN: Show Dashboard, Live Map, Learn, About (Gov Portal is HIDDEN)
@@ -40,14 +41,11 @@ export const Navbar: React.FC = () => {
           { to: '/about', label: 'About', icon: Info },
         ];
 
+  // Role switch requires re-authentication via LoginModal
   const handleSwitchRole = () => {
-    if (userRole === 'gov') {
-      setUserRole('user');
-      navigate('/dashboard');
-    } else {
-      setUserRole('gov');
-      navigate('/government');
-    }
+    const targetRole = userRole === 'gov' ? 'user' : 'gov';
+    setSwitchTargetRole(targetRole);
+    setIsModalOpen(true);
   };
 
   const handleLogout = () => {
@@ -232,7 +230,7 @@ export const Navbar: React.FC = () => {
       {/* LOGIN MODAL */}
       <LoginModal
         isOpen={isModalOpen}
-        initialRole={userRole}
+        initialRole={switchTargetRole}
         onClose={() => setIsModalOpen(false)}
       />
     </>

@@ -18,7 +18,10 @@ interface AppState {
   selectedLocation: Location;
   activeScenario: string | null;
   userRole: AuthRole;
+  isAuthenticated: boolean;
+  sessionToken: string | null;
   setUserRole: (role: AuthRole) => void;
+  loginAs: (role: AuthRole) => void;
   logout: () => void;
   setLocation: (loc: Location) => void;
   setIndiaLocation: (
@@ -37,10 +40,34 @@ interface AppState {
 const getInitialRole = (): AuthRole => {
   try {
     const saved = localStorage.getItem('thermosafe_auth_role');
-    if (saved === 'gov' || saved === 'user') return saved;
+    const token = localStorage.getItem('thermosafe_session_token');
+    if ((saved === 'gov' || saved === 'user') && token) return saved;
   } catch {}
   return 'user';
 };
+
+const getInitialAuth = (): boolean => {
+  try {
+    const token = localStorage.getItem('thermosafe_session_token');
+    return Boolean(token && token.length > 0);
+  } catch {}
+  return false;
+};
+
+const getInitialToken = (): string | null => {
+  try {
+    return localStorage.getItem('thermosafe_session_token') || null;
+  } catch {}
+  return null;
+};
+
+function generateSessionToken(): string {
+  // Use crypto.randomUUID if available, otherwise fallback
+  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).substring(2)}`;
+}
 
 const getInitialLocation = (): Location => {
   try {
@@ -89,17 +116,28 @@ export const useAppStore = create<AppState>((set) => ({
   selectedLocation: getInitialLocation(),
   activeScenario: null,
   userRole: getInitialRole(),
+  isAuthenticated: getInitialAuth(),
+  sessionToken: getInitialToken(),
   setUserRole: (role) => {
     try {
       localStorage.setItem('thermosafe_auth_role', role);
     } catch {}
     set({ userRole: role });
   },
+  loginAs: (role) => {
+    const token = generateSessionToken();
+    try {
+      localStorage.setItem('thermosafe_auth_role', role);
+      localStorage.setItem('thermosafe_session_token', token);
+    } catch {}
+    set({ userRole: role, isAuthenticated: true, sessionToken: token });
+  },
   logout: () => {
     try {
       localStorage.removeItem('thermosafe_auth_role');
+      localStorage.removeItem('thermosafe_session_token');
     } catch {}
-    set({ userRole: 'user' });
+    set({ userRole: 'user', isAuthenticated: false, sessionToken: null });
   },
   setLocation: (loc) => {
     let normalizedLoc = loc;

@@ -32,18 +32,22 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
 // User Login Route Guard: Available in USER LOGIN. In GOV LOGIN, redirects to /government
 function UserRoute({ children }: { children: React.ReactNode }) {
-  const { userRole } = useAppStore();
+  const { userRole, isAuthenticated } = useAppStore();
+  if (!isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
   if (userRole === 'gov') {
     return <Navigate to="/government" replace />;
   }
   return <>{children}</>;
 }
 
-// Gov Login Route Guard: Available in GOV LOGIN. In USER LOGIN, Gov Portal is hidden and redirects to /dashboard
+// Gov Login Route Guard: Available in GOV LOGIN. Requires authenticated session.
+// In USER LOGIN, Gov Portal is hidden and redirects to /dashboard
 function GovRoute({ children }: { children: React.ReactNode }) {
-  const { userRole } = useAppStore();
-  if (userRole !== 'gov') {
-    return <Navigate to="/dashboard" replace />;
+  const { userRole, isAuthenticated } = useAppStore();
+  if (!isAuthenticated || userRole !== 'gov') {
+    return <Navigate to="/" replace />;
   }
   return <>{children}</>;
 }

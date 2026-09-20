@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { useWeather, useThermalStress, useRisk, useAlerts } from '../hooks/useApi';
 import { ThermalStressGauge } from '../components/dashboard/ThermalStressGauge';
 import { WeatherCard } from '../components/dashboard/WeatherCard';
@@ -7,7 +7,12 @@ import { RiskContributionBar } from '../components/dashboard/RiskContributionBar
 import { AlertPanel } from '../components/dashboard/AlertPanel';
 import { RecommendationCard } from '../components/dashboard/RecommendationCard';
 import { HeatwaveProbability } from '../components/dashboard/HeatwaveProbability';
+import { DataProvenancePanel } from '../components/dashboard/DataProvenancePanel';
+import { HTSSDetailPanel } from '../components/dashboard/HTSSDetailPanel';
+import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
 import { useAppStore } from '../stores/appStore';
+import { buildWeatherProvenance } from '../lib/dataProvenance';
+import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb } from '../lib/htssEngine';
 import { MapPin, RefreshCw, AlertTriangle } from 'lucide-react';
 
 export const CitizenDashboard: React.FC = () => {
@@ -16,6 +21,39 @@ export const CitizenDashboard: React.FC = () => {
   const { data: thermal, isLoading: tLoading, isError: tError } = useThermalStress();
   const { data: risk, isLoading: rLoading, isError: rError } = useRisk();
   const { data: alerts, isLoading: aLoading } = useAlerts();
+  const [isAuditOpen, setIsAuditOpen] = useState(false);
+  const { userRole } = useAppStore();
+
+  // Compute provenance from weather data
+  const provenance = useMemo(() => {
+    if (!weather || !weather.isLive) {
+      return buildWeatherProvenance({
+        location: selectedLocation.name,
+        apiStatus: 'FAILED',
+        dataType: 'LIVE_WEATHER',
+      });
+    }
+    return buildWeatherProvenance({
+      source: weather.source || 'Open-Meteo',
+      lastUpdated: weather.apiTimestamp || weather.timestamp,
+      location: selectedLocation.name,
+      apiStatus: 'SUCCESS',
+      calculationTime: weather.timestamp,
+      dataType: 'LIVE_WEATHER',
+    });
+  }, [weather, selectedLocation.name]);
+
+  // Compute full HTSS audit when needed
+  const auditData = useMemo(() => {
+    if (!weather || !thermal) return null;
+    return computeFullAudit(
+      weather.temperature,
+      weather.humidity,
+      weather.windSpeed,
+      weather.solarRadiation,
+      weather.source || 'Open-Meteo'
+    );
+  }, [weather, thermal]);
 
   if (wLoading || tLoading || rLoading || aLoading) {
     return (
@@ -39,12 +77,20 @@ export const CitizenDashboard: React.FC = () => {
           <p className="text-xs text-gray-500 font-mono mt-2">
             Mock and synthetic weather data fallbacks are strictly disabled.
           </p>
+          <div className="mt-4">
+            <DataProvenancePanel provenance={provenance} compact={false} />
+          </div>
         </div>
       </div>
     );
   }
 
   const fmt = (val: number | undefined) => (typeof val === 'number' ? Math.round(val * 10) / 10 : val ?? 0);
+
+  // Compute additional thermal indicators for the detail panel
+  const wetBulbTemp = calculateWetBulb(weather.temperature, weather.humidity);
+  const humidex = calculateHumidex(weather.temperature, weather.humidity);
+  const heatIndex = thermal.heatIndex ?? calculateHeatIndex(weather.temperature, weather.humidity);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -72,10 +118,13 @@ export const CitizenDashboard: React.FC = () => {
         {weather.isLive && (
           <span className="skeuo-pill px-3.5 py-1.5 text-xs font-black tracking-wider flex items-center gap-2 text-emerald-400 border-emerald-500/40 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            100% REAL-TIME LIVE TELEMETRY
+            🟢 LIVE
           </span>
         )}
       </div>
+
+      {/* DATA PROVENANCE PANEL */}
+      <DataProvenancePanel provenance={provenance} compact={true} />
 
       {/* PRIMARY INSTRUMENTS ROW (HTSS DIAL + 4 CORE OPEN-METEO TELEMETRY FIELDS) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -89,6 +138,22 @@ export const CitizenDashboard: React.FC = () => {
           <WeatherCard title="Solar Rad" value={fmt(weather.solarRadiation)} unit="W/m²" icon="Sun" color="#eab308" />
         </div>
       </div>
+
+      {/* HTSS CALCULATION DETAILS (expandable) */}
+      <HTSSDetailPanel
+        temperature={weather.temperature}
+        humidity={weather.humidity}
+        windSpeed={weather.windSpeed}
+        solarRadiation={weather.solarRadiation}
+        htss={fmt(thermal.htss) as number}
+        riskCategory={thermal.htssCategory || risk.level}
+        wbgt={fmt(thermal.wbgt) as number}
+        utci={fmt(thermal.utci) as number}
+        heatIndex={fmt(heatIndex) as number}
+        humidex={humidex}
+        wetBulbTemp={wetBulbTemp}
+        dataTimestamp={weather.apiTimestamp || weather.timestamp}
+      />
 
       {/* ADDITIONAL ATMOSPHERIC API TELEMETRY (REAL OPEN-METEO FIELDS) */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -162,6 +227,27 @@ export const CitizenDashboard: React.FC = () => {
           <RecommendationCard risk={risk} />
         </div>
       </div>
+
+      {/* HTSS AUDIT VIEW — accessible via button (gov users) or keyboard shortcut */}
+      {userRole === 'gov' && auditData && (
+        <div className="flex justify-end">
+          <button
+            onClick={() => setIsAuditOpen(true)}
+            className="text-[10px] font-mono text-gray-500 hover:text-orange-400 transition-colors px-3 py-1.5 rounded-lg border border-white/5 hover:border-orange-500/20 cursor-pointer"
+            type="button"
+          >
+            🔍 Open HTSS Audit View
+          </button>
+        </div>
+      )}
+
+      {auditData && (
+        <HTSSAuditView
+          audit={auditData}
+          isOpen={isAuditOpen}
+          onClose={() => setIsAuditOpen(false)}
+        />
+      )}
     </div>
   );
 };

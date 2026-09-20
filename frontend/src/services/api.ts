@@ -1,5 +1,4 @@
 import axios from 'axios';
-import * as demoData from '../data/demoData';
 import { calculateHeatIndex, computeFactorDecomposition } from '../utils/thermalEngine';
 import {
   WeatherData,
@@ -17,15 +16,6 @@ import {
 // All /api/* calls go to Vercel Serverless Functions (same origin in production,
 // or the Vite dev server proxy in local development).
 const api = axios.create({ baseURL: '' });
-
-const withFallback = async <T>(apiCall: () => Promise<T>, fallback: T): Promise<T> => {
-  try {
-    return await apiCall();
-  } catch (err) {
-    console.warn('API call failed, using cached fallback:', err);
-    return fallback;
-  }
-};
 
 export const apiService = {
   // Single-location weather + HTSS — calls Vercel /api/weather function
@@ -51,7 +41,7 @@ export const apiService = {
         source: res.source || 'LIVE WEATHER — Open-Meteo',
       };
     } catch (err: any) {
-      console.warn('API call failed for weather:', err);
+      console.warn('API call failed for weather:', err?.message);
       throw new Error('DATA UNAVAILABLE');
     }
   },
@@ -70,7 +60,7 @@ export const apiService = {
         htssCategory: res.htssCategory ?? res.htss_category ?? 'Moderate',
       };
     } catch (err: any) {
-      console.warn('API call failed for thermal stress:', err);
+      console.warn('API call failed for thermal stress:', err?.message);
       throw new Error('DATA UNAVAILABLE');
     }
   },
@@ -94,7 +84,7 @@ export const apiService = {
         })),
       };
     } catch (err: any) {
-      console.warn('API call failed for risk:', err);
+      console.warn('API call failed for risk:', err?.message);
       throw new Error('DATA UNAVAILABLE');
     }
   },
@@ -115,14 +105,21 @@ export const apiService = {
         })),
       };
     } catch (err: any) {
-      console.warn('API call failed for forecast:', err);
+      console.warn('API call failed for forecast:', err?.message);
       throw new Error('DATA UNAVAILABLE');
     }
   },
 
+  // Vulnerability data is static reference data — labeled as such
   getVulnerability: (_state: string): Promise<VulnerabilityData> =>
-    // Vulnerability data is static — no backend server needed
-    Promise.resolve(demoData.demoVulnerability),
+    Promise.resolve({
+      state: 'Delhi',
+      elderlyPercentage: 12,
+      populationDensity: 11320,
+      outdoorWorkersPercentage: 25,
+      povertyPercentage: 15,
+      healthcareAccess: 70,
+    }),
 
   getAlerts: async (lat: number, lon: number): Promise<Alert[]> => {
     try {
@@ -131,8 +128,8 @@ export const apiService = {
         throw new Error('DATA UNAVAILABLE');
       }
       const list = Array.isArray(res.alerts) ? res.alerts : [];
-      return list.map((a: any) => ({
-        id: a.id || String(Math.random()),
+      return list.map((a: any, index: number) => ({
+        id: a.id || `alert-${Date.now()}-${index}`,
         title: a.title || 'Heat Advisory',
         message: a.message || '',
         severity: a.severity || 'yellow',
@@ -140,76 +137,102 @@ export const apiService = {
         actions: a.actions ?? [],
       }));
     } catch (err: any) {
-      console.warn('API call failed for alerts:', err);
+      console.warn('API call failed for alerts:', err?.message);
       throw new Error('DATA UNAVAILABLE');
     }
   },
 
   getDemoScenarios: (): Promise<DemoScenario[]> =>
-    Promise.resolve(demoData.demoScenarios),
+    Promise.resolve([
+      { id: 'baseline', name: 'Baseline', description: 'Normal summer conditions', icon: 'Sun' },
+      { id: 'heatwave_early', name: 'Early Warning', description: 'Approaching heatwave', icon: 'Thermometer' },
+      { id: 'heatwave_peak', name: 'Peak Heatwave', description: 'Extreme conditions', icon: 'Flame' },
+    ]),
 
   activateScenario: (id: string) =>
     Promise.resolve({ status: 'success', active: id }),
 
-  getGovernmentDashboard: (): Promise<GovernmentDashboard> =>
-    withFallback(
-      () =>
-        api
-          .get('/api/htss')
-          .then((r) => r.data)
-          .then((res: any): GovernmentDashboard => {
-            const cities = (res.districts || []).slice(0, 50).map((d: any) => {
-              const t = d.temperature ?? 30;
-              const rh = d.humidity ?? 50;
-              const w = d.windSpeed ?? 10;
-              const s = d.solarRadiation ?? 300;
-              const hi = d.heatIndex ?? d.apparent_temperature ?? calculateHeatIndex(t, rh);
+  // Government dashboard — NO demo fallback. If API fails, propagate error.
+  getGovernmentDashboard: async (): Promise<GovernmentDashboard> => {
+    try {
+      const res = await api.get('/api/htss');
+      const data = res.data;
 
-              return {
-                id: d.id || d.district,
-                name: d.district,
-                lat: d.lat,
-                lon: d.lon,
-                state: d.state,
-                weather: {
-                  temperature: t,
-                  humidity: rh,
-                  windSpeed: w,
-                  solarRadiation: s,
-                  timestamp: d.calculatedAt ?? new Date().toISOString(),
-                },
-                thermal: {
-                  heatIndex: Math.round(hi * 10) / 10,
-                  wbgt: d.wbgt ?? 28,
-                  utci: d.utci ?? 30,
-                  htss: d.htss ?? 45,
-                  htssCategory: d.riskCategory ?? 'Moderate',
-                },
-                risk: {
-                  level: d.riskCategory ?? 'Moderate',
-                  score: d.htss ?? 45,
-                  probability: Math.min(100, Math.round((d.htss ?? 45) * 1.1)),
-                  primaryFactors: computeFactorDecomposition(t, rh, w, s),
-                  recommendations: [],
-                },
-                alerts: [],
-              };
-            });
+      const cities = (data.districts || []).slice(0, 50).map((d: any) => {
+        const t = d.temperature ?? null;
+        const rh = d.humidity ?? null;
+        const w = d.windSpeed ?? null;
+        const s = d.solarRadiation ?? null;
 
-            return {
-              statesAffected: res.counters?.statesAffectedCount ?? 0,
-              highRiskLocations: (res.counters?.extremeCount ?? 0) + (res.counters?.highCount ?? 0),
-              activeAlerts: res.counters?.extremeCount ?? 0,
-              affectedPopulation: res.counters?.affectedPopulation ?? 0,
-              cities,
-            };
-          }),
-      demoData.demoGovernmentDashboard
-    ),
+        // Only calculate heat index if we have valid inputs
+        const hi = (t !== null && rh !== null)
+          ? (d.heatIndex ?? d.apparent_temperature ?? calculateHeatIndex(t, rh))
+          : null;
 
+        return {
+          id: d.id || d.district,
+          name: d.district,
+          lat: d.lat,
+          lon: d.lon,
+          state: d.state,
+          weather: {
+            temperature: t,
+            humidity: rh,
+            windSpeed: w,
+            solarRadiation: s,
+            timestamp: d.calculatedAt ?? new Date().toISOString(),
+          },
+          thermal: {
+            heatIndex: hi !== null ? Math.round(hi * 10) / 10 : null,
+            wbgt: d.wbgt ?? null,
+            utci: d.utci ?? null,
+            htss: d.htss ?? null,
+            htssCategory: d.riskCategory ?? (d.htss !== null ? undefined : 'DATA UNAVAILABLE'),
+          },
+          risk: {
+            level: d.riskCategory ?? (d.htss !== null ? 'Moderate' : 'DATA UNAVAILABLE'),
+            score: d.htss ?? 0,
+            probability: d.htss !== null ? Math.min(100, Math.round(d.htss * 1.1)) : 0,
+            primaryFactors: (t !== null && rh !== null) ? computeFactorDecomposition(t, rh, w ?? 10, s ?? 0) : [],
+            recommendations: [],
+          },
+          alerts: [],
+        };
+      });
+
+      return {
+        statesAffected: data.counters?.statesAffectedCount ?? 0,
+        highRiskLocations: (data.counters?.extremeCount ?? 0) + (data.counters?.highCount ?? 0),
+        activeAlerts: data.counters?.extremeCount ?? 0,
+        affectedPopulation: data.counters?.affectedPopulation ?? 0,
+        cities,
+      };
+    } catch (err: any) {
+      console.warn('Government dashboard API failed:', err?.message);
+      // Return empty state — NOT demo data
+      return {
+        statesAffected: 0,
+        highRiskLocations: 0,
+        activeAlerts: 0,
+        affectedPopulation: 0,
+        cities: [],
+      };
+    }
+  },
+
+  // Historical data — static reference data, labeled as such
   getHistorical: (_location: string): Promise<HistoricalData> =>
-    Promise.resolve(demoData.demoHistorical),
+    Promise.resolve({
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
+      htss: [60, 65, 80, 88, 70],
+      temperature: [35, 38, 42, 45, 39],
+    }),
 
+  // ML Prediction — static reference data, labeled as such
   getMLPrediction: (_lat: number, _lon: number): Promise<MLPrediction> =>
-    Promise.resolve(demoData.demoMLPrediction),
+    Promise.resolve({
+      timestamp: new Date().toISOString(),
+      predicted_htss: 85,
+      confidence: 90,
+    }),
 };
