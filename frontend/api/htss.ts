@@ -1,19 +1,15 @@
 /**
  * GET /api/htss
  *
- * Returns the latest cached HTSS results for all Indian states & districts
- * from Supabase. This endpoint is called by the React frontend dashboard.
- *
- * Data is pre-calculated by the /api/refresh cron function — no Open-Meteo
- * calls are made here. Response is instant.
+ * Returns cached HTSS results from Supabase if configured.
+ * If Supabase is unconfigured, returns an empty set so the frontend's
+ * robust direct Open-Meteo multi-batch live sync takes over seamlessly.
  *
  * Cache-Control: s-maxage=300 (Vercel Edge Cache, 5 minutes)
  */
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { LIVE_DISTRICT_TELEMETRY } from '../src/data/liveDistrictTelemetry.ts';
-import { BASELINE_DISTRICT_TELEMETRY } from '../src/data/baselineDistrictTelemetry.ts';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -64,6 +60,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
+
   try {
     let rawRows: any[] = [];
     const supabase = buildSupabaseClient();
@@ -79,18 +77,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           rawRows = data;
         }
       } catch (err: any) {
-        console.warn('[/api/htss] Supabase query failed, falling back to baseline:', err?.message);
+        console.warn('[/api/htss] Supabase query failed:', err?.message);
       }
     }
 
-    // Fallback to live pre-calculated telemetry if Supabase is empty or unconfigured
     if (rawRows.length === 0) {
-      rawRows = (LIVE_DISTRICT_TELEMETRY && LIVE_DISTRICT_TELEMETRY.length > 0)
-        ? LIVE_DISTRICT_TELEMETRY
-        : BASELINE_DISTRICT_TELEMETRY;
+      return res.status(200).json({
+        status: 'ok',
+        districts: [],
+        states: [],
+        counters: {
+          totalDistricts: 788,
+          successfulCount: 0,
+          failedCount: 0,
+          extremeCount: 0,
+          highCount: 0,
+          moderateCount: 0,
+          lowCount: 0,
+          statesAffectedCount: 0,
+          affectedPopulation: 0,
+        },
+        lastFetchedAt: new Date().toISOString(),
+        isCached: false,
+        isLive: false,
+        message: 'No cached database rows. Client live sync active.',
+      });
     }
 
-    // Build district list (already sorted by htss DESC)
+    // Build district list from Supabase
     const districts = rawRows.map((row: any, index: number) => {
       const levelRaw = (row.risk_category ?? row.level ?? 'LOW').toUpperCase();
       let riskCategory: 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW' | 'DATA UNAVAILABLE' = 'LOW';
@@ -127,7 +141,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         riskCategory,
         status: row.status ?? 'SUCCESS',
         calculatedAt: row.updated_at || new Date().toISOString(),
-        source: row.data_source ?? 'Open-Meteo REST Pipeline',
+        source: row.data_source ?? 'Supabase Cache',
       };
     });
 
@@ -193,26 +207,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       affectedPopulation: (extremeCount + highCount) * 1250000,
     };
 
-    // Last updated = current live response timestamp
-    const lastFetchedAt = new Date().toISOString();
-
-    res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
-
     return res.status(200).json({
       status: 'ok',
       districts,
       states,
       counters,
-      lastFetchedAt,
-      isCached: false,
-      isLive: true,
+      lastFetchedAt: new Date().toISOString(),
+      isCached: true,
+      isLive: false,
     });
   } catch (err: any) {
-    console.error('[/api/htss] Unhandled error:', err?.message ?? err);
-    return res.status(500).json({
-      error: 'Internal server error',
-      detail: err?.message ?? 'Unknown error',
+    console.error('[/api/htss] Error:', err?.message ?? err);
+    return res.status(200).json({
+      status: 'ok',
+      districts: [],
+      states: [],
+      counters: {
+        totalDistricts: 788,
+        successfulCount: 0,
+        failedCount: 0,
+        extremeCount: 0,
+        highCount: 0,
+        moderateCount: 0,
+        lowCount: 0,
+        statesAffectedCount: 0,
+        affectedPopulation: 0,
+      },
+      lastFetchedAt: new Date().toISOString(),
+      isCached: false,
+      isLive: false,
+      message: 'Client live sync active.',
     });
   }
 }
-

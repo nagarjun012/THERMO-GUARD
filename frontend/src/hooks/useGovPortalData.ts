@@ -22,19 +22,22 @@ export function useGovPortalData() {
   const loadPipeline = useCallback(async (forceRefresh: boolean = false) => {
     if (forceRefresh) {
       setIsRefreshing(true);
-    } else if (!data) {
-      setIsLoading(true);
+    } else if (!data || data.counters.successfulCount === 0) {
+      setIsRefreshing(true);
     }
 
     setProgress({ loaded: 0, total: 788, percent: 0 });
 
     try {
-      const result = await govHtssService.executePipeline(forceRefresh, (loaded, total) => {
+      const result = await govHtssService.executePipeline(forceRefresh, (loaded, total, partial) => {
         setProgress({
           loaded,
           total,
           percent: Math.round((loaded / total) * 100),
         });
+        if (partial) {
+          setData(partial);
+        }
       });
       setData(result);
     } catch (err) {
@@ -43,7 +46,7 @@ export function useGovPortalData() {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, []);
+  }, [data]);
 
   useEffect(() => {
     loadPipeline(false);

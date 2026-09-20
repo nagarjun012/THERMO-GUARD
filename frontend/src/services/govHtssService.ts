@@ -89,15 +89,42 @@ class GovHtssService {
   private isProcessing = false;
 
   /**
-   * Check for cached result in memory, localStorage (live sync), or sessionStorage
+   * Generates the baseline initial dataset of all 788 districts
    */
-  public getCachedResult(): GovPortalPipelineResult | null {
-    if (this.inMemoryResult) {
-      const age = Date.now() - new Date(this.inMemoryResult.lastFetchedAt).getTime();
-      if (age < CACHE_TTL_MS) {
-        return this.inMemoryResult;
-      }
-      this.inMemoryResult = null;
+  public getInitialDataset(): GovPortalPipelineResult {
+    const districts: ProcessedDistrict[] = ALL_INDIA_DISTRICTS.map((d, idx) => ({
+      id: d.id,
+      rank: idx + 1,
+      district: d.district,
+      state: d.state,
+      lat: d.lat,
+      lon: d.lon,
+      temperature: null,
+      humidity: null,
+      windSpeed: null,
+      solarRadiation: null,
+      heatIndex: null,
+      apparent_temperature: null,
+      twb: null,
+      wbgt: null,
+      utci: null,
+      htss: null,
+      riskCategory: 'DATA UNAVAILABLE',
+      status: 'LOADING',
+      calculatedAt: null,
+      source: 'Open-Meteo Live Batch Pipeline',
+      isLive: false,
+    }));
+
+    return this.recalculatePipeline(districts, false);
+  }
+
+  /**
+   * Retrieve cached result if valid, otherwise return the initial 788-district dataset
+   */
+  public getCachedResult(): GovPortalPipelineResult {
+    if (this.inMemoryResult && this.inMemoryResult.districts && this.inMemoryResult.districts.length > 0) {
+      return this.inMemoryResult;
     }
 
     // 1. Try local storage (live synced dataset)
@@ -130,7 +157,7 @@ class GovHtssService {
       console.warn('SessionStorage read error:', e);
     }
 
-    return null;
+    return this.getInitialDataset();
   }
 
   /**
@@ -418,7 +445,7 @@ class GovHtssService {
    * Queries Open-Meteo in paced chunks of 35 districts with 350ms delays to avoid 429 rate limits.
    */
   public async refreshAllLive(
-    onProgress?: (loaded: number, total: number) => void,
+    onProgress?: (loaded: number, total: number, partialData?: GovPortalPipelineResult) => void,
     baseDistricts?: ProcessedDistrict[]
   ): Promise<GovPortalPipelineResult> {
     const current = this.getCachedResult();
@@ -499,7 +526,8 @@ class GovHtssService {
       });
 
       const loaded = Math.min(i + CHUNK_SIZE, total);
-      onProgress?.(loaded, total);
+      const intermediate = this.recalculatePipeline(currentDistricts, true);
+      onProgress?.(loaded, total, intermediate);
 
       // Brief pacing pause between chunks to keep Open-Meteo happy
       if (i + CHUNK_SIZE < currentDistricts.length) {
@@ -515,7 +543,7 @@ class GovHtssService {
    */
   public async executePipeline(
     forceRefresh = false,
-    onProgress?: (loaded: number, total: number) => void
+    onProgress?: (loaded: number, total: number, partialData?: GovPortalPipelineResult) => void
   ): Promise<GovPortalPipelineResult> {
     // 1. Check in-memory / cache if not force refresh
     if (!forceRefresh) {
