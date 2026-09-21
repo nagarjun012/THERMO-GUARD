@@ -109,7 +109,8 @@ let lastHardwarePos: { lat: number; lon: number } | null = null;
  */
 export function detectRealtimeLocation(
   forcePrompt: boolean = false,
-  onLocatingChange?: (locating: boolean) => void
+  onLocatingChange?: (locating: boolean) => void,
+  onError?: (errorMessage: string) => void
 ): void {
   if (onLocatingChange) onLocatingChange(true);
 
@@ -153,26 +154,38 @@ export function detectRealtimeLocation(
       if (onLocatingChange) onLocatingChange(false);
     };
 
-    const handleGpsError = (err: GeolocationPositionError) => {
+    const handleGpsError = async (err: GeolocationPositionError) => {
       console.warn('Browser GPS lock unavailable or timed out:', err.message);
+      if (!hasResolvedGps) {
+        await fallbackToIpOrKnownLocation(() => hasResolvedGps);
+      }
       if (onLocatingChange) onLocatingChange(false);
+      if (forcePrompt && onError) {
+        if (err.code === 1) {
+          onError('Browser location access is blocked. Please allow Location permission in your address bar (tune/lock icon) to enable GPS precision.');
+        } else if (err.code === 3) {
+          onError('GPS signal timed out. High-accuracy network/IP location was applied.');
+        } else {
+          onError('Hardware GPS lock unavailable. Network/IP location was applied.');
+        }
+      }
     };
 
-    // First attempt: Wi-Fi / cellular network location (fast, reliable on both desktop and mobile)
+    // First attempt: High accuracy GPS
     navigator.geolocation.getCurrentPosition(
       handleGpsSuccess,
       () => {
-        // Fallback attempt: Try with high accuracy if standard accuracy failed
+        // Fallback attempt: Try standard accuracy if high accuracy failed
         navigator.geolocation.getCurrentPosition(
           handleGpsSuccess,
           handleGpsError,
-          { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+          { enableHighAccuracy: false, timeout: 6000, maximumAge: forcePrompt ? 0 : 30000 }
         );
       },
       {
-        enableHighAccuracy: forcePrompt,
-        timeout: 6000,
-        maximumAge: 30000,
+        enableHighAccuracy: true,
+        timeout: 8000,
+        maximumAge: forcePrompt ? 0 : 30000,
       }
     );
 
@@ -223,14 +236,14 @@ export function detectRealtimeLocation(
 async function fallbackToIpOrKnownLocation(isGpsAlreadyResolved?: () => boolean): Promise<void> {
   if (useAppStore.getState().isManualSelection) return;
 
-  // 1. Primary: BigDataCloud client API
+  // 1. Primary: ipwho.is (fastest, high reliability in India, CORS-friendly)
   try {
-    const res = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client', {
-      signal: AbortSignal.timeout(5000),
+    const res = await fetch('https://ipwho.is/', {
+      signal: AbortSignal.timeout(4000),
     });
     if (res.ok) {
       const d = await res.json();
-      if (d.latitude && d.longitude && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
+      if (d.success !== false && d.latitude && d.longitude && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
         const resolved = await resolveLocationFromCoords(d.latitude, d.longitude, false);
         if (!useAppStore.getState().isManualSelection) {
           useAppStore.getState().setIndiaLocation(
@@ -250,10 +263,10 @@ async function fallbackToIpOrKnownLocation(isGpsAlreadyResolved?: () => boolean)
     }
   } catch {}
 
-  // 2. Secondary backup: ipapi.co
+  // 2. Secondary backup: BigDataCloud client API
   try {
-    const res2 = await fetch('https://ipapi.co/json/', {
-      signal: AbortSignal.timeout(4000),
+    const res2 = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client', {
+      signal: AbortSignal.timeout(5000),
     });
     if (res2.ok) {
       const d2 = await res2.json();
@@ -268,6 +281,33 @@ async function fallbackToIpOrKnownLocation(isGpsAlreadyResolved?: () => boolean)
             true,
             'LIVE',
             resolved2.locality,
+            false,
+            false
+          );
+          return;
+        }
+      }
+    }
+  } catch {}
+
+  // 3. Tertiary backup: ipapi.co
+  try {
+    const res3 = await fetch('https://ipapi.co/json/', {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (res3.ok) {
+      const d3 = await res3.json();
+      if (d3.latitude && d3.longitude && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
+        const resolved3 = await resolveLocationFromCoords(d3.latitude, d3.longitude, false);
+        if (!useAppStore.getState().isManualSelection) {
+          useAppStore.getState().setIndiaLocation(
+            resolved3.state,
+            resolved3.district,
+            resolved3.lat,
+            resolved3.lon,
+            true,
+            'LIVE',
+            resolved3.locality,
             false,
             false
           );

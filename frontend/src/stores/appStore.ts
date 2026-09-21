@@ -76,12 +76,18 @@ const getInitialLocation = (): Location => {
     const saved = localStorage.getItem('thermosafe_user_location');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Immediately purge any stale Aravakurichi entries from cache
-      if (
+      // Immediately purge any stale Aravakurichi or Karur entries from cache
+      const isStale =
         parsed?.name?.toLowerCase().includes('arava') ||
         parsed?.localityName?.toLowerCase().includes('arava') ||
-        (parsed?.lat === 10.777 && parsed?.lon === 77.9094)
-      ) {
+        parsed?.districtName?.toLowerCase().includes('arava') ||
+        parsed?.name?.toLowerCase().includes('karur') ||
+        parsed?.localityName?.toLowerCase().includes('karur') ||
+        parsed?.districtName?.toLowerCase().includes('karur') ||
+        (typeof parsed?.lat === 'number' && Math.abs(parsed.lat - 10.777) < 0.05) ||
+        (typeof parsed?.lat === 'number' && Math.abs(parsed.lat - 10.96) < 0.05);
+
+      if (isStale) {
         try {
           localStorage.removeItem('thermosafe_user_location');
         } catch {}
@@ -89,6 +95,7 @@ const getInitialLocation = (): Location => {
         parsed &&
         typeof parsed.lat === 'number' &&
         typeof parsed.lon === 'number' &&
+        parsed.isManual === true &&
         !parsed.name?.includes('Central Delhi')
       ) {
         return parsed;
@@ -143,9 +150,9 @@ export const useAppStore = create<AppState>((set) => ({
   },
   setLocation: (loc) => {
     try {
-      localStorage.setItem('thermosafe_user_location', JSON.stringify(loc));
+      localStorage.setItem('thermosafe_user_location', JSON.stringify({ ...loc, isManual: true }));
     } catch {}
-    set({ selectedLocation: loc });
+    set({ selectedLocation: loc, isManualSelection: true });
   },
   setIndiaLocation: (
     stateName,
@@ -183,7 +190,7 @@ export const useAppStore = create<AppState>((set) => ({
       isGpsLive,
     };
     try {
-      localStorage.setItem('thermosafe_user_location', JSON.stringify(newLoc));
+      localStorage.setItem('thermosafe_user_location', JSON.stringify({ ...newLoc, isManual }));
     } catch {}
     set((state) => ({
       selectedLocation: newLoc,

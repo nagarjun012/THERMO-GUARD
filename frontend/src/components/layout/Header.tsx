@@ -10,6 +10,7 @@ export const Header: React.FC = () => {
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
   const [isLocating, setIsLocating] = useState(false);
+  const [gpsNotice, setGpsNotice] = useState<string | null>(null);
 
   useEffect(() => {
     setSearch(selectedLocation.name);
@@ -21,7 +22,11 @@ export const Header: React.FC = () => {
   }, []);
 
   const fetchRealtimeLocation = () => {
-    detectRealtimeLocation(true, setIsLocating);
+    setGpsNotice(null);
+    detectRealtimeLocation(true, setIsLocating, (msg) => {
+      setGpsNotice(msg);
+      setTimeout(() => setGpsNotice(null), 8000);
+    });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +44,7 @@ export const Header: React.FC = () => {
 
   const selectSearchResult = (item: any) => {
     const stName = item.stateName || item.state || 'Tamil Nadu';
-    const distName = item.districtName || item.district || 'Karur';
+    const distName = item.districtName || item.district || selectedLocation.districtName || 'Chennai';
     const locName = item.localityName || undefined;
     setIndiaLocation(stName, distName, item.lat, item.lon, item.hasWardData ?? true, 'LIVE', locName, true, true);
     setSearch(locName ? `${locName}, ${distName}, ${stName}` : `${distName}, ${stName}`);
@@ -125,6 +130,17 @@ export const Header: React.FC = () => {
           </button>
         </div>
       </div>
+      {gpsNotice && (
+        <div className="bg-amber-500/20 border-t border-b border-amber-500/30 px-4 py-2 text-center text-xs text-amber-200 animate-fadeIn flex items-center justify-center gap-2">
+          <span>{gpsNotice}</span>
+          <button
+            onClick={() => setGpsNotice(null)}
+            className="text-amber-400 hover:text-white font-bold ml-2 px-1.5 py-0.5 rounded text-[11px] cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </header>
   );
 };

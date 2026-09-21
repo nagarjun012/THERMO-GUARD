@@ -127,7 +127,7 @@ export function generateWardsForLocation(
   const locLower = (localityName || '').toLowerCase().replace(/[^a-z]/g, '');
   const distLower = (districtName || '').toLowerCase().replace(/[^a-z]/g, '');
 
-  // 1. Locate registry presets: check locality first (e.g. 'aravakurichi')
+  // 1. Locate registry presets: check locality first (e.g. 'RS Puram', 'T. Nagar')
   let wardPresets = null;
   if (locLower) {
     if (REAL_FIVE_WARDS_REGISTRY[locLower]) {
