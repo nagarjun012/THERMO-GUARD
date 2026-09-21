@@ -105,13 +105,7 @@ export const OfficialSafetyHub: React.FC = () => {
     },
   };
 
-  // Provide unified `t` object for compatibility
-  const t = {
-    ...tr,
-    riskTiers,
-  };
-
-  const activeTierData = t.riskTiers[selectedTier];
+  const activeTierData = riskTiers[selectedTier];
   const activeCfg = tierColors[selectedTier];
   const ActiveIcon = activeTierData.icon;
 
@@ -145,7 +139,7 @@ export const OfficialSafetyHub: React.FC = () => {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {(['low', 'moderate', 'high', 'extreme'] as const).map((tierKey) => {
             const isSelected = selectedTier === tierKey;
-            const tierData = t.riskTiers[tierKey];
+            const tierData = riskTiers[tierKey];
             const cfg = tierColors[tierKey];
 
             return (
