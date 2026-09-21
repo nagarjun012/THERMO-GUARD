@@ -1,18 +1,29 @@
 import React from 'react';
-import { Shield, Thermometer, Heart, Phone, AlertTriangle, Users, Stethoscope, Cross } from 'lucide-react';
+import { Shield, Thermometer, Heart, Phone, AlertTriangle, Users, Stethoscope, ShieldAlert } from 'lucide-react';
 import { useAppStore } from '../../stores/appStore';
 import { translations } from '../../i18n/translations';
 import { GOV_CONFIG } from '../../config/governmentConfig';
 
+interface TierConfigItem {
+  key: 'low' | 'moderate' | 'high' | 'extreme';
+  title: string;
+  actions: readonly string[];
+  borderColor: string;
+  bgColor: string;
+  badgeColor: string;
+  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>;
+  riskLabel: string;
+}
+
 export const OfficialSafetyHub: React.FC = () => {
   const { language } = useAppStore();
-  const tr = translations[language];
+  const tr = translations[language] ?? translations.en;
 
-  const tierConfig = [
-    { key: 'low' as const, title: tr.safety.lowTitle, actions: tr.safety.lowActions, borderColor: 'border-green-500/30', bgColor: 'bg-green-500/5', badgeColor: 'bg-green-500/10 text-green-300 border-green-500/30', icon: Shield, riskLabel: tr.risk.low },
-    { key: 'moderate' as const, title: tr.safety.moderateTitle, actions: tr.safety.moderateActions, borderColor: 'border-yellow-500/30', bgColor: 'bg-yellow-500/5', badgeColor: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30', icon: Thermometer, riskLabel: tr.risk.moderate },
-    { key: 'high' as const, title: tr.safety.highTitle, actions: tr.safety.highActions, borderColor: 'border-orange-500/30', bgColor: 'bg-orange-500/5', badgeColor: 'bg-orange-500/10 text-orange-300 border-orange-500/30', icon: AlertTriangle, riskLabel: tr.risk.high },
-    { key: 'extreme' as const, title: tr.safety.extremeTitle, actions: tr.safety.extremeActions, borderColor: 'border-red-500/30', bgColor: 'bg-red-500/5', badgeColor: 'bg-red-500/10 text-red-300 border-red-500/30', icon: AlertTriangle, riskLabel: tr.risk.extreme },
+  const tierConfig: TierConfigItem[] = [
+    { key: 'low', title: tr.safety.lowTitle, actions: tr.safety.lowActions, borderColor: 'border-green-500/30', bgColor: 'bg-green-500/5', badgeColor: 'bg-green-500/10 text-green-300 border-green-500/30', icon: Shield, riskLabel: tr.risk.low },
+    { key: 'moderate', title: tr.safety.moderateTitle, actions: tr.safety.moderateActions, borderColor: 'border-yellow-500/30', bgColor: 'bg-yellow-500/5', badgeColor: 'bg-yellow-500/10 text-yellow-300 border-yellow-500/30', icon: Thermometer, riskLabel: tr.risk.moderate },
+    { key: 'high', title: tr.safety.highTitle, actions: tr.safety.highActions, borderColor: 'border-orange-500/30', bgColor: 'bg-orange-500/5', badgeColor: 'bg-orange-500/10 text-orange-300 border-orange-500/30', icon: AlertTriangle, riskLabel: tr.risk.high },
+    { key: 'extreme', title: tr.safety.extremeTitle, actions: tr.safety.extremeActions, borderColor: 'border-red-500/30', bgColor: 'bg-red-500/5', badgeColor: 'bg-red-500/10 text-red-300 border-red-500/30', icon: AlertTriangle, riskLabel: tr.risk.extreme },
   ];
 
   return (
@@ -20,7 +31,7 @@ export const OfficialSafetyHub: React.FC = () => {
       {/* Header */}
       <div>
         <h2 className="text-lg font-bold text-white flex items-center gap-2">
-          <Cross className="w-5 h-5 text-red-400" aria-hidden="true" />
+          <ShieldAlert className="w-5 h-5 text-red-400" aria-hidden="true" />
           {tr.safety.title}
         </h2>
         <p className="text-sm text-gray-400 mt-1">{tr.safety.subtitle}</p>
@@ -28,30 +39,33 @@ export const OfficialSafetyHub: React.FC = () => {
 
       {/* ── 4-Tier Safety Actions ──────────────────────────────────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {tierConfig.map((tier) => (
-          <div
-            key={tier.key}
-            className={`rounded-xl border ${tier.borderColor} ${tier.bgColor} p-4 space-y-2`}
-            role="region"
-            aria-label={tier.riskLabel}
-          >
-            <div className="flex items-center gap-2">
-              <tier.icon className="w-4 h-4" aria-hidden="true" />
-              <span className={`px-2 py-0.5 rounded-md border text-xs font-bold ${tier.badgeColor}`}>
-                {tier.riskLabel}
-              </span>
+        {tierConfig.map((tier) => {
+          const IconComp = tier.icon;
+          return (
+            <div
+              key={tier.key}
+              className={`rounded-xl border ${tier.borderColor} ${tier.bgColor} p-4 space-y-2`}
+              role="region"
+              aria-label={tier.riskLabel}
+            >
+              <div className="flex items-center gap-2">
+                <IconComp className="w-4 h-4" aria-hidden="true" />
+                <span className={`px-2 py-0.5 rounded-md border text-xs font-bold ${tier.badgeColor}`}>
+                  {tier.riskLabel}
+                </span>
+              </div>
+              <h3 className="text-sm font-bold text-white">{tier.title}</h3>
+              <ul className="space-y-1.5">
+                {tier.actions.map((action, i) => (
+                  <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
+                    <span className="text-gray-500 mt-0.5 shrink-0">•</span>
+                    <span>{action}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <h3 className="text-sm font-bold text-white">{tier.title}</h3>
-            <ul className="space-y-1.5">
-              {tier.actions.map((action, i) => (
-                <li key={i} className="text-xs text-gray-300 flex items-start gap-2">
-                  <span className="text-gray-500 mt-0.5 shrink-0">•</span>
-                  <span>{action}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       {/* ── Vulnerable Groups ─────────────────────────────────────────── */}

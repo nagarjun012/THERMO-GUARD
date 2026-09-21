@@ -14,8 +14,6 @@ export const LANGUAGE_NAMES: Record<Language, string> = {
   hi: 'हिन्दी',
 };
 
-type TranslationKeys = typeof translations.en;
-
 export const translations = {
   // ══════════════════════════════════════════════════════════════════════
   // ENGLISH
@@ -461,6 +459,8 @@ export const translations = {
     },
   },
 } as const;
+
+export type TranslationKeys = typeof translations.en;
 
 export function t(lang: Language): TranslationKeys {
   return translations[lang] as unknown as TranslationKeys;
