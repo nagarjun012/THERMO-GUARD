@@ -14,5 +14,8 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
     "@vercel/node": "^13.0.1"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-linux-x64-gnu": "4.62.5"
   }
 }
