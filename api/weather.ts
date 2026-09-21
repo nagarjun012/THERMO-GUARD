@@ -152,7 +152,7 @@ async function fetchCurrentWeather(lat: number, lon: number) {
     try {
       const res = await fetchWithTimeout(url, 12000);
       if (res.ok) {
-        const data = await res.json();
+        const data: any = await res.json();
         const curr = data?.current ?? {};
         if (
           curr.temperature_2m === undefined ||
@@ -243,7 +243,7 @@ async function fetchForecast(lat: number, lon: number, hours = 24) {
 
   const res = await fetchWithTimeout(url, 12000);
   if (!res.ok) throw new Error(`Open-Meteo forecast HTTP ${res.status}`);
-  const data = await res.json();
+  const data: any = await res.json();
   const hourly = data?.hourly ?? {};
   const allTimes: string[] = hourly.time ?? [];
 
