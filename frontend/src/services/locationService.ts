@@ -11,19 +11,6 @@ export interface ResolvedLocation {
   isGpsLive: boolean;
 }
 
-export const ARAVAKURICHI_CENTER = {
-  lat: 10.7770,
-  lon: 77.9094,
-};
-
-/**
- * Spatial bounding box check for Aravakurichi Taluk in Karur District, Tamil Nadu.
- * Extends from 10.60° N to 11.08° N, 77.65° E to 78.10° E (covering rural taluk & ISP towers).
- */
-export const isAravakurichiArea = (lat: number, lon: number): boolean => {
-  return lat >= 10.60 && lat <= 11.08 && lon >= 77.65 && lon <= 78.10;
-};
-
 /**
  * Reverse geocodes coordinates to exact Locality / Taluk, District, and State.
  * Always preserves the exact coordinates (real user GPS or physical position).
@@ -37,7 +24,7 @@ export async function resolveLocationFromCoords(
   // Query BigDataCloud reverse geocoding client API (CORS-friendly, free, high precision)
   try {
     const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
+    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
     if (res.ok) {
       const data = await res.json();
       
@@ -116,9 +103,9 @@ let lastHardwarePos: { lat: number; lon: number } | null = null;
 
 /**
  * Automatically detects real-time location.
- * 1. Checks device GPS via navigator.geolocation.getCurrentPosition with high accuracy.
- * 2. In parallel, fires fast IP geolocation so user isn't kept waiting.
- * 3. Applies updates to the global appStore immediately.
+ * 1. Immediately fires fast IP geolocation in parallel so real city displays in <300ms.
+ * 2. Concurrently checks device GPS via navigator.geolocation.getCurrentPosition.
+ * 3. Registers watchPosition for physical device movement without clobbering manual selections.
  */
 export function detectRealtimeLocation(
   forcePrompt: boolean = false,
@@ -135,51 +122,66 @@ export function detectRealtimeLocation(
 
   let hasResolvedGps = false;
 
-  // STEP A: Try high-precision browser GPS
+  // STEP 1: Fast Parallel IP Geolocation (instant response ~200ms)
+  fallbackToIpOrKnownLocation(() => hasResolvedGps).then(() => {
+    if (!hasResolvedGps && onLocatingChange) {
+      onLocatingChange(false);
+    }
+  });
+
+  // STEP 2: Browser GPS / Hardware Geolocation
   if (typeof navigator !== 'undefined' && navigator.geolocation) {
+    const handleGpsSuccess = async (pos: GeolocationPosition) => {
+      hasResolvedGps = true;
+      const { latitude, longitude, accuracy } = pos.coords;
+      lastHardwarePos = { lat: latitude, lon: longitude };
+
+      const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
+
+      useAppStore.getState().setIndiaLocation(
+        resolved.state,
+        resolved.district,
+        resolved.lat,
+        resolved.lon,
+        true,
+        'LIVE',
+        resolved.locality,
+        true,
+        false
+      );
+
+      if (onLocatingChange) onLocatingChange(false);
+    };
+
+    const handleGpsError = (err: GeolocationPositionError) => {
+      console.warn('Browser GPS lock unavailable or timed out:', err.message);
+      if (onLocatingChange) onLocatingChange(false);
+    };
+
+    // First attempt: Wi-Fi / cellular network location (fast, reliable on both desktop and mobile)
     navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        hasResolvedGps = true;
-        const { latitude, longitude, accuracy } = pos.coords;
-        lastHardwarePos = { lat: latitude, lon: longitude };
-
-        const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
-
-        useAppStore.getState().setIndiaLocation(
-          resolved.state,
-          resolved.district,
-          resolved.lat,
-          resolved.lon,
-          true,
-          'LIVE',
-          resolved.locality,
-          true,
-          false
+      handleGpsSuccess,
+      () => {
+        // Fallback attempt: Try with high accuracy if standard accuracy failed
+        navigator.geolocation.getCurrentPosition(
+          handleGpsSuccess,
+          handleGpsError,
+          { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
         );
-
-        if (onLocatingChange) onLocatingChange(false);
-      },
-      async (err) => {
-        console.warn('GPS hardware lock not available or denied, falling back to IP/default:', err);
-        if (!hasResolvedGps && !useAppStore.getState().isManualSelection) {
-          await fallbackToIpOrKnownLocation();
-        }
-        if (onLocatingChange) onLocatingChange(false);
       },
       {
-        enableHighAccuracy: true,
-        timeout: forcePrompt ? 10000 : 7000,
-        maximumAge: forcePrompt ? 0 : 30000,
+        enableHighAccuracy: forcePrompt,
+        timeout: 6000,
+        maximumAge: 30000,
       }
     );
 
-    // Also register watchPosition to continuously update if user physically moves
+    // Register watchPosition for continuous tracking when physically moving
     if (activeWatchId !== null) {
       navigator.geolocation.clearWatch(activeWatchId);
     }
     activeWatchId = navigator.geolocation.watchPosition(
       async (pos) => {
-        // If user manually chose a different city/district in the UI, do not overwrite it!
         if (useAppStore.getState().isManualSelection) {
           return;
         }
@@ -188,7 +190,6 @@ export function detectRealtimeLocation(
         if (!lastHardwarePos) {
           lastHardwarePos = { lat: latitude, lon: longitude };
         } else {
-          // Only update if physical device moved more than ~200 meters
           const dLat = Math.abs(lastHardwarePos.lat - latitude);
           const dLon = Math.abs(lastHardwarePos.lon - longitude);
           if (dLat < 0.002 && dLon < 0.002) {
@@ -211,39 +212,66 @@ export function detectRealtimeLocation(
         );
       },
       () => {},
-      { enableHighAccuracy: true, maximumAge: 60000 }
+      { enableHighAccuracy: false, maximumAge: 60000 }
     );
-  } else {
-    fallbackToIpOrKnownLocation().then(() => {
-      if (onLocatingChange) onLocatingChange(false);
-    });
   }
 }
 
 /**
- * Fallback to IP geolocation if GPS hardware permission is pending or unavailable.
+ * Fast IP geolocation fallback to detect the user's real city/coordinates instantly.
  */
-async function fallbackToIpOrKnownLocation(): Promise<void> {
+async function fallbackToIpOrKnownLocation(isGpsAlreadyResolved?: () => boolean): Promise<void> {
   if (useAppStore.getState().isManualSelection) return;
+
+  // 1. Primary: BigDataCloud client API
   try {
     const res = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client', {
-      signal: AbortSignal.timeout(3000),
+      signal: AbortSignal.timeout(5000),
     });
     if (res.ok) {
       const d = await res.json();
-      if (d.latitude && d.longitude) {
+      if (d.latitude && d.longitude && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
         const resolved = await resolveLocationFromCoords(d.latitude, d.longitude, false);
-        useAppStore.getState().setIndiaLocation(
-          resolved.state,
-          resolved.district,
-          resolved.lat,
-          resolved.lon,
-          true,
-          'LIVE',
-          resolved.locality,
-          false,
-          false
-        );
+        if (!useAppStore.getState().isManualSelection) {
+          useAppStore.getState().setIndiaLocation(
+            resolved.state,
+            resolved.district,
+            resolved.lat,
+            resolved.lon,
+            true,
+            'LIVE',
+            resolved.locality,
+            false,
+            false
+          );
+          return;
+        }
+      }
+    }
+  } catch {}
+
+  // 2. Secondary backup: ipapi.co
+  try {
+    const res2 = await fetch('https://ipapi.co/json/', {
+      signal: AbortSignal.timeout(4000),
+    });
+    if (res2.ok) {
+      const d2 = await res2.json();
+      if (d2.latitude && d2.longitude && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
+        const resolved2 = await resolveLocationFromCoords(d2.latitude, d2.longitude, false);
+        if (!useAppStore.getState().isManualSelection) {
+          useAppStore.getState().setIndiaLocation(
+            resolved2.state,
+            resolved2.district,
+            resolved2.lat,
+            resolved2.lon,
+            true,
+            'LIVE',
+            resolved2.locality,
+            false,
+            false
+          );
+        }
       }
     }
   } catch {}

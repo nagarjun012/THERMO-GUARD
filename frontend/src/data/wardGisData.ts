@@ -110,13 +110,6 @@ const REAL_FIVE_WARDS_REGISTRY: Record<string, { code: string; name: string; can
     { code: 'W-KRR-4', name: 'Ward 4 — Thanthoni Residential Belt', canopy: 28, builtUp: 62, pop: 11400 },
     { code: 'W-KRR-5', name: 'Ward 5 — Gandhigramam Colony Sector', canopy: 32, builtUp: 55, pop: 10800 },
   ],
-  aravakurichi: [
-    { code: 'W-AKA-1', name: 'Ward 1 — Aravakurichi Town Central Market', canopy: 14, builtUp: 86, pop: 11200 },
-    { code: 'W-AKA-2', name: 'Ward 2 — North Agricultural & Residential Sector', canopy: 26, builtUp: 60, pop: 8500 },
-    { code: 'W-AKA-3', name: 'Ward 3 — South Highway Transit & Power Hub', canopy: 10, builtUp: 90, pop: 9800 },
-    { code: 'W-AKA-4', name: 'Ward 4 — East Commercial Bazaar', canopy: 12, builtUp: 88, pop: 12400 },
-    { code: 'W-AKA-5', name: 'Ward 5 — West Green Village Panchayat Sector', canopy: 38, builtUp: 50, pop: 7200 },
-  ]
 };
 
 export function generateWardsForLocation(
@@ -149,12 +142,7 @@ export function generateWardsForLocation(
     }
   }
 
-  // Direct check for Aravakurichi in districtName or localityName
-  if (!wardPresets && (locLower.includes('arava') || distLower.includes('arava'))) {
-    wardPresets = REAL_FIVE_WARDS_REGISTRY['aravakurichi'];
-  }
-
-  // 2. Fallback to district in registry (e.g. 'karur', 'coimbatore', 'chennai', 'delhi')
+  // 2. Fallback to district in registry (e.g. 'coimbatore', 'chennai', 'delhi', 'karur')
   if (!wardPresets && distLower) {
     if (REAL_FIVE_WARDS_REGISTRY[distLower]) {
       wardPresets = REAL_FIVE_WARDS_REGISTRY[distLower];
@@ -180,13 +168,9 @@ export function generateWardsForLocation(
 
   const presets = (wardPresets || defaultFiveWards).slice(0, 5); // STRICTLY 5 WARDS
 
-  // Anchor genuine Aravakurichi town center (10.7770, 77.9094)
-  let baseCenterLat = centerLat;
-  let baseCenterLon = centerLon;
-  if (locLower.includes('arava') || distLower.includes('arava')) {
-    baseCenterLat = 10.7770;
-    baseCenterLon = 77.9094;
-  }
+  // Use the exact coordinates of the user's real location or selected district
+  const baseCenterLat = centerLat;
+  const baseCenterLon = centerLon;
 
   // Exact spatial offsets around district/town center (radius approx 1.5 to 2 km per sub-ward)
   const offsets = [

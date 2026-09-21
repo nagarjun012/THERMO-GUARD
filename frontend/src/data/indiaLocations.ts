@@ -4197,36 +4197,12 @@ export interface SearchResult {
   dataStatus?: 'LIVE' | 'DEMO' | 'LIMITED' | 'UNAVAILABLE';
 }
 
-export const NOTABLE_TOWNS: SearchResult[] = [
-  {
-    stateName: 'Tamil Nadu',
-    districtName: 'Karur',
-    localityName: 'Aravakurichi',
-    state: 'Tamil Nadu',
-    district: 'Karur',
-    type: 'Taluk / Municipal Ward Center',
-    lat: 10.7770,
-    lon: 77.9094,
-    hasWardData: true,
-    dataStatus: 'LIVE',
-  },
-];
+export const NOTABLE_TOWNS: SearchResult[] = [];
 
 export function searchLocations(query: string): SearchResult[] {
   if (!query || query.trim().length < 1) return [];
   const q = query.toLowerCase().trim();
   const results: SearchResult[] = [];
-
-  // Check notable sub-districts and towns first (e.g. Aravakurichi)
-  for (const town of NOTABLE_TOWNS) {
-    if (
-      town.localityName?.toLowerCase().includes(q) ||
-      town.districtName.toLowerCase().includes(q) ||
-      q.includes(town.localityName?.toLowerCase() || '')
-    ) {
-      results.push(town);
-    }
-  }
 
   for (const state of INDIA_LOCATIONS) {
     const stateMatch = state.name.toLowerCase().includes(q);
@@ -4299,14 +4275,13 @@ export function findNearestDistrict(lat: number, lon: number): SearchResult {
 
   return (
     closest || {
-      stateName: 'Tamil Nadu',
-      districtName: 'Karur',
-      localityName: 'Aravakurichi',
-      state: 'Tamil Nadu',
-      district: 'Karur',
+      stateName: 'Delhi',
+      districtName: 'New Delhi',
+      state: 'Delhi',
+      district: 'New Delhi',
       type: 'District',
-      lat: 10.7770,
-      lon: 77.9094,
+      lat: 28.6139,
+      lon: 77.2090,
       hasWardData: true,
       dataStatus: 'LIVE',
     }

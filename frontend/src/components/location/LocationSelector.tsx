@@ -146,7 +146,7 @@ export const LocationSelector: React.FC = () => {
           <Search className="w-4 h-4 text-gray-400 absolute left-3 pointer-events-none" />
           <input
             type="text"
-            placeholder="🔍 Search State, UT or District (e.g. Karur, Aravakurichi, Pune)..."
+            placeholder="🔍 Search State, UT or District (e.g. Chennai, Coimbatore, Delhi)..."
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={() => setIsSearchFocused(true)}

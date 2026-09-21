@@ -65,7 +65,6 @@ const getInitialToken = (): string | null => {
 };
 
 function generateSessionToken(): string {
-  // Use crypto.randomUUID if available, otherwise fallback
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();
   }
@@ -77,7 +76,16 @@ const getInitialLocation = (): Location => {
     const saved = localStorage.getItem('thermosafe_user_location');
     if (saved) {
       const parsed = JSON.parse(saved);
+      // Immediately purge any stale Aravakurichi entries from cache
       if (
+        parsed?.name?.toLowerCase().includes('arava') ||
+        parsed?.localityName?.toLowerCase().includes('arava') ||
+        (parsed?.lat === 10.777 && parsed?.lon === 77.9094)
+      ) {
+        try {
+          localStorage.removeItem('thermosafe_user_location');
+        } catch {}
+      } else if (
         parsed &&
         typeof parsed.lat === 'number' &&
         typeof parsed.lon === 'number' &&
@@ -90,14 +98,14 @@ const getInitialLocation = (): Location => {
     console.warn('Error reading stored location:', e);
   }
 
-  // Initial real-time default: Karur district center
+  // Default initial anchor until instant live geolocation resolves in <300ms
   return {
-    lat: 10.96,
-    lon: 78.08,
-    name: 'Karur, Tamil Nadu',
+    lat: 13.0827,
+    lon: 80.2707,
+    name: 'Chennai, Tamil Nadu',
     stateName: 'Tamil Nadu',
-    districtName: 'Karur',
-    localityName: 'Karur',
+    districtName: 'Chennai',
+    localityName: 'Chennai',
     hasWardData: true,
     dataStatus: 'LIVE',
     isGpsLive: true,
