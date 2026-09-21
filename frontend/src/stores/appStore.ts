@@ -105,14 +105,14 @@ const getInitialLocation = (): Location => {
     console.warn('Error reading stored location:', e);
   }
 
-  // Default initial anchor until instant live geolocation resolves in <300ms
+  // Initial placeholder until instant live OpenStreetMap geolocation resolves in <300ms
   return {
     lat: 13.0827,
     lon: 80.2707,
-    name: 'Chennai, Tamil Nadu',
-    stateName: 'Tamil Nadu',
-    districtName: 'Chennai',
-    localityName: 'Chennai',
+    name: 'Detecting live location...',
+    stateName: '',
+    districtName: '',
+    localityName: '',
     hasWardData: true,
     dataStatus: 'LIVE',
     isGpsLive: true,

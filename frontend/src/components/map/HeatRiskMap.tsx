@@ -100,10 +100,10 @@ export const HeatRiskMap: React.FC<Props> = ({
   // Active Map Layer States
   const [mapLayers, setMapLayers] = useState<ActiveMapLayers>({
     thermalRisk: true,
-    wardBoundaries: true,
+    wardBoundaries: false,
     districtBoundaries: true,
     stateBoundaries: true,
-    heatPulseGradient: true,
+    heatPulseGradient: false,
     temperature: activeLayer === 'temp',
     humidity: false,
     wind: false,
@@ -168,11 +168,11 @@ export const HeatRiskMap: React.FC<Props> = ({
         style={{ height: '100%', width: '100%', background: '#030712' }}
         zoomControl={false}
       >
-        {/* Google Satellite Hybrid Map Base Layer */}
+        {/* Genuine OpenStreetMap Standard Tile Layer */}
         <TileLayer
-          url="https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
-          maxZoom={20}
-          attribution="&copy; Google Maps Satellite"
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          maxZoom={19}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
         />
 
         <MapCameraController center={targetCenter} zoom={targetZoom} />
@@ -325,37 +325,56 @@ export const HeatRiskMap: React.FC<Props> = ({
         {/* ========================================================================= */}
         <CircleMarker
           center={[selectedLocation.lat, selectedLocation.lon]}
-          radius={26}
+          radius={30}
           pathOptions={{
-            fillColor: '#10b981',
-            fillOpacity: 0.25,
-            color: '#10b981',
+            fillColor: '#3b82f6',
+            fillOpacity: 0.2,
+            color: '#2563eb',
             weight: 2,
             dashArray: '4 4',
           }}
         />
         <CircleMarker
           center={[selectedLocation.lat, selectedLocation.lon]}
-          radius={9}
+          radius={11}
           pathOptions={{
-            fillColor: '#10b981',
+            fillColor: '#2563eb',
             fillOpacity: 1,
             color: '#ffffff',
-            weight: 3,
+            weight: 3.5,
           }}
         >
-          <Popup className="dark-popup font-mono">
-            <div className="p-1.5 min-w-[210px]">
-              <div className="flex items-center gap-1.5 text-emerald-400 font-bold text-xs mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
-                YOUR REAL-TIME LOCATION
+          <Popup className="dark-popup font-sans" autoPan={true}>
+            <div className="p-2 min-w-[240px]">
+              <div className="flex items-center gap-1.5 text-blue-400 font-black text-[11px] mb-1">
+                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
+                📍 REAL-TIME LOCATION (OPENSTREETMAP)
               </div>
-              <div className="font-extrabold text-sm text-white font-sans">{selectedLocation.name}</div>
-              <div className="text-[10px] text-gray-400 font-mono mt-1">
-                Coordinates: {selectedLocation.lat.toFixed(4)}°N, {selectedLocation.lon.toFixed(4)}°E
+              <div className="font-extrabold text-sm text-white font-sans leading-tight">
+                {selectedLocation.name}
               </div>
-              <div className="mt-2 text-[10px] font-bold text-emerald-400 border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 rounded text-center">
-                🔴 100% REAL-TIME LIVE TELEMETRY
+              <div className="text-[11px] text-gray-300 font-mono mt-1.5 bg-dark-800/80 p-1.5 rounded border border-dark-600">
+                <div>Latitude: <strong>{selectedLocation.lat.toFixed(5)}°N</strong></div>
+                <div>Longitude: <strong>{selectedLocation.lon.toFixed(5)}°E</strong></div>
+              </div>
+              {weather && (
+                <div className="mt-2 text-xs text-gray-200 border-t border-dark-600 pt-1.5 space-y-0.5">
+                  <div className="flex justify-between">
+                    <span>Live Air Temp:</span>
+                    <strong className="text-orange-400">{weather.temperature}°C</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Humidity:</span>
+                    <strong>{weather.humidity}%</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Wind Speed:</span>
+                    <strong>{weather.windSpeed} km/h</strong>
+                  </div>
+                </div>
+              )}
+              <div className="mt-2.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 rounded text-center">
+                ✅ 100% GENUINE OPENSTREETMAP POSITION
               </div>
             </div>
           </Popup>

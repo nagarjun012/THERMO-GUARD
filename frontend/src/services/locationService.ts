@@ -21,16 +21,69 @@ export async function resolveLocationFromCoords(
   isGps: boolean = true,
   _accuracy?: number
 ): Promise<ResolvedLocation> {
-  // Query BigDataCloud reverse geocoding client API (CORS-friendly, free, high precision)
+  // 1. Primary: Genuine OpenStreetMap Nominatim reverse geocode (real OpenStreetMap street/neighbourhood/town/district)
+  try {
+    const osmUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
+    const res = await fetch(osmUrl, {
+      headers: {
+        'User-Agent': 'ThermoSafe-Heatwave-Early-Warning/1.0',
+        'Accept': 'application/json',
+      },
+      signal: AbortSignal.timeout(4000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const addr = data.address || {};
+
+      const locality =
+        addr.suburb ||
+        addr.neighbourhood ||
+        addr.residential ||
+        addr.village ||
+        addr.town ||
+        addr.city_district ||
+        addr.city ||
+        '';
+
+      let district =
+        addr.state_district?.replace(/\s+district/i, '').trim() ||
+        addr.county?.replace(/\s+district/i, '').trim() ||
+        addr.city ||
+        '';
+
+      const state = addr.state || '';
+
+      if (district || locality || state) {
+        if (!district) district = locality || data.name || '';
+        const hasLocality = locality && locality.toLowerCase() !== district.toLowerCase();
+        const displayName = hasLocality
+          ? `${locality}, ${district}, ${state}`
+          : `${district}, ${state}`;
+
+        return {
+          lat,
+          lon,
+          locality: hasLocality ? locality : district,
+          district: district || locality,
+          state,
+          displayName: displayName || data.display_name?.split(',').slice(0, 3).join(', ') || `${lat.toFixed(4)}, ${lon.toFixed(4)}`,
+          isGpsLive: isGps,
+        };
+      }
+    }
+  } catch (err) {
+    console.warn('OpenStreetMap reverse geocode error, trying backup resolver:', err);
+  }
+
+  // 2. Secondary: BigDataCloud reverse geocoding API
   try {
     const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+    const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
     if (res.ok) {
       const data = await res.json();
       
       const adminList: any[] = data.localityInfo?.administrative || [];
       
-      // Look for taluk / subdistrict / town
       const talukObj = adminList.find(
         (a) =>
           a.description?.toLowerCase().includes('taluk') ||
@@ -38,7 +91,6 @@ export async function resolveLocationFromCoords(
           a.name?.toLowerCase().includes('taluk')
       );
       
-      // Look for district
       const distObj = adminList.find(
         (a) =>
           a.description?.toLowerCase().includes('district') ||
@@ -58,14 +110,12 @@ export async function resolveLocationFromCoords(
 
       let state = data.principalSubdivision || '';
 
-      // Fallback district and state if BigDataCloud missed them
       if (!district || !state) {
         const nearest = findNearestDistrict(lat, lon);
         if (!district) district = nearest.district;
         if (!state) state = nearest.state;
       }
 
-      // If locality is same as district or blank, use district
       const hasLocality = locality && locality.toLowerCase() !== district.toLowerCase();
       const displayName = hasLocality
         ? `${locality}, ${district}, ${state}`
@@ -82,7 +132,7 @@ export async function resolveLocationFromCoords(
       };
     }
   } catch (err) {
-    console.warn('Reverse geocode API failed, falling back to nearest district lookup:', err);
+    console.warn('Backup reverse geocode failed, falling back to nearest district lookup:', err);
   }
 
   // Fallback to 788-district nearest neighbor dataset
