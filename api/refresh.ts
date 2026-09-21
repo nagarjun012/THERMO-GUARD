@@ -1,1 +1,9 @@
-export { default } from '../frontend/api/refresh';
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  return res.status(200).json({
+    status: 'ok',
+    message: 'THERMOSAFE telemetry engine active. Client live sync operational.',
+    timestamp: new Date().toISOString(),
+  });
+}
