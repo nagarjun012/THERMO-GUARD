@@ -17,14 +17,44 @@ import {
 // or the Vite dev server proxy in local development).
 const api = axios.create({ baseURL: '' });
 
-export const apiService = {
-  // Single-location weather + HTSS — calls Vercel /api/weather function
-  getWeather: async (lat: number, lon: number): Promise<WeatherData> => {
+// Deduplication and coordinate cache for /api/weather to prevent simultaneous request storms
+const weatherPromiseCache = new Map<string, Promise<any>>();
+const weatherDataCache = new Map<string, { data: any; timestamp: number }>();
+
+async function fetchWeatherBundle(lat: number, lon: number): Promise<any> {
+  const coordKey = `${Number(lat).toFixed(3)},${Number(lon).toFixed(3)}`;
+
+  const cached = weatherDataCache.get(coordKey);
+  if (cached && Date.now() - cached.timestamp < 30000) {
+    return cached.data;
+  }
+
+  if (weatherPromiseCache.has(coordKey)) {
+    return weatherPromiseCache.get(coordKey)!;
+  }
+
+  const promise = (async () => {
     try {
       const res = (await api.get('/api/weather', { params: { lat, lon } })).data;
       if (res.error === 'DATA UNAVAILABLE' || res.isLive === false) {
         throw new Error('DATA UNAVAILABLE');
       }
+      weatherDataCache.set(coordKey, { data: res, timestamp: Date.now() });
+      return res;
+    } finally {
+      weatherPromiseCache.delete(coordKey);
+    }
+  })();
+
+  weatherPromiseCache.set(coordKey, promise);
+  return promise;
+}
+
+export const apiService = {
+  // Single-location weather + HTSS — calls Vercel /api/weather function
+  getWeather: async (lat: number, lon: number): Promise<WeatherData> => {
+    try {
+      const res = await fetchWeatherBundle(lat, lon);
       return {
         temperature: res.temperature ?? res.temp,
         humidity: res.humidity,
@@ -48,10 +78,7 @@ export const apiService = {
 
   getThermalStress: async (lat: number, lon: number): Promise<ThermalStressData> => {
     try {
-      const res = (await api.get('/api/weather', { params: { lat, lon } })).data;
-      if (res.error === 'DATA UNAVAILABLE' || res.isLive === false) {
-        throw new Error('DATA UNAVAILABLE');
-      }
+      const res = await fetchWeatherBundle(lat, lon);
       return {
         heatIndex: res.heatIndex ?? res.heat_index,
         wbgt: res.wbgt,
@@ -67,10 +94,7 @@ export const apiService = {
 
   getRisk: async (lat: number, lon: number): Promise<RiskAssessment> => {
     try {
-      const res = (await api.get('/api/weather', { params: { lat, lon } })).data;
-      if (res.error === 'DATA UNAVAILABLE' || res.isLive === false) {
-        throw new Error('DATA UNAVAILABLE');
-      }
+      const res = await fetchWeatherBundle(lat, lon);
       return {
         level: res.level ?? res.risk_level ?? 'Moderate',
         score: res.score ?? res.htss ?? 0,
@@ -123,10 +147,7 @@ export const apiService = {
 
   getAlerts: async (lat: number, lon: number): Promise<Alert[]> => {
     try {
-      const res = (await api.get('/api/weather', { params: { lat, lon } })).data;
-      if (res.error === 'DATA UNAVAILABLE' || res.isLive === false) {
-        throw new Error('DATA UNAVAILABLE');
-      }
+      const res = await fetchWeatherBundle(lat, lon);
       const list = Array.isArray(res.alerts) ? res.alerts : [];
       return list.map((a: any, index: number) => ({
         id: a.id || `alert-${Date.now()}-${index}`,

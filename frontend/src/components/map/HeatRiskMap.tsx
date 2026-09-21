@@ -175,6 +175,7 @@ export const HeatRiskMap: React.FC<Props> = ({
           attribution="&copy; Google Maps Satellite"
         />
 
+        <MapCameraController center={targetCenter} zoom={targetZoom} />
         <MapInstanceRegistrar setMap={setMapInstance} />
 
         {/* ========================================================================= */}
@@ -219,7 +220,7 @@ export const HeatRiskMap: React.FC<Props> = ({
 
                     <button
                       onClick={() => {
-                        setIndiaLocation(dist.state, dist.name, dist.lat, dist.lon, true, 'LIVE');
+                        setIndiaLocation(dist.state, dist.name, dist.lat, dist.lon, true, 'LIVE', undefined, false, true);
                         if (onSelectResolution) onSelectResolution('Hyper-Local Ward GIS Risk');
                       }}
                       className="mt-3 w-full py-1.5 px-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black text-xs rounded-lg shadow-md transition-all cursor-pointer text-center"

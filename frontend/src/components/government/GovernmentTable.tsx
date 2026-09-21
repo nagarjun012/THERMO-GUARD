@@ -394,7 +394,7 @@ export const GovernmentTable: React.FC<Props> = () => {
                     <tr
                       key={loc.id}
                       onClick={() => {
-                        setIndiaLocation(loc.state, loc.district, loc.lat, loc.lon, true, 'LIVE');
+                        setIndiaLocation(loc.state, loc.district, loc.lat, loc.lon, true, 'LIVE', undefined, false, true);
                         inspectDistrict(loc);
                       }}
                       className="hover:bg-white/5 transition-colors cursor-pointer group"
@@ -464,7 +464,7 @@ export const GovernmentTable: React.FC<Props> = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setIndiaLocation(loc.state, loc.district, loc.lat, loc.lon, true, 'LIVE');
+                            setIndiaLocation(loc.state, loc.district, loc.lat, loc.lon, true, 'LIVE', undefined, false, true);
                             inspectDistrict(loc);
                           }}
                           className="skeuo-btn skeuo-btn-dark px-2.5 py-1 rounded-lg text-[11px] font-mono transition flex items-center gap-1 mx-auto hover:border-orange-500/50"

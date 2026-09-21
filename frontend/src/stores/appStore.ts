@@ -16,6 +16,7 @@ export type AuthRole = 'user' | 'gov';
 
 interface AppState {
   selectedLocation: Location;
+  isManualSelection: boolean;
   activeScenario: string | null;
   userRole: AuthRole;
   isAuthenticated: boolean;
@@ -24,6 +25,7 @@ interface AppState {
   loginAs: (role: AuthRole) => void;
   logout: () => void;
   setLocation: (loc: Location) => void;
+  setIsManualSelection: (manual: boolean) => void;
   setIndiaLocation: (
     stateName: string,
     districtName: string,
@@ -32,7 +34,8 @@ interface AppState {
     hasWardData?: boolean,
     dataStatus?: 'LIVE' | 'DEMO' | 'LIMITED' | 'UNAVAILABLE',
     localityName?: string,
-    isGpsLive?: boolean
+    isGpsLive?: boolean,
+    isManual?: boolean
   ) => void;
   setScenario: (id: string | null) => void;
 }
@@ -80,17 +83,6 @@ const getInitialLocation = (): Location => {
         typeof parsed.lon === 'number' &&
         !parsed.name?.includes('Central Delhi')
       ) {
-        // Sanitize: If location is Aravakurichi, anchor coordinates to exact town center
-        if (
-          parsed.localityName?.toLowerCase().includes('arava') ||
-          parsed.name?.toLowerCase().includes('arava')
-        ) {
-          parsed.lat = 10.7770;
-          parsed.lon = 77.9094;
-          try {
-            localStorage.setItem('thermosafe_user_location', JSON.stringify(parsed));
-          } catch {}
-        }
         return parsed;
       }
     }
@@ -98,7 +90,7 @@ const getInitialLocation = (): Location => {
     console.warn('Error reading stored location:', e);
   }
 
-  // Automatic real-time initial anchor: Karur, Tamil Nadu
+  // Initial real-time default: Karur district center
   return {
     lat: 10.96,
     lon: 78.08,
@@ -114,10 +106,12 @@ const getInitialLocation = (): Location => {
 
 export const useAppStore = create<AppState>((set) => ({
   selectedLocation: getInitialLocation(),
+  isManualSelection: false,
   activeScenario: null,
   userRole: getInitialRole(),
   isAuthenticated: getInitialAuth(),
   sessionToken: getInitialToken(),
+  setIsManualSelection: (manual) => set({ isManualSelection: manual }),
   setUserRole: (role) => {
     try {
       localStorage.setItem('thermosafe_auth_role', role);
@@ -140,17 +134,10 @@ export const useAppStore = create<AppState>((set) => ({
     set({ userRole: 'user', isAuthenticated: false, sessionToken: null });
   },
   setLocation: (loc) => {
-    let normalizedLoc = loc;
-    if (
-      loc.localityName?.toLowerCase().includes('arava') ||
-      loc.name?.toLowerCase().includes('arava')
-    ) {
-      normalizedLoc = { ...loc, lat: 10.7770, lon: 77.9094 };
-    }
     try {
-      localStorage.setItem('thermosafe_user_location', JSON.stringify(normalizedLoc));
+      localStorage.setItem('thermosafe_user_location', JSON.stringify(loc));
     } catch {}
-    set({ selectedLocation: normalizedLoc });
+    set({ selectedLocation: loc });
   },
   setIndiaLocation: (
     stateName,
@@ -160,19 +147,12 @@ export const useAppStore = create<AppState>((set) => ({
     hasWardData = true,
     dataStatus = 'LIVE',
     localityName,
-    isGpsLive = true
+    isGpsLive = true,
+    isManual
   ) => {
-    // Spatial anchor: If Aravakurichi is detected, pin directly to genuine town center
-    let finalLat = lat;
-    let finalLon = lon;
-    if (
-      localityName?.toLowerCase().includes('arava') ||
-      districtName?.toLowerCase().includes('arava') ||
-      (stateName === 'Tamil Nadu' && lat >= 10.60 && lat <= 11.08 && lon >= 77.65 && lon <= 78.10)
-    ) {
-      finalLat = 10.7770;
-      finalLon = 77.9094;
-    }
+    // Preserve genuine coordinates (real user GPS or selected district coordinates)
+    const finalLat = lat;
+    const finalLon = lon;
 
     const hasLoc =
       localityName &&
@@ -197,7 +177,10 @@ export const useAppStore = create<AppState>((set) => ({
     try {
       localStorage.setItem('thermosafe_user_location', JSON.stringify(newLoc));
     } catch {}
-    set({ selectedLocation: newLoc });
+    set((state) => ({
+      selectedLocation: newLoc,
+      isManualSelection: isManual !== undefined ? isManual : state.isManualSelection,
+    }));
   },
   setScenario: (id) => set({ activeScenario: id }),
 }));

@@ -26,7 +26,7 @@ export const isAravakurichiArea = (lat: number, lon: number): boolean => {
 
 /**
  * Reverse geocodes coordinates to exact Locality / Taluk, District, and State.
- * Includes offline spatial heuristics for Aravakurichi + BigDataCloud Client API.
+ * Always preserves the exact coordinates (real user GPS or physical position).
  */
 export async function resolveLocationFromCoords(
   lat: number,
@@ -34,23 +34,7 @@ export async function resolveLocationFromCoords(
   isGps: boolean = true,
   _accuracy?: number
 ): Promise<ResolvedLocation> {
-  // 1. Instant offline check for Aravakurichi Taluk
-  if (isAravakurichiArea(lat, lon)) {
-    // Desktop Wi-Fi/cellular triangulation routes through ISP switches or taluk centroid 12km north.
-    // Always anchor coordinates directly to genuine Aravakurichi town center (10.7770, 77.9094)
-    // so the map camera, municipal wards, and pulse beacon sit directly on Aravakurichi town.
-    return {
-      lat: ARAVAKURICHI_CENTER.lat,
-      lon: ARAVAKURICHI_CENTER.lon,
-      locality: 'Aravakurichi',
-      district: 'Karur',
-      state: 'Tamil Nadu',
-      displayName: 'Aravakurichi, Karur, Tamil Nadu',
-      isGpsLive: isGps,
-    };
-  }
-
-  // 2. Query BigDataCloud reverse geocoding client API (CORS-friendly, free, high precision)
+  // Query BigDataCloud reverse geocoding client API (CORS-friendly, free, high precision)
   try {
     const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
     const res = await fetch(url, { signal: AbortSignal.timeout(4000) });
@@ -79,17 +63,6 @@ export async function resolveLocationFromCoords(
         data.city ||
         talukObj?.name ||
         '';
-
-      // Normalize common transliterations like Aravakkurichchi -> Aravakurichi
-      if (
-        locality.toLowerCase().includes('arava') ||
-        data.city?.toLowerCase().includes('arava') ||
-        talukObj?.name?.toLowerCase().includes('arava')
-      ) {
-        locality = 'Aravakurichi';
-        lat = ARAVAKURICHI_CENTER.lat;
-        lon = ARAVAKURICHI_CENTER.lon;
-      }
 
       let district = distObj?.name?.replace(/\s+district/i, '').trim() || '';
       if (!district) {
@@ -125,7 +98,7 @@ export async function resolveLocationFromCoords(
     console.warn('Reverse geocode API failed, falling back to nearest district lookup:', err);
   }
 
-  // 3. Fallback to 788-district nearest neighbor dataset
+  // Fallback to 788-district nearest neighbor dataset
   const nearest: SearchResult = findNearestDistrict(lat, lon);
   return {
     lat,
@@ -139,6 +112,7 @@ export async function resolveLocationFromCoords(
 }
 
 let activeWatchId: number | null = null;
+let lastHardwarePos: { lat: number; lon: number } | null = null;
 
 /**
  * Automatically detects real-time location.
@@ -152,6 +126,13 @@ export function detectRealtimeLocation(
 ): void {
   if (onLocatingChange) onLocatingChange(true);
 
+  if (forcePrompt) {
+    useAppStore.getState().setIsManualSelection(false);
+  } else if (useAppStore.getState().isManualSelection) {
+    if (onLocatingChange) onLocatingChange(false);
+    return;
+  }
+
   let hasResolvedGps = false;
 
   // STEP A: Try high-precision browser GPS
@@ -160,6 +141,8 @@ export function detectRealtimeLocation(
       async (pos) => {
         hasResolvedGps = true;
         const { latitude, longitude, accuracy } = pos.coords;
+        lastHardwarePos = { lat: latitude, lon: longitude };
+
         const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
 
         useAppStore.getState().setIndiaLocation(
@@ -170,14 +153,15 @@ export function detectRealtimeLocation(
           true,
           'LIVE',
           resolved.locality,
-          true
+          true,
+          false
         );
 
         if (onLocatingChange) onLocatingChange(false);
       },
       async (err) => {
         console.warn('GPS hardware lock not available or denied, falling back to IP/default:', err);
-        if (!hasResolvedGps) {
+        if (!hasResolvedGps && !useAppStore.getState().isManualSelection) {
           await fallbackToIpOrKnownLocation();
         }
         if (onLocatingChange) onLocatingChange(false);
@@ -189,30 +173,42 @@ export function detectRealtimeLocation(
       }
     );
 
-    // Also register watchPosition to continuously update if user moves
+    // Also register watchPosition to continuously update if user physically moves
     if (activeWatchId !== null) {
       navigator.geolocation.clearWatch(activeWatchId);
     }
     activeWatchId = navigator.geolocation.watchPosition(
       async (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
-        const currentLoc = useAppStore.getState().selectedLocation;
-        // Only update if moved more than ~200 meters
-        const dLat = Math.abs(currentLoc.lat - latitude);
-        const dLon = Math.abs(currentLoc.lon - longitude);
-        if (dLat > 0.002 || dLon > 0.002) {
-          const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
-          useAppStore.getState().setIndiaLocation(
-            resolved.state,
-            resolved.district,
-            resolved.lat,
-            resolved.lon,
-            true,
-            'LIVE',
-            resolved.locality,
-            true
-          );
+        // If user manually chose a different city/district in the UI, do not overwrite it!
+        if (useAppStore.getState().isManualSelection) {
+          return;
         }
+
+        const { latitude, longitude, accuracy } = pos.coords;
+        if (!lastHardwarePos) {
+          lastHardwarePos = { lat: latitude, lon: longitude };
+        } else {
+          // Only update if physical device moved more than ~200 meters
+          const dLat = Math.abs(lastHardwarePos.lat - latitude);
+          const dLon = Math.abs(lastHardwarePos.lon - longitude);
+          if (dLat < 0.002 && dLon < 0.002) {
+            return;
+          }
+          lastHardwarePos = { lat: latitude, lon: longitude };
+        }
+
+        const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
+        useAppStore.getState().setIndiaLocation(
+          resolved.state,
+          resolved.district,
+          resolved.lat,
+          resolved.lon,
+          true,
+          'LIVE',
+          resolved.locality,
+          true,
+          false
+        );
       },
       () => {},
       { enableHighAccuracy: true, maximumAge: 60000 }
@@ -228,6 +224,7 @@ export function detectRealtimeLocation(
  * Fallback to IP geolocation if GPS hardware permission is pending or unavailable.
  */
 async function fallbackToIpOrKnownLocation(): Promise<void> {
+  if (useAppStore.getState().isManualSelection) return;
   try {
     const res = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client', {
       signal: AbortSignal.timeout(3000),
@@ -244,22 +241,10 @@ async function fallbackToIpOrKnownLocation(): Promise<void> {
           true,
           'LIVE',
           resolved.locality,
+          false,
           false
         );
-        return;
       }
     }
   } catch {}
-
-  // If even IP fetch fails, ensure we are set to Aravakurichi, Karur, Tamil Nadu!
-  useAppStore.getState().setIndiaLocation(
-    'Tamil Nadu',
-    'Karur',
-    ARAVAKURICHI_CENTER.lat,
-    ARAVAKURICHI_CENTER.lon,
-    true,
-    'LIVE',
-    'Aravakurichi',
-    true
-  );
 }

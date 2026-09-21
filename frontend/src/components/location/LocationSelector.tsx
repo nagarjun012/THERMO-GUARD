@@ -63,7 +63,10 @@ export const LocationSelector: React.FC = () => {
         firstDistrict.lat,
         firstDistrict.lon,
         firstDistrict.hasWardData || false,
-        'LIVE'
+        'LIVE',
+        undefined,
+        false,
+        true
       );
     }
   };
@@ -80,7 +83,10 @@ export const LocationSelector: React.FC = () => {
         distObj.lat,
         distObj.lon,
         distObj.hasWardData || false,
-        'LIVE'
+        'LIVE',
+        undefined,
+        false,
+        true
       );
     }
   };
@@ -97,7 +103,7 @@ export const LocationSelector: React.FC = () => {
     setSearchResults([]);
     setIsSearchFocused(false);
 
-    setIndiaLocation(stName, distName, res.lat, res.lon, res.hasWardData || false, 'LIVE', locName, true);
+    setIndiaLocation(stName, distName, res.lat, res.lon, res.hasWardData || false, 'LIVE', locName, false, true);
   };
 
   const htssScore = thermal?.htss ?? 75;
