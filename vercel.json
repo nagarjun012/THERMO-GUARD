@@ -1,4 +1,8 @@
 {
+  "buildCommand": "npm --prefix frontend run build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "npm --prefix frontend install",
+  "framework": "vite",
   "crons": [
     {
       "path": "/api/refresh",
@@ -8,12 +12,15 @@
   "functions": {
     "api/*.ts": {
       "maxDuration": 10
+    },
+    "frontend/api/*.ts": {
+      "maxDuration": 10
     }
   },
   "rewrites": [
     {
       "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "destination": "/frontend/api/$1"
     },
     {
       "source": "/((?!api/).*)",
