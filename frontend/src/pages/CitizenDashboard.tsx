@@ -10,6 +10,7 @@ import { HeatwaveProbability } from '../components/dashboard/HeatwaveProbability
 import { DataProvenancePanel } from '../components/dashboard/DataProvenancePanel';
 import { HTSSDetailPanel } from '../components/dashboard/HTSSDetailPanel';
 import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
+import { OfficialThresholdReconciliation } from '../components/common/OfficialThresholdReconciliation';
 import { useAppStore } from '../stores/appStore';
 import { buildWeatherProvenance } from '../lib/dataProvenance';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb } from '../lib/htssEngine';
@@ -211,6 +212,12 @@ export const CitizenDashboard: React.FC = () => {
           category={thermal.utci >= 38 ? 'Extreme' : thermal.utci >= 32 ? 'High' : thermal.utci >= 26 ? 'Moderate' : 'Low'}
         />
       </div>
+ 
+      {/* STATUTORY IMD VS AI HTSS RECONCILIATION */}
+      <OfficialThresholdReconciliation
+        currentTemp={Number(weather.temperature)}
+        currentHtss={Number(thermal.htss)}
+      />
 
       {/* HEAT STRESS FACTOR DECOMPOSITION */}
       <RiskContributionBar factors={risk.primaryFactors} />

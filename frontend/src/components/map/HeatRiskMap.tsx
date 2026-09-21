@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Polygon, CircleMarker, Popup, useMap } from 'r
 import L from 'leaflet';
 import { CityData } from '../../types';
 import { useAppStore } from '../../stores/appStore';
-import { useWeather } from '../../hooks/useApi';
+import { useWeather, useThermalStress, useRisk } from '../../hooks/useApi';
 import { generateWardsForLocation, WardGisData, getRiskColorByCategory } from '../../data/wardGisData';
 import { WardDetailPanel } from './WardDetailPanel';
 import { MapControls } from './MapControls';
@@ -59,8 +59,10 @@ export const HeatRiskMap: React.FC<Props> = ({
   onSelectResolution,
   onOpenGuide,
 }) => {
-  const { selectedLocation, setIndiaLocation } = useAppStore();
+  const { selectedLocation, setIndiaLocation, lowBandwidthMode } = useAppStore();
   const { data: weather } = useWeather();
+  const { data: thermal } = useThermalStress();
+  const { data: risk } = useRisk();
   const { districts: liveDistricts } = useAllIndiaLiveTelemetry();
 
   const currentCenter: [number, number] = center || [selectedLocation.lat, selectedLocation.lon];
@@ -156,6 +158,100 @@ export const HeatRiskMap: React.FC<Props> = ({
       selectedLocation.localityName
     );
   }, [selectedLocation, weather]);
+
+  if (lowBandwidthMode) {
+    return (
+      <div className="w-full h-full overflow-y-auto bg-slate-950 p-4 sm:p-6 text-slate-200 space-y-6">
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="w-3 h-3 rounded-full bg-amber-400 animate-pulse" />
+            <div>
+              <h3 className="text-sm font-bold text-white">Low Bandwidth / Battery Saver Mode Active</h3>
+              <p className="text-xs text-slate-400">Map tiles, WebGL, and high-data animations are suspended to save data.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => useAppStore.getState().setLowBandwidthMode(false)}
+            className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors"
+          >
+            Switch to Interactive Map
+          </button>
+        </div>
+
+        {/* Active Location Summary Card */}
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Active Monitoring Zone</span>
+              <h2 className="text-lg font-extrabold text-white">{selectedLocation.name}</h2>
+            </div>
+            <div className="text-right">
+              <span className="text-xs text-slate-400">Coordinates</span>
+              <p className="font-mono text-xs text-slate-300">{selectedLocation.lat.toFixed(4)}°N, {selectedLocation.lon.toFixed(4)}°E</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+              <span className="text-[11px] text-slate-400">Temperature</span>
+              <p className="text-lg font-bold text-white mt-0.5">{weather?.temperature ?? '--'}°C</p>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+              <span className="text-[11px] text-slate-400">Relative Humidity</span>
+              <p className="text-lg font-bold text-white mt-0.5">{weather?.humidity ?? '--'}%</p>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+              <span className="text-[11px] text-slate-400">HTSS Risk Score</span>
+              <p className="text-lg font-bold text-amber-400 mt-0.5">{thermal?.htss ?? '--'} / 100</p>
+            </div>
+            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
+              <span className="text-[11px] text-slate-400">Advisory Level</span>
+              <p className="text-lg font-bold text-orange-400 mt-0.5">{risk?.level ?? thermal?.htssCategory ?? 'Moderate'}</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Hyper-Local / District Grid */}
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-white flex items-center justify-between">
+            <span>Local Wards &amp; Sub-Districts Telemetry</span>
+            <span className="text-xs text-slate-400 font-normal">{wardDataList.length} monitoring points</span>
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {wardDataList.map((ward) => (
+              <div
+                key={ward.id}
+                className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-3"
+              >
+                <div>
+                  <h4 className="text-xs font-bold text-white">{ward.wardName}</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">
+                    {ward.weather.temperature}°C • {ward.weather.humidity}% RH
+                  </p>
+                </div>
+                <div className="text-right">
+                  <span
+                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                      ward.riskCategory === 'EXTREME'
+                        ? 'bg-red-500/20 text-red-300 border border-red-500'
+                        : ward.riskCategory === 'HIGH'
+                        ? 'bg-orange-500/20 text-orange-300 border border-orange-500'
+                        : ward.riskCategory === 'MODERATE'
+                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500'
+                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500'
+                    }`}
+                  >
+                    HTSS {ward.htssScore}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full h-full relative z-0 overflow-hidden bg-dark-950">

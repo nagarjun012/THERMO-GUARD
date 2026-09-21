@@ -10,6 +10,11 @@ import { LearnPage } from './pages/LearnPage';
 import AboutPage from './pages/AboutPage';
 import { useAppStore } from './stores/appStore';
 
+import { OfficialTopBanner } from './components/layout/OfficialTopBanner';
+import { OfficialFooter } from './components/layout/OfficialFooter';
+import { OfficialSafetyHub } from './components/safety/OfficialSafetyHub';
+import { OfficialModals } from './components/official/OfficialModals';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -23,9 +28,12 @@ const queryClient = new QueryClient({
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen text-gray-200 selection:bg-orange-500/30 selection:text-orange-200">
+      <OfficialTopBanner />
       <Navbar />
       <Header />
-      <main className="pt-2 pb-16">{children}</main>
+      <main id="main-content" className="pt-2 pb-16" role="main">{children}</main>
+      <OfficialFooter />
+      <OfficialModals />
     </div>
   );
 }
@@ -99,6 +107,14 @@ function App() {
             element={
               <AppLayout>
                 <LearnPage />
+              </AppLayout>
+            }
+          />
+          <Route
+            path="/safety"
+            element={
+              <AppLayout>
+                <OfficialSafetyHub />
               </AppLayout>
             }
           />

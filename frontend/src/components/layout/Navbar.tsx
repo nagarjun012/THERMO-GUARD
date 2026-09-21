@@ -13,8 +13,10 @@ import {
   Shield,
   LogOut,
   ArrowRightLeft,
+  HeartPulse,
 } from 'lucide-react';
 import { useAppStore } from '../../stores/appStore';
+import { TRANSLATIONS } from '../../i18n/translations';
 import { LoginModal } from '../auth/LoginModal';
 
 export const Navbar: React.FC = () => {
@@ -22,23 +24,26 @@ export const Navbar: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [switchTargetRole, setSwitchTargetRole] = useState<'user' | 'gov'>('user');
   const navigate = useNavigate();
-  const { userRole, logout } = useAppStore();
+  const { userRole, logout, language } = useAppStore();
+  const t = TRANSLATIONS[language];
 
   // Filter navigation links based on user role:
-  // - USER LOGIN: Show Dashboard, Live Map, Learn, About (Gov Portal is HIDDEN)
-  // - GOV LOGIN: Show Gov Portal, Learn, About (Dashboard and Live Map are HIDDEN)
+  // - USER LOGIN: Show Dashboard, Live Map, Safety Guide, Learn, About (Gov Portal is HIDDEN)
+  // - GOV LOGIN: Show Gov Portal, Safety Guide, Learn, About (Dashboard and Live Map are HIDDEN)
   const links =
     userRole === 'gov'
       ? [
-          { to: '/government', label: 'Gov Portal', icon: Activity },
-          { to: '/learn', label: 'Learn THERMOS', icon: BookOpen },
-          { to: '/about', label: 'About', icon: Info },
+          { to: '/government', label: t.nav.govPortal, icon: Activity },
+          { to: '/safety', label: t.nav.safety, icon: HeartPulse },
+          { to: '/learn', label: t.nav.learn, icon: BookOpen },
+          { to: '/about', label: t.nav.about, icon: Info },
         ]
       : [
-          { to: '/dashboard', label: 'Dashboard', icon: Home },
-          { to: '/map', label: 'Live Map', icon: Map },
-          { to: '/learn', label: 'Learn THERMOS', icon: BookOpen },
-          { to: '/about', label: 'About', icon: Info },
+          { to: '/dashboard', label: t.nav.dashboard, icon: Home },
+          { to: '/map', label: t.nav.liveMap, icon: Map },
+          { to: '/safety', label: t.nav.safety, icon: HeartPulse },
+          { to: '/learn', label: t.nav.learn, icon: BookOpen },
+          { to: '/about', label: t.nav.about, icon: Info },
         ];
 
   // Role switch requires re-authentication via LoginModal

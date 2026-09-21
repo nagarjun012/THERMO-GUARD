@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 
+import { Language } from '../i18n/translations';
+
 export interface Location {
   lat: number;
   lon: number;
@@ -13,6 +15,7 @@ export interface Location {
 }
 
 export type AuthRole = 'user' | 'gov';
+export type OfficialModalType = 'privacy' | 'terms' | 'accessibility' | 'ai' | 'governance' | null;
 
 interface AppState {
   selectedLocation: Location;
@@ -21,6 +24,16 @@ interface AppState {
   userRole: AuthRole;
   isAuthenticated: boolean;
   sessionToken: string | null;
+  language: Language;
+  lowBandwidthMode: boolean;
+  highContrastMode: boolean;
+  activeOfficialModal: OfficialModalType;
+  setLanguage: (lang: Language) => void;
+  setLowBandwidthMode: (enabled: boolean) => void;
+  toggleLowBandwidthMode: () => void;
+  setHighContrastMode: (enabled: boolean) => void;
+  toggleHighContrastMode: () => void;
+  setActiveOfficialModal: (modal: OfficialModalType) => void;
   setUserRole: (role: AuthRole) => void;
   loginAs: (role: AuthRole) => void;
   logout: () => void;
@@ -62,6 +75,28 @@ const getInitialToken = (): string | null => {
     return localStorage.getItem('thermosafe_session_token') || null;
   } catch {}
   return null;
+};
+
+const getInitialLanguage = (): Language => {
+  try {
+    const saved = localStorage.getItem('thermosafe_language');
+    if (saved === 'en' || saved === 'ta' || saved === 'hi') return saved;
+  } catch {}
+  return 'en';
+};
+
+const getInitialLowBandwidth = (): boolean => {
+  try {
+    return localStorage.getItem('thermosafe_low_bandwidth') === 'true';
+  } catch {}
+  return false;
+};
+
+const getInitialHighContrast = (): boolean => {
+  try {
+    return localStorage.getItem('thermosafe_high_contrast') === 'true';
+  } catch {}
+  return false;
 };
 
 function generateSessionToken(): string {
@@ -126,6 +161,47 @@ export const useAppStore = create<AppState>((set) => ({
   userRole: getInitialRole(),
   isAuthenticated: getInitialAuth(),
   sessionToken: getInitialToken(),
+  language: getInitialLanguage(),
+  lowBandwidthMode: getInitialLowBandwidth(),
+  highContrastMode: getInitialHighContrast(),
+  activeOfficialModal: null,
+  setLanguage: (lang) => {
+    try {
+      localStorage.setItem('thermosafe_language', lang);
+    } catch {}
+    set({ language: lang });
+  },
+  setLowBandwidthMode: (enabled) => {
+    try {
+      localStorage.setItem('thermosafe_low_bandwidth', String(enabled));
+    } catch {}
+    set({ lowBandwidthMode: enabled });
+  },
+  toggleLowBandwidthMode: () => {
+    set((state) => {
+      const next = !state.lowBandwidthMode;
+      try {
+        localStorage.setItem('thermosafe_low_bandwidth', String(next));
+      } catch {}
+      return { lowBandwidthMode: next };
+    });
+  },
+  setHighContrastMode: (enabled) => {
+    try {
+      localStorage.setItem('thermosafe_high_contrast', String(enabled));
+    } catch {}
+    set({ highContrastMode: enabled });
+  },
+  toggleHighContrastMode: () => {
+    set((state) => {
+      const next = !state.highContrastMode;
+      try {
+        localStorage.setItem('thermosafe_high_contrast', String(next));
+      } catch {}
+      return { highContrastMode: next };
+    });
+  },
+  setActiveOfficialModal: (modal) => set({ activeOfficialModal: modal }),
   setIsManualSelection: (manual) => set({ isManualSelection: manual }),
   setUserRole: (role) => {
     try {
