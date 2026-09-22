@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 
 import { Language } from '../i18n/translations';
+import { VulnerabilityProfile } from '../utils/thermalEngine';
 
 export interface Location {
   lat: number;
@@ -24,11 +25,13 @@ interface AppState {
   userRole: AuthRole;
   isAuthenticated: boolean;
   sessionToken: string | null;
+  vulnerabilityProfile: VulnerabilityProfile;
   language: Language;
   lowBandwidthMode: boolean;
   highContrastMode: boolean;
   activeOfficialModal: OfficialModalType;
   setLanguage: (lang: Language) => void;
+  setVulnerabilityProfile: (profile: VulnerabilityProfile) => void;
   setLowBandwidthMode: (enabled: boolean) => void;
   toggleLowBandwidthMode: () => void;
   setHighContrastMode: (enabled: boolean) => void;
@@ -53,11 +56,18 @@ interface AppState {
   setScenario: (id: string | null) => void;
 }
 
+const GOV_TOKEN_PREFIX = 'TS-SECURE-GOV-';
+
+function isValidGovSession(token: string | null): boolean {
+  return Boolean(token && token.startsWith(GOV_TOKEN_PREFIX) && token.length > 24);
+}
+
 const getInitialRole = (): AuthRole => {
   try {
     const saved = localStorage.getItem('thermosafe_auth_role');
     const token = localStorage.getItem('thermosafe_session_token');
-    if ((saved === 'gov' || saved === 'user') && token) return saved;
+    if (saved === 'gov' && isValidGovSession(token)) return 'gov';
+    if (saved === 'user' && token) return 'user';
   } catch {}
   return 'user';
 };
@@ -167,6 +177,16 @@ const getInitialIsManual = (): boolean => {
   return false;
 };
 
+const getInitialProfile = (): VulnerabilityProfile => {
+  try {
+    const saved = localStorage.getItem('thermosafe_user_profile') as VulnerabilityProfile;
+    if (saved === 'OUTDOOR_LABORER' || saved === 'ELDERLY_VULNERABLE' || saved === 'PREGNANT_OR_CHILD' || saved === 'GENERAL_CITIZEN') {
+      return saved;
+    }
+  } catch {}
+  return 'GENERAL_CITIZEN';
+};
+
 export const useAppStore = create<AppState>((set) => ({
   selectedLocation: getInitialLocation(),
   isManualSelection: getInitialIsManual(),
@@ -174,6 +194,7 @@ export const useAppStore = create<AppState>((set) => ({
   userRole: getInitialRole(),
   isAuthenticated: getInitialAuth(),
   sessionToken: getInitialToken(),
+  vulnerabilityProfile: getInitialProfile(),
   language: getInitialLanguage(),
   lowBandwidthMode: getInitialLowBandwidth(),
   highContrastMode: getInitialHighContrast(),
@@ -183,6 +204,12 @@ export const useAppStore = create<AppState>((set) => ({
       localStorage.setItem('thermosafe_language', lang);
     } catch {}
     set({ language: lang });
+  },
+  setVulnerabilityProfile: (profile) => {
+    try {
+      localStorage.setItem('thermosafe_user_profile', profile);
+    } catch {}
+    set({ vulnerabilityProfile: profile });
   },
   setLowBandwidthMode: (enabled) => {
     try {
@@ -223,7 +250,9 @@ export const useAppStore = create<AppState>((set) => ({
     set({ userRole: role });
   },
   loginAs: (role) => {
-    const token = generateSessionToken();
+    const token = role === 'gov'
+      ? `${GOV_TOKEN_PREFIX}${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 14)}`
+      : generateSessionToken();
     try {
       localStorage.setItem('thermosafe_auth_role', role);
       localStorage.setItem('thermosafe_session_token', token);

@@ -13,17 +13,29 @@ import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
 import { OfficialThresholdReconciliation } from '../components/common/OfficialThresholdReconciliation';
 import { useAppStore } from '../stores/appStore';
 import { buildWeatherProvenance } from '../lib/dataProvenance';
-import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb } from '../lib/htssEngine';
-import { MapPin, RefreshCw, AlertTriangle } from 'lucide-react';
+import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
+import { MapPin, RefreshCw, AlertTriangle, Activity, Users } from 'lucide-react';
 
 export const CitizenDashboard: React.FC = () => {
-  const { selectedLocation } = useAppStore();
+  const { selectedLocation, vulnerabilityProfile, setVulnerabilityProfile } = useAppStore();
   const { data: weather, isLoading: wLoading, isError: wError } = useWeather();
   const { data: thermal, isLoading: tLoading, isError: tError } = useThermalStress();
   const { data: risk, isLoading: rLoading, isError: rError } = useRisk();
   const { data: alerts, isLoading: aLoading } = useAlerts();
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const { userRole } = useAppStore();
+
+  // Compute personalized thermal risk dynamically based on selected demographic vulnerability profile
+  const activeThermal = useMemo(() => {
+    if (!weather) return null;
+    return computeRealThermalRisk(
+      weather.temperature,
+      weather.humidity,
+      weather.windSpeed,
+      weather.solarRadiation,
+      vulnerabilityProfile
+    );
+  }, [weather, vulnerabilityProfile]);
 
   // Compute provenance from weather data
   const provenance = useMemo(() => {
@@ -127,10 +139,51 @@ export const CitizenDashboard: React.FC = () => {
       {/* DATA PROVENANCE PANEL */}
       <DataProvenancePanel provenance={provenance} compact={true} />
 
+      {/* PERSONALIZED VULNERABILITY PROFILE SELECTOR */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-800/80 border border-white/10 shadow-lg">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+          <div className="flex items-center gap-2">
+            <Users className="w-4 h-4 text-orange-400" />
+            <span className="text-xs font-bold font-mono tracking-wider text-slate-200 uppercase">
+              Personalized Biometeorological Strain Profile
+            </span>
+          </div>
+          <span className="text-[11px] font-mono text-cyan-400">
+            {VULNERABILITY_PROFILES[vulnerabilityProfile].description}
+          </span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {(Object.keys(VULNERABILITY_PROFILES) as VulnerabilityProfile[]).map((profKey) => {
+            const prof = VULNERABILITY_PROFILES[profKey];
+            const isActive = vulnerabilityProfile === profKey;
+            return (
+              <button
+                key={profKey}
+                onClick={() => setVulnerabilityProfile(profKey)}
+                className={`px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left flex flex-col gap-0.5 cursor-pointer border ${
+                  isActive
+                    ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_12px_rgba(249,115,22,0.3)]'
+                    : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                }`}
+                type="button"
+              >
+                <span>{prof.label}</span>
+                <span className="text-[10px] font-normal text-slate-400">
+                  {prof.metabolicOffset > 0 ? `+${prof.metabolicOffset} HTSS Strain` : 'Standard 150 W/m²'}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {/* PRIMARY INSTRUMENTS ROW (HTSS DIAL + 4 CORE OPEN-METEO TELEMETRY FIELDS) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
-          <ThermalStressGauge score={fmt(thermal.htss)} level={thermal.htssCategory || risk.level} />
+          <ThermalStressGauge
+            score={fmt(activeThermal?.htss ?? thermal.htss)}
+            level={activeThermal?.level ?? (thermal.htssCategory as any) ?? risk.level}
+          />
         </div>
         <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
           <WeatherCard title="Air Temp" value={fmt(weather.temperature)} unit="°C" icon="Thermometer" color="#f97316" />
@@ -187,6 +240,53 @@ export const CitizenDashboard: React.FC = () => {
           color="#f43f5e"
         />
       </div>
+
+      {/* AIR QUALITY & DUAL-HAZARD COUPLING (OPEN-METEO AIR QUALITY TELEMETRY) */}
+      {weather.airQuality && (
+        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 border border-white/10 shadow-lg">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div className="flex items-center gap-2.5">
+              <Activity className="w-5 h-5 text-emerald-400" />
+              <div>
+                <h3 className="text-sm font-bold font-mono text-white tracking-wide">
+                  AIR QUALITY & DUAL-HAZARD COUPLING
+                </h3>
+                <p className="text-xs font-mono text-slate-400">
+                  Live atmospheric particulate & ground-level ozone telemetry (Open-Meteo Air Quality)
+                </p>
+              </div>
+            </div>
+            <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold border ${
+              (weather.airQuality.aqi ?? 50) > 150
+                ? 'bg-red-500/20 border-red-500/40 text-red-400 animate-pulse'
+                : (weather.airQuality.aqi ?? 50) > 100
+                ? 'bg-orange-500/20 border-orange-500/40 text-orange-400'
+                : 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+            }`}>
+              AQI {weather.airQuality.aqi} — {weather.airQuality.aqiCategory}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
+            <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-[11px] text-slate-400 block">PM2.5 Particulate</span>
+              <span className="text-lg font-bold text-white">{weather.airQuality.pm25} <span className="text-xs font-normal text-slate-400">µg/m³</span></span>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-[11px] text-slate-400 block">PM10 Coarse Dust</span>
+              <span className="text-lg font-bold text-white">{weather.airQuality.pm10} <span className="text-xs font-normal text-slate-400">µg/m³</span></span>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-[11px] text-slate-400 block">Ground Ozone (O₃)</span>
+              <span className="text-lg font-bold text-white">{weather.airQuality.ozone} <span className="text-xs font-normal text-slate-400">µg/m³</span></span>
+            </div>
+            <div className="p-3 rounded-xl bg-white/5 border border-white/5">
+              <span className="text-[11px] text-slate-400 block">Compounding CHPI</span>
+              <span className="text-lg font-bold text-orange-400">{weather.chpi ?? activeThermal?.htss ?? thermal.htss} <span className="text-xs font-normal text-slate-400">/ 100</span></span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SECONDARY THERMAL INDICES (LOCALLY CALCULATED VIA DETERMINISTIC FORMULAS) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

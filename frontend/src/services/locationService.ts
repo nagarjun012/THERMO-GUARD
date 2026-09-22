@@ -264,10 +264,29 @@ export function detectRealtimeLocation(
       }
     );
 
-    // Register watchPosition for continuous tracking when physically moving
+    // Register watchPosition with battery-smart throttling and tab visibility pausing
     if (activeWatchId !== null) {
       navigator.geolocation.clearWatch(activeWatchId);
     }
+
+    if (typeof document !== 'undefined' && !(window as any).__tsVisibilityAttached) {
+      (window as any).__tsVisibilityAttached = true;
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'hidden') {
+          // Pause hardware GPS polling to conserve mobile battery
+          if (activeWatchId !== null && typeof navigator !== 'undefined' && navigator.geolocation) {
+            navigator.geolocation.clearWatch(activeWatchId);
+            activeWatchId = null;
+          }
+        } else if (document.visibilityState === 'visible') {
+          // Resume location check when tab is foregrounded
+          if (!useAppStore.getState().isManualSelection) {
+            detectRealtimeLocation(false);
+          }
+        }
+      });
+    }
+
     activeWatchId = navigator.geolocation.watchPosition(
       async (pos) => {
         if (useAppStore.getState().isManualSelection) {
@@ -280,7 +299,8 @@ export function detectRealtimeLocation(
         } else {
           const dLat = Math.abs(lastHardwarePos.lat - latitude);
           const dLon = Math.abs(lastHardwarePos.lon - longitude);
-          if (dLat < 0.002 && dLon < 0.002) {
+          // Hysteresis threshold (~450m) to eliminate continuous battery drain when stationary
+          if (dLat < 0.004 && dLon < 0.004) {
             return;
           }
           lastHardwarePos = { lat: latitude, lon: longitude };
@@ -300,7 +320,7 @@ export function detectRealtimeLocation(
         );
       },
       () => {},
-      { enableHighAccuracy: false, maximumAge: 60000 }
+      { enableHighAccuracy: false, maximumAge: 120000 }
     );
   }
 }

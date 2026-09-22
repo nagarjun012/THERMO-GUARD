@@ -10,6 +10,14 @@
   },
   "rewrites": [
     {
+      "source": "/api/facilities/:path*",
+      "destination": "/api/facilities?subpath=:path*"
+    },
+    {
+      "source": "/api/health/:path*",
+      "destination": "/api/facilities?subpath=health-:path*"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

@@ -27,6 +27,46 @@
 export type RiskCategory = 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW';
 export type RiskLevel = 'Extreme' | 'High' | 'Moderate' | 'Low';
 
+export type VulnerabilityProfile =
+  | 'GENERAL_CITIZEN'
+  | 'OUTDOOR_LABORER'
+  | 'ELDERLY_VULNERABLE'
+  | 'PREGNANT_OR_CHILD';
+
+export interface ProfileAdjustment {
+  label: string;
+  metabolicOffset: number; // additional HTSS points for internal heat production
+  wbgtThresholdShift: number; // shift in danger threshold (°C)
+  description: string;
+}
+
+export const VULNERABILITY_PROFILES: Record<VulnerabilityProfile, ProfileAdjustment> = {
+  GENERAL_CITIZEN: {
+    label: 'General Citizen',
+    metabolicOffset: 0,
+    wbgtThresholdShift: 0,
+    description: 'Standard adult metabolic baseline (150 W/m²)',
+  },
+  OUTDOOR_LABORER: {
+    label: 'Outdoor Laborer',
+    metabolicOffset: 8,
+    wbgtThresholdShift: -2.5,
+    description: 'Heavy construction, agriculture, or delivery manual labor (350–450 W/m²)',
+  },
+  ELDERLY_VULNERABLE: {
+    label: 'Senior Citizen (65+)',
+    metabolicOffset: 6,
+    wbgtThresholdShift: -2.0,
+    description: 'Reduced cardiovascular thermoregulation and delayed sweat onset',
+  },
+  PREGNANT_OR_CHILD: {
+    label: 'Pregnant / Child',
+    metabolicOffset: 5,
+    wbgtThresholdShift: -1.5,
+    description: 'Elevated baseline metabolic rate and higher dehydration risk',
+  },
+};
+
 export interface ThermalRiskResult {
   wbgt: number;
   utci: number;
@@ -34,6 +74,7 @@ export interface ThermalRiskResult {
   htss: number;
   level: RiskLevel;
   riskCategory: RiskCategory;
+  profile?: VulnerabilityProfile;
 }
 
 /**
@@ -276,7 +317,8 @@ export function computeRealThermalRisk(
   tempC: number,
   rh: number,
   windKmh = 10,
-  solarRad = 0
+  solarRad = 0,
+  profile: VulnerabilityProfile = 'GENERAL_CITIZEN'
 ): ThermalRiskResult {
   const twb = calculateWetBulb(tempC, rh);
   const wbgt = calculateOutdoorWBGT(tempC, rh, solarRad);
@@ -287,7 +329,8 @@ export function computeRealThermalRisk(
   const n_temp = Math.min(100, Math.max(0, ((tempC - 20) / 25) * 100));
 
   const weighted = 0.45 * n_wbgt + 0.35 * n_utci + 0.20 * n_temp;
-  const htss = Math.min(99, Math.max(10, Math.round(weighted)));
+  const profileOffset = VULNERABILITY_PROFILES[profile]?.metabolicOffset || 0;
+  const htss = Math.min(99, Math.max(10, Math.round(weighted + profileOffset)));
 
   return {
     wbgt,
@@ -296,6 +339,7 @@ export function computeRealThermalRisk(
     htss,
     level: htssToLevel(htss),
     riskCategory: htssToRiskCategory(htss),
+    profile,
   };
 }
 

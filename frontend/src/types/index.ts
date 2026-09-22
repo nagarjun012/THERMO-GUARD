@@ -1,3 +1,11 @@
+export interface AirQualityTelemetry {
+  pm25: number;
+  pm10: number;
+  ozone: number;
+  aqi: number;
+  aqiCategory: string;
+}
+
 export interface WeatherData {
   temperature: number;
   humidity: number;
@@ -12,6 +20,9 @@ export interface WeatherData {
   apiTimestamp?: string;
   isLive?: boolean;
   source?: string;
+  airQuality?: AirQualityTelemetry;
+  aqi?: number;
+  chpi?: number;
 }
 
 export interface ThermalStressData {
