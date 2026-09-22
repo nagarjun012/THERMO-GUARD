@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useWeather, useThermalStress, useRisk, useAlerts } from '../hooks/useApi';
 import { ThermalStressGauge } from '../components/dashboard/ThermalStressGauge';
 import { WeatherCard } from '../components/dashboard/WeatherCard';
@@ -14,7 +14,6 @@ import { OfficialThresholdReconciliation } from '../components/common/OfficialTh
 import { useAppStore } from '../stores/appStore';
 import { buildWeatherProvenance } from '../lib/dataProvenance';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
-import { resolveLocationFromCoords } from '../services/locationService';
 import { MapPin, RefreshCw, AlertTriangle, Activity, Users } from 'lucide-react';
 
 export const CitizenDashboard: React.FC = () => {
@@ -25,34 +24,6 @@ export const CitizenDashboard: React.FC = () => {
   const { data: alerts, isLoading: aLoading } = useAlerts();
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const { userRole } = useAppStore();
-
-  // Ensure the displayed Dashboard location corresponds to the exact coordinates currently being used by the MAP
-  useEffect(() => {
-    let isMounted = true;
-    if (typeof selectedLocation.lat === 'number' && typeof selectedLocation.lon === 'number') {
-      resolveLocationFromCoords(selectedLocation.lat, selectedLocation.lon, selectedLocation.isGpsLive ?? true).then(
-        (resolved) => {
-          if (!isMounted) return;
-          if (resolved.displayName && resolved.displayName !== selectedLocation.name) {
-            useAppStore.getState().setIndiaLocation(
-              resolved.state,
-              resolved.district,
-              selectedLocation.lat,
-              selectedLocation.lon,
-              true,
-              'LIVE',
-              resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
-              selectedLocation.isGpsLive ?? true,
-              useAppStore.getState().isManualSelection
-            );
-          }
-        }
-      );
-    }
-    return () => {
-      isMounted = false;
-    };
-  }, [selectedLocation.lat, selectedLocation.lon]);
 
   // Compute personalized thermal risk dynamically based on selected demographic vulnerability profile
   const activeThermal = useMemo(() => {

@@ -127,7 +127,8 @@ const getInitialLocation = (): Location => {
         typeof parsed.lat === 'number' &&
         typeof parsed.lon === 'number' &&
         parsed.name &&
-        !parsed.name.includes('Detecting live')
+        !parsed.name.includes('Detecting live') &&
+        !parsed.name.includes('Aravakkurichchi')
       ) {
         return parsed;
       }
@@ -136,7 +137,7 @@ const getInitialLocation = (): Location => {
     console.warn('Error reading stored location:', e);
   }
 
-  // Initial fallback to Karur, Tamil Nadu
+  // Baseline fallback (isGpsLive false until verified by live GPS or user selection)
   return {
     lat: 10.9601,
     lon: 78.0766,
@@ -145,7 +146,7 @@ const getInitialLocation = (): Location => {
     districtName: 'Karur',
     localityName: 'Karur',
     dataStatus: 'LIVE',
-    isGpsLive: true,
+    isGpsLive: false,
   };
 };
 
@@ -154,6 +155,10 @@ const getInitialIsManual = (): boolean => {
     const saved = localStorage.getItem('thermosafe_user_location');
     if (saved) {
       const parsed = JSON.parse(saved);
+      // Stale fallbacks or previous corrupted taluk names should not block real-time GPS
+      if (parsed?.name?.includes('Aravakkurichchi') || parsed?.name === 'Karur, Tamil Nadu') {
+        return false;
+      }
       return parsed?.isManual === true;
     }
   } catch {}

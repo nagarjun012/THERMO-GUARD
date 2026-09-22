@@ -58,8 +58,8 @@ export async function resolveLocationFromCoords(
       );
 
       const rawLocality =
-        data.locality ||
         data.city ||
+        data.locality ||
         talukObj?.name ||
         '';
 
@@ -178,11 +178,48 @@ export function detectRealtimeLocation(
 ): void {
   if (onLocatingChange) onLocatingChange(true);
 
+  const curLoc = useAppStore.getState().selectedLocation;
+  const isDefaultFallback =
+    !curLoc.isGpsLive &&
+    (curLoc.districtName === 'Karur' ||
+      curLoc.name.includes('Karur') ||
+      curLoc.name.includes('Aravakkurichchi'));
+
   if (forcePrompt) {
     useAppStore.getState().setIsManualSelection(false);
-  } else if (useAppStore.getState().isManualSelection) {
+  } else if (useAppStore.getState().isManualSelection && !isDefaultFallback) {
     if (onLocatingChange) onLocatingChange(false);
     return;
+  }
+
+  // Fast Client IP Geolocation (<200ms quick-fill before browser GPS resolves)
+  if (!useAppStore.getState().isManualSelection || isDefaultFallback) {
+    fetch('https://api.bigdatacloud.net/data/reverse-geocode-client', { signal: AbortSignal.timeout(2500) })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        if (
+          typeof data.latitude === 'number' &&
+          typeof data.longitude === 'number' &&
+          !useAppStore.getState().selectedLocation.isGpsLive
+        ) {
+          const resolved = await resolveLocationFromCoords(data.latitude, data.longitude, true);
+          if (!useAppStore.getState().selectedLocation.isGpsLive && !useAppStore.getState().isManualSelection) {
+            useAppStore.getState().setIndiaLocation(
+              resolved.state,
+              resolved.district,
+              resolved.lat,
+              resolved.lon,
+              true,
+              'LIVE',
+              resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
+              true,
+              false
+            );
+          }
+        }
+      })
+      .catch(() => {});
   }
 
   // Browser GPS / Hardware Geolocation (Single Source of Truth)
@@ -209,15 +246,15 @@ export function detectRealtimeLocation(
     };
 
     const handleGpsError = async (err: GeolocationPositionError) => {
-      console.warn('Browser GPS lock unavailable or timed out:', err.message);
+      console.warn('Browser GPS lock unavailable or timed out:', err?.message);
       if (onLocatingChange) onLocatingChange(false);
-      if (err.code === 1) {
+      if (err?.code === 1) {
         useAppStore.getState().setLocationPermissionDenied(true);
         if (onError) {
           onError('Location permission denied. Please allow location access in your browser address bar.');
         }
       } else if (forcePrompt && onError) {
-        if (err.code === 3) {
+        if (err?.code === 3) {
           onError('GPS signal timed out. Retaining last verified location.');
         } else {
           onError('Hardware GPS lock unavailable. Retaining last verified location.');
@@ -227,25 +264,37 @@ export function detectRealtimeLocation(
 
     // Use cached position if available within last 5 minutes (0ms return)
     const cacheAge = forcePrompt ? 0 : 300000;
-    const primaryTimeout = forcePrompt ? 6000 : 5000;
 
-    // First attempt: High accuracy GPS
+    // Fast-path: Standard accuracy Wi-Fi/cellular triangulation returns in <300ms without 5s desktop hang
     navigator.geolocation.getCurrentPosition(
       handleGpsSuccess,
       () => {
-        // Fallback attempt: Standard accuracy resolves rapidly via Wi-Fi/cellular
-        navigator.geolocation.getCurrentPosition(
-          handleGpsSuccess,
-          handleGpsError,
-          { enableHighAccuracy: false, timeout: 4000, maximumAge: cacheAge }
-        );
+        // If standard accuracy timed out, try high accuracy if forcePrompt
+        if (forcePrompt) {
+          navigator.geolocation.getCurrentPosition(
+            handleGpsSuccess,
+            handleGpsError,
+            { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+          );
+        } else {
+          handleGpsError({ code: 3, message: 'GPS timeout' } as any);
+        }
       },
       {
-        enableHighAccuracy: true,
-        timeout: primaryTimeout,
+        enableHighAccuracy: false,
+        timeout: 3500,
         maximumAge: cacheAge,
       }
     );
+
+    // If user explicitly pressed "Use My Location", concurrently request high-accuracy GPS refinement
+    if (forcePrompt) {
+      navigator.geolocation.getCurrentPosition(
+        handleGpsSuccess,
+        () => {},
+        { enableHighAccuracy: true, timeout: 6000, maximumAge: 0 }
+      );
+    }
 
     // Register watchPosition with battery-smart throttling and tab visibility pausing
     if (activeWatchId !== null) {
