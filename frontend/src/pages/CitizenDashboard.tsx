@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useWeather, useThermalStress, useRisk, useAlerts } from '../hooks/useApi';
 import { ThermalStressGauge } from '../components/dashboard/ThermalStressGauge';
 import { WeatherCard } from '../components/dashboard/WeatherCard';
@@ -14,16 +14,45 @@ import { OfficialThresholdReconciliation } from '../components/common/OfficialTh
 import { useAppStore } from '../stores/appStore';
 import { buildWeatherProvenance } from '../lib/dataProvenance';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
+import { resolveLocationFromCoords } from '../services/locationService';
 import { MapPin, RefreshCw, AlertTriangle, Activity, Users } from 'lucide-react';
 
 export const CitizenDashboard: React.FC = () => {
-  const { selectedLocation, vulnerabilityProfile, setVulnerabilityProfile } = useAppStore();
+  const { selectedLocation, vulnerabilityProfile, setVulnerabilityProfile, locationPermissionDenied, isManualSelection } = useAppStore();
   const { data: weather, isLoading: wLoading, isError: wError } = useWeather();
   const { data: thermal, isLoading: tLoading, isError: tError } = useThermalStress();
   const { data: risk, isLoading: rLoading, isError: rError } = useRisk();
   const { data: alerts, isLoading: aLoading } = useAlerts();
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const { userRole } = useAppStore();
+
+  // Ensure the displayed Dashboard location corresponds to the exact coordinates currently being used by the MAP
+  useEffect(() => {
+    let isMounted = true;
+    if (typeof selectedLocation.lat === 'number' && typeof selectedLocation.lon === 'number') {
+      resolveLocationFromCoords(selectedLocation.lat, selectedLocation.lon, selectedLocation.isGpsLive ?? true).then(
+        (resolved) => {
+          if (!isMounted) return;
+          if (resolved.displayName && resolved.displayName !== selectedLocation.name) {
+            useAppStore.getState().setIndiaLocation(
+              resolved.state,
+              resolved.district,
+              selectedLocation.lat,
+              selectedLocation.lon,
+              true,
+              'LIVE',
+              resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
+              selectedLocation.isGpsLive ?? true,
+              useAppStore.getState().isManualSelection
+            );
+          }
+        }
+      );
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedLocation.lat, selectedLocation.lon]);
 
   // Compute personalized thermal risk dynamically based on selected demographic vulnerability profile
   const activeThermal = useMemo(() => {
@@ -135,6 +164,16 @@ export const CitizenDashboard: React.FC = () => {
           </span>
         )}
       </div>
+
+      {/* LOCATION PERMISSION NOTICE IF DENIED */}
+      {locationPermissionDenied && !isManualSelection && (
+        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs font-mono">
+          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+          <span>
+            Location access is blocked in your browser. Showing last verified coordinates. Enable location access in your address bar for live GPS precision.
+          </span>
+        </div>
+      )}
 
       {/* DATA PROVENANCE PANEL */}
       <DataProvenancePanel provenance={provenance} compact={true} />

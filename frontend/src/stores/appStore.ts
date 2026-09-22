@@ -53,6 +53,8 @@ interface AppState {
     isGpsLive?: boolean,
     isManual?: boolean
   ) => void;
+  locationPermissionDenied: boolean;
+  setLocationPermissionDenied: (denied: boolean) => void;
   setScenario: (id: string | null) => void;
 }
 
@@ -182,6 +184,8 @@ export const useAppStore = create<AppState>((set) => ({
   lowBandwidthMode: getInitialLowBandwidth(),
   highContrastMode: getInitialHighContrast(),
   activeOfficialModal: null,
+  locationPermissionDenied: false,
+  setLocationPermissionDenied: (denied) => set({ locationPermissionDenied: denied }),
   setLanguage: (lang) => {
     try {
       localStorage.setItem('thermosafe_language', lang);

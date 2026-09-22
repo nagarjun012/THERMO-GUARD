@@ -185,19 +185,10 @@ export function detectRealtimeLocation(
     return;
   }
 
-  let hasResolvedGps = false;
-
-  // STEP 1: Fast Parallel IP Geolocation (instant response ~150ms)
-  fallbackToIpOrKnownLocation(() => hasResolvedGps).then(() => {
-    if (!hasResolvedGps && onLocatingChange) {
-      onLocatingChange(false);
-    }
-  });
-
-  // STEP 2: Browser GPS / Hardware Geolocation
+  // Browser GPS / Hardware Geolocation (Single Source of Truth)
   if (typeof navigator !== 'undefined' && navigator.geolocation) {
     const handleGpsSuccess = async (pos: GeolocationPosition) => {
-      hasResolvedGps = true;
+      useAppStore.getState().setLocationPermissionDenied(false);
       const { latitude, longitude, accuracy } = pos.coords;
       lastHardwarePos = { lat: latitude, lon: longitude };
 
@@ -219,24 +210,24 @@ export function detectRealtimeLocation(
 
     const handleGpsError = async (err: GeolocationPositionError) => {
       console.warn('Browser GPS lock unavailable or timed out:', err.message);
-      if (!hasResolvedGps) {
-        await fallbackToIpOrKnownLocation(() => hasResolvedGps);
-      }
       if (onLocatingChange) onLocatingChange(false);
-      if (forcePrompt && onError) {
-        if (err.code === 1) {
-          onError('Browser location access is blocked. Please allow Location permission in your address bar (tune/lock icon) to enable GPS precision.');
-        } else if (err.code === 3) {
-          onError('GPS signal timed out. High-accuracy network/IP location was applied.');
+      if (err.code === 1) {
+        useAppStore.getState().setLocationPermissionDenied(true);
+        if (onError) {
+          onError('Location permission denied. Please allow location access in your browser address bar.');
+        }
+      } else if (forcePrompt && onError) {
+        if (err.code === 3) {
+          onError('GPS signal timed out. Retaining last verified location.');
         } else {
-          onError('Hardware GPS lock unavailable. Network/IP location was applied.');
+          onError('Hardware GPS lock unavailable. Retaining last verified location.');
         }
       }
     };
 
     // Use cached position if available within last 5 minutes (0ms return)
     const cacheAge = forcePrompt ? 0 : 300000;
-    const primaryTimeout = forcePrompt ? 4000 : 3500;
+    const primaryTimeout = forcePrompt ? 6000 : 5000;
 
     // First attempt: High accuracy GPS
     navigator.geolocation.getCurrentPosition(
@@ -246,7 +237,7 @@ export function detectRealtimeLocation(
         navigator.geolocation.getCurrentPosition(
           handleGpsSuccess,
           handleGpsError,
-          { enableHighAccuracy: false, timeout: 3000, maximumAge: cacheAge }
+          { enableHighAccuracy: false, timeout: 4000, maximumAge: cacheAge }
         );
       },
       {
@@ -306,7 +297,7 @@ export function detectRealtimeLocation(
           resolved.lon,
           true,
           'LIVE',
-          resolved.locality,
+          resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
           true,
           false
         );
@@ -314,118 +305,7 @@ export function detectRealtimeLocation(
       () => {},
       { enableHighAccuracy: false, maximumAge: 120000 }
     );
+  } else {
+    if (onLocatingChange) onLocatingChange(false);
   }
-}
-
-/**
- * Fast IP geolocation fallback to detect the user's real city/coordinates instantly (~150ms).
- */
-async function fallbackToIpOrKnownLocation(isGpsAlreadyResolved?: () => boolean): Promise<void> {
-  if (useAppStore.getState().isManualSelection) return;
-
-  // Don't overwrite if user already has a valid location in state
-  const current = useAppStore.getState().selectedLocation;
-  if (
-    current &&
-    current.districtName &&
-    current.name &&
-    !current.name.includes('Detecting live')
-  ) {
-    return;
-  }
-
-  // 1. Primary: ipwho.is (fastest, high reliability in India, CORS-friendly ~150ms)
-  try {
-    const res = await fetch('https://ipwho.is/', {
-      signal: AbortSignal.timeout(2500),
-    });
-    if (res.ok) {
-      const d = await res.json();
-      if (d.success !== false && d.latitude && d.longitude && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
-        const nearest = findNearestDistrict(d.latitude, d.longitude);
-        const city = d.city || nearest.district;
-        const region = d.region || nearest.state;
-        const district = nearest.district || city;
-
-        if (!useAppStore.getState().isManualSelection && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
-          useAppStore.getState().setIndiaLocation(
-            region,
-            district,
-            d.latitude,
-            d.longitude,
-            nearest.hasWardData ?? true,
-            'LIVE',
-            city.toLowerCase() !== district.toLowerCase() ? city : undefined,
-            false,
-            false
-          );
-          return;
-        }
-      }
-    }
-  } catch {}
-
-  // 2. Secondary backup: BigDataCloud client API (~200ms)
-  try {
-    const res2 = await fetch('https://api.bigdatacloud.net/data/reverse-geocode-client', {
-      signal: AbortSignal.timeout(2500),
-    });
-    if (res2.ok) {
-      const d2 = await res2.json();
-      if (d2.latitude && d2.longitude && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
-        const nearest = findNearestDistrict(d2.latitude, d2.longitude);
-        const locality = d2.locality || d2.city || nearest.district;
-        const distObj = d2.localityInfo?.administrative?.find((a: any) =>
-          a.description?.toLowerCase().includes('district') || a.name?.toLowerCase().includes('district')
-        );
-        const district = distObj?.name?.replace(/\s+district/i, '').trim() || nearest.district;
-        const state = d2.principalSubdivision || nearest.state;
-
-        if (!useAppStore.getState().isManualSelection && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
-          useAppStore.getState().setIndiaLocation(
-            state,
-            district,
-            d2.latitude,
-            d2.longitude,
-            nearest.hasWardData ?? true,
-            'LIVE',
-            locality.toLowerCase() !== district.toLowerCase() ? locality : undefined,
-            false,
-            false
-          );
-          return;
-        }
-      }
-    }
-  } catch {}
-
-  // 3. Tertiary backup: ipapi.co
-  try {
-    const res3 = await fetch('https://ipapi.co/json/', {
-      signal: AbortSignal.timeout(2500),
-    });
-    if (res3.ok) {
-      const d3 = await res3.json();
-      if (d3.latitude && d3.longitude && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
-        const nearest = findNearestDistrict(d3.latitude, d3.longitude);
-        const city = d3.city || nearest.district;
-        const region = d3.region || nearest.state;
-        const district = nearest.district || city;
-
-        if (!useAppStore.getState().isManualSelection && (!isGpsAlreadyResolved || !isGpsAlreadyResolved())) {
-          useAppStore.getState().setIndiaLocation(
-            region,
-            district,
-            d3.latitude,
-            d3.longitude,
-            nearest.hasWardData ?? true,
-            'LIVE',
-            city.toLowerCase() !== district.toLowerCase() ? city : undefined,
-            false,
-            false
-          );
-        }
-      }
-    }
-  } catch {}
 }
