@@ -10,7 +10,94 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { getSession } from './auth';
+import crypto from 'crypto';
+
+export interface UserSession {
+  userId: string;
+  role: 'CITIZEN' | 'OFFICER' | 'ADMIN';
+  name: string;
+  department?: string;
+  issuedAt: number;
+  expiresAt: number;
+}
+
+const AUTH_SECRET =
+  process.env.AUTH_SECRET ||
+  process.env.SECRET_KEY ||
+  'thermosafe-secure-hmac-sha256-auth-token-key-prod-2026';
+
+function base64UrlDecode(str: string): string {
+  let b64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (b64.length % 4) {
+    b64 += '=';
+  }
+  return Buffer.from(b64, 'base64').toString('utf8');
+}
+
+function base64UrlEncode(str: string): string {
+  return Buffer.from(str)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/, '');
+}
+
+function verifySessionToken(token: string): UserSession | null {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+
+  const [encodedPayload, providedSignature] = parts;
+  const hmac = crypto.createHmac('sha256', AUTH_SECRET);
+  hmac.update(encodedPayload);
+  const expectedSignature = base64UrlEncode(hmac.digest('base64'));
+
+  const providedBuf = Buffer.from(providedSignature);
+  const expectedBuf = Buffer.from(expectedSignature);
+  if (providedBuf.length !== expectedBuf.length) return null;
+  if (!crypto.timingSafeEqual(providedBuf, expectedBuf)) return null;
+
+  try {
+    const raw = base64UrlDecode(encodedPayload);
+    const session: UserSession = JSON.parse(raw);
+    if (!session.expiresAt || Date.now() > session.expiresAt) {
+      return null;
+    }
+    return session;
+  } catch {
+    return null;
+  }
+}
+
+function parseCookies(header: string | undefined): Record<string, string> {
+  const cookies: Record<string, string> = {};
+  if (!header) return cookies;
+  const pairs = header.split(';');
+  for (const pair of pairs) {
+    const idx = pair.indexOf('=');
+    if (idx < 0) continue;
+    const key = pair.substring(0, idx).trim();
+    const val = pair.substring(idx + 1).trim();
+    cookies[key] = decodeURIComponent(val);
+  }
+  return cookies;
+}
+
+function getSession(req: VercelRequest): UserSession | null {
+  const cookies = parseCookies(req.headers?.cookie);
+  let token = cookies['ts_session'];
+  if (!token && req.headers?.authorization) {
+    const authHeader = req.headers.authorization;
+    if (authHeader.startsWith('Bearer ')) {
+      token = authHeader.substring(7).trim();
+    }
+  }
+  if (!token && req.headers?.['x-session-token']) {
+    token = String(req.headers['x-session-token']).trim();
+  }
+  if (!token) return null;
+  return verifySessionToken(token);
+}
 
 const DISTRICT_CENSUS_POPULATION: Record<string, number> = {
   'Thane': 11060148, 'North 24 Parganas': 10009781, 'Bengaluru Urban': 9621551, 'Pune': 9429408,
@@ -164,45 +251,48 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         (temp !== null && rh !== null ? calculateHeatIndex(temp, rh) : null);
 
       return {
-        id: row.id,
-        rank: row.htss !== null ? index + 1 : null,
-        district: row.district,
-        state: row.state,
-        lat: row.lat,
-        lon: row.lon,
+        id: row.id ?? `dist-${index}`,
+        rank: row.rank ?? index + 1,
+        district: row.district_name ?? row.district ?? 'Unknown',
+        state: row.state_name ?? row.state ?? 'Unknown',
+        lat: row.latitude ?? row.lat ?? 0,
+        lon: row.longitude ?? row.lon ?? 0,
         temperature: temp,
         humidity: rh,
         windSpeed: row.wind_speed ?? row.wind ?? null,
         solarRadiation: solar,
-        heatIndex,
-        apparent_temperature: heatIndex,
-        twb: row.twb ?? null,
         wbgt: row.wbgt ?? null,
         utci: row.utci ?? null,
-        htss: row.htss !== null ? Math.round(row.htss) : null,
+        twb: row.twb ?? null,
+        htss: row.htss ?? null,
+        heatIndex,
+        apparent_temperature: row.apparent_temperature ?? heatIndex,
         riskCategory,
         status: row.status ?? 'SUCCESS',
-        calculatedAt: row.updated_at || new Date().toISOString(),
-        source: row.data_source ?? 'Supabase Cache',
+        calculatedAt: row.calculated_at ?? row.updated_at ?? null,
+        source: row.data_source ?? 'Supabase Telemetry Cache',
+        isLive: false,
       };
     });
 
-    // Aggregate state summaries
-    const stateMap: Record<string, typeof districts> = {};
-    districts.forEach((d) => {
-      if (!stateMap[d.state]) stateMap[d.state] = [];
-      stateMap[d.state].push(d);
-    });
+    // Build state aggregates
+    const stateMap = new Map<string, any[]>();
+    for (const d of districts) {
+      if (!stateMap.has(d.state)) {
+        stateMap.set(d.state, []);
+      }
+      stateMap.get(d.state)!.push(d);
+    }
 
-    const states = Object.entries(stateMap)
+    const states = Array.from(stateMap.entries())
       .map(([stateName, dists]) => {
         const validDists = dists.filter((d) => d.htss !== null);
         const avgHtss =
           validDists.length > 0
-            ? Math.round(validDists.reduce((s, d) => s + (d.htss as number), 0) / validDists.length)
+            ? Math.round(validDists.reduce((s, d) => s + d.htss, 0) / validDists.length)
             : null;
         const maxHtss =
-          validDists.length > 0 ? Math.max(...validDists.map((d) => d.htss as number)) : null;
+          validDists.length > 0 ? Math.max(...validDists.map((d) => d.htss)) : null;
 
         let maxLevel: string = 'DATA UNAVAILABLE';
         if (maxHtss !== null) {
@@ -301,7 +391,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       lastFetchedAt: new Date().toISOString(),
       isCached: false,
       isLive: false,
-      message: 'Client live sync active.',
     });
   }
 }
