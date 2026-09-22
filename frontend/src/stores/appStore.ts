@@ -130,8 +130,10 @@ const getInitialLocation = (): Location => {
         parsed &&
         typeof parsed.lat === 'number' &&
         typeof parsed.lon === 'number' &&
-        parsed.isManual === true &&
-        !parsed.name?.includes('Central Delhi')
+        parsed.districtName &&
+        parsed.name &&
+        !parsed.name?.includes('Central Delhi') &&
+        !parsed.name?.includes('Detecting live')
       ) {
         return parsed;
       }
@@ -140,7 +142,7 @@ const getInitialLocation = (): Location => {
     console.warn('Error reading stored location:', e);
   }
 
-  // Initial placeholder until instant live OpenStreetMap geolocation resolves in <300ms
+  // Initial placeholder until instant live geolocation resolves in <150ms
   return {
     lat: 13.0827,
     lon: 80.2707,
@@ -154,9 +156,20 @@ const getInitialLocation = (): Location => {
   };
 };
 
+const getInitialIsManual = (): boolean => {
+  try {
+    const saved = localStorage.getItem('thermosafe_user_location');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      return parsed?.isManual === true;
+    }
+  } catch {}
+  return false;
+};
+
 export const useAppStore = create<AppState>((set) => ({
   selectedLocation: getInitialLocation(),
-  isManualSelection: false,
+  isManualSelection: getInitialIsManual(),
   activeScenario: null,
   userRole: getInitialRole(),
   isAuthenticated: getInitialAuth(),
