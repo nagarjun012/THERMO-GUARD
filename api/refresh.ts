@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { getSession } from './_lib/auth';
+import { getSession } from './auth';
 
 /**
  * National Data Refresh Pipeline

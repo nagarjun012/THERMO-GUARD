@@ -4,10 +4,8 @@ import path from 'path'
 import weatherHandler from './api/weather'
 import htssHandler from './api/htss'
 import refreshHandler from './api/refresh'
-import authLoginHandler from './api/auth/login'
-import authLogoutHandler from './api/auth/logout'
-import authSessionHandler from './api/auth/session'
-import hospitalUpdateHandler from './api/admin/hospital/update'
+import authHandler from './api/auth'
+import adminHandler from './api/admin'
 import facilitiesHandler from './api/facilities'
 
 function localVercelApiPlugin(): Plugin {
@@ -53,20 +51,12 @@ function localVercelApiPlugin(): Plugin {
         };
 
         try {
-          if (pathname === '/api/auth/login') {
-            await authLoginHandler(req as any, res as any);
+          if (pathname.startsWith('/api/auth')) {
+            await authHandler(req as any, res as any);
             return;
           }
-          if (pathname === '/api/auth/logout') {
-            await authLogoutHandler(req as any, res as any);
-            return;
-          }
-          if (pathname === '/api/auth/session') {
-            await authSessionHandler(req as any, res as any);
-            return;
-          }
-          if (pathname === '/api/admin/hospital/update') {
-            await hospitalUpdateHandler(req as any, res as any);
+          if (pathname.startsWith('/api/admin')) {
+            await adminHandler(req as any, res as any);
             return;
           }
           if (pathname === '/api/weather') {

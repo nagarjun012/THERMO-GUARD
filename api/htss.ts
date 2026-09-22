@@ -10,8 +10,33 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { requireRole } from './_lib/auth';
-import { getDistrictPopulation } from './_lib/populations';
+import { getSession } from './auth';
+
+const DISTRICT_CENSUS_POPULATION: Record<string, number> = {
+  'Thane': 11060148, 'North 24 Parganas': 10009781, 'Bengaluru Urban': 9621551, 'Pune': 9429408,
+  'Mumbai Suburban': 9356962, 'South 24 Parganas': 8161961, 'Barddhaman': 7717563, 'Ahmedabad': 7214225,
+  'Murshidabad': 7103807, 'Jaipur': 6626178, 'Nashik': 6107187, 'Surat': 6081322, 'Paschim Medinipur': 5913457,
+  'Patna': 5838465, 'Allahabad': 5954391, 'Prayagraj': 5954391, 'Kancheepuram': 3998252, 'Vellore': 3936331,
+  'Tiruvallur': 3728104, 'Salem': 3482056, 'Viluppuram': 3458873, 'Coimbatore': 3458045, 'Tirunelveli': 3077233,
+  'Madurai': 3038252, 'Tiruchirappalli': 2722290, 'Cuddalore': 2605914, 'Tiruppur': 2479052, 'Tiruvannamalai': 2464875,
+  'Thanjavur': 2405890, 'Erode': 2251744, 'Dindigul': 2159775, 'Virudhunagar': 1942288, 'Krishnagiri': 1879809,
+  'Kanniyakumari': 1870374, 'Thoothukkudi': 1750176, 'Namakkal': 1726601, 'Pudukkottai': 1618345, 'Nagapattinam': 1616450,
+  'Dharmapuri': 1506843, 'Ramanathapuram': 1353445, 'Sivaganga': 1339101, 'Thiruvarur': 1264282, 'Theni': 1245899,
+  'Karur': 1064493, 'Ariyalur': 754894, 'The Nilgiris': 735394, 'Perambalur': 565223, 'Chennai': 4646732,
+  'Nagpur': 4653570, 'Lucknow': 4589838, 'Kanpur Nagar': 4581268, 'Agra': 4418797, 'Varanasi': 3676841,
+  'Hyderabad': 3943323, 'Kolkata': 4496694, 'Indore': 3276697, 'Bhopal': 2371061, 'Visakhapatnam': 4290589,
+};
+
+function getDistrictPopulation(districtName: string): number {
+  if (!districtName) return 1250000;
+  const direct = DISTRICT_CENSUS_POPULATION[districtName];
+  if (direct) return direct;
+  const clean = districtName.trim().toLowerCase();
+  for (const [key, val] of Object.entries(DISTRICT_CENSUS_POPULATION)) {
+    if (key.toLowerCase() === clean) return val;
+  }
+  return 1250000;
+}
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -63,8 +88,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // Server-side RBAC: Requires active OFFICER or ADMIN session
-  const session = requireRole(req, res, 'OFFICER');
-  if (!session) return;
+  const session = getSession(req);
+  if (!session) {
+    return res.status(401).json({
+      error: 'UNAUTHORIZED',
+      message: 'Access denied. A valid server-authenticated session is required.',
+    });
+  }
+  if (session.role !== 'OFFICER' && session.role !== 'ADMIN') {
+    return res.status(403).json({
+      error: 'FORBIDDEN',
+      message: 'Access denied. Requires OFFICER or ADMIN role.',
+    });
+  }
 
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
 

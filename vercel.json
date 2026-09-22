@@ -24,6 +24,14 @@
       "destination": "/api/facilities"
     },
     {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth"
+    },
+    {
+      "source": "/api/admin/(.*)",
+      "destination": "/api/admin"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
