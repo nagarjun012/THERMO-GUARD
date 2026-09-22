@@ -57,25 +57,28 @@ export async function resolveLocationFromCoords(
           a.name?.toLowerCase().includes('district')
       );
 
-      const locality =
+      const rawLocality =
         data.locality ||
         data.city ||
         talukObj?.name ||
         '';
 
       const rawDist = distObj?.name?.replace(/\s+district/i, '').trim() || data.city || '';
-      const district = rawDist || nearest.district;
+      const district = (rawDist || nearest.district).replace(/\s+district/i, '').trim();
       const state = data.principalSubdivision || nearest.state;
 
-      const hasLocality = locality && locality.toLowerCase() !== district.toLowerCase();
+      const cleanLocality = rawLocality
+        ? rawLocality.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
+        : '';
+      const hasLocality = cleanLocality.length > 0 && cleanLocality.toLowerCase() !== district.toLowerCase();
       const displayName = hasLocality
-        ? `${locality}, ${district}, ${state}`
+        ? `${cleanLocality}, ${district}, ${state}`
         : `${district}, ${state}`;
 
       const resolved: ResolvedLocation = {
         lat,
         lon,
-        locality: hasLocality ? locality : district,
+        locality: hasLocality ? cleanLocality : district,
         district,
         state,
         displayName,
@@ -102,35 +105,40 @@ export async function resolveLocationFromCoords(
       const data = await res.json();
       const addr = data.address || {};
 
-      const locality =
+      const rawLocality =
         addr.suburb ||
+        addr.town ||
+        addr.village ||
         addr.neighbourhood ||
         addr.residential ||
-        addr.village ||
-        addr.town ||
         addr.city_district ||
         addr.city ||
         '';
 
-      let district =
+      let rawDist =
         addr.state_district?.replace(/\s+district/i, '').trim() ||
         addr.county?.replace(/\s+district/i, '').trim() ||
-        addr.city ||
+        addr.city?.replace(/\s+Corporation/i, '').trim() ||
         nearest.district;
 
+      const district = (rawDist || nearest.district).replace(/\s+district/i, '').trim();
       const state = addr.state || nearest.state;
-      const hasLocality = locality && locality.toLowerCase() !== district.toLowerCase();
+
+      const cleanLocality = rawLocality
+        ? rawLocality.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
+        : '';
+      const hasLocality = cleanLocality.length > 0 && cleanLocality.toLowerCase() !== district.toLowerCase();
       const displayName = hasLocality
-        ? `${locality}, ${district}, ${state}`
+        ? `${cleanLocality}, ${district}, ${state}`
         : `${district}, ${state}`;
 
       const resolved: ResolvedLocation = {
         lat,
         lon,
-        locality: hasLocality ? locality : district,
+        locality: hasLocality ? cleanLocality : district,
         district,
         state,
-        displayName: displayName || data.display_name?.split(',').slice(0, 3).join(', ') || `${district}, ${state}`,
+        displayName: displayName || `${district}, ${state}`,
         isGpsLive: isGps,
       };
       geoCache.set(cacheKey, resolved);
@@ -193,36 +201,20 @@ export function detectRealtimeLocation(
       const { latitude, longitude, accuracy } = pos.coords;
       lastHardwarePos = { lat: latitude, lon: longitude };
 
-      // Immediately apply instant local district matching (0ms) so user gets instant response
-      const nearest = findNearestDistrict(latitude, longitude);
+      // Concurrently resolve exact location (taluk / town / district / state)
+      const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
       useAppStore.getState().setIndiaLocation(
-        nearest.state,
-        nearest.district,
-        latitude,
-        longitude,
-        nearest.hasWardData ?? true,
+        resolved.state,
+        resolved.district,
+        resolved.lat,
+        resolved.lon,
+        true,
         'LIVE',
-        undefined,
+        resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
         true,
         false
       );
       if (onLocatingChange) onLocatingChange(false);
-
-      // Concurrently refine with fine locality/street name (from cache or fast reverse geocode)
-      const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
-      if (resolved.locality && resolved.locality !== nearest.district) {
-        useAppStore.getState().setIndiaLocation(
-          resolved.state,
-          resolved.district,
-          resolved.lat,
-          resolved.lon,
-          true,
-          'LIVE',
-          resolved.locality,
-          true,
-          false
-        );
-      }
     };
 
     const handleGpsError = async (err: GeolocationPositionError) => {
@@ -330,6 +322,17 @@ export function detectRealtimeLocation(
  */
 async function fallbackToIpOrKnownLocation(isGpsAlreadyResolved?: () => boolean): Promise<void> {
   if (useAppStore.getState().isManualSelection) return;
+
+  // Don't overwrite if user already has a valid location in state
+  const current = useAppStore.getState().selectedLocation;
+  if (
+    current &&
+    current.districtName &&
+    current.name &&
+    !current.name.includes('Detecting live')
+  ) {
+    return;
+  }
 
   // 1. Primary: ipwho.is (fastest, high reliability in India, CORS-friendly ~150ms)
   try {

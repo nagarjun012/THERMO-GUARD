@@ -44,7 +44,7 @@ export const Header: React.FC = () => {
 
   const selectSearchResult = (item: any) => {
     const stName = item.stateName || item.state || 'Tamil Nadu';
-    const distName = item.districtName || item.district || selectedLocation.districtName || 'Chennai';
+    const distName = item.districtName || item.district || selectedLocation.districtName || 'Karur';
     const locName = item.localityName || undefined;
     setIndiaLocation(stName, distName, item.lat, item.lon, item.hasWardData ?? true, 'LIVE', locName, true, true);
     setSearch(locName ? `${locName}, ${distName}, ${stName}` : `${distName}, ${stName}`);

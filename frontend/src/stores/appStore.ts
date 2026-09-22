@@ -121,29 +121,12 @@ const getInitialLocation = (): Location => {
     const saved = localStorage.getItem('thermosafe_user_location');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Immediately purge any stale Aravakurichi or Karur entries from cache
-      const isStale =
-        parsed?.name?.toLowerCase().includes('arava') ||
-        parsed?.localityName?.toLowerCase().includes('arava') ||
-        parsed?.districtName?.toLowerCase().includes('arava') ||
-        parsed?.name?.toLowerCase().includes('karur') ||
-        parsed?.localityName?.toLowerCase().includes('karur') ||
-        parsed?.districtName?.toLowerCase().includes('karur') ||
-        (typeof parsed?.lat === 'number' && Math.abs(parsed.lat - 10.777) < 0.05) ||
-        (typeof parsed?.lat === 'number' && Math.abs(parsed.lat - 10.96) < 0.05);
-
-      if (isStale) {
-        try {
-          localStorage.removeItem('thermosafe_user_location');
-        } catch {}
-      } else if (
+      if (
         parsed &&
         typeof parsed.lat === 'number' &&
         typeof parsed.lon === 'number' &&
-        parsed.districtName &&
         parsed.name &&
-        !parsed.name?.includes('Central Delhi') &&
-        !parsed.name?.includes('Detecting live')
+        !parsed.name.includes('Detecting live')
       ) {
         return parsed;
       }
@@ -152,14 +135,14 @@ const getInitialLocation = (): Location => {
     console.warn('Error reading stored location:', e);
   }
 
-  // Initial placeholder until instant live geolocation resolves in <150ms
+  // Initial fallback to Karur, Tamil Nadu
   return {
-    lat: 13.0827,
-    lon: 80.2707,
-    name: 'Detecting live location...',
-    stateName: '',
-    districtName: '',
-    localityName: '',
+    lat: 10.9601,
+    lon: 78.0766,
+    name: 'Karur, Tamil Nadu',
+    stateName: 'Tamil Nadu',
+    districtName: 'Karur',
+    localityName: 'Karur',
     hasWardData: true,
     dataStatus: 'LIVE',
     isGpsLive: true,
@@ -287,14 +270,24 @@ export const useAppStore = create<AppState>((set) => ({
     const finalLat = lat;
     const finalLon = lon;
 
-    const hasLoc =
-      localityName &&
-      localityName.trim().length > 0 &&
-      localityName.toLowerCase() !== districtName.toLowerCase();
+    // Clean up localityName (strip trailing 'taluk', 'district', 'town', whitespace)
+    const cleanLoc = localityName
+      ? localityName.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
+      : undefined;
 
-    const displayName = hasLoc
-      ? `${localityName}, ${districtName}, ${stateName}`
-      : `${districtName}, ${stateName}`;
+    const hasLoc =
+      cleanLoc &&
+      cleanLoc.length > 0 &&
+      cleanLoc.toLowerCase() !== districtName.toLowerCase();
+
+    let displayName = districtName;
+    if (hasLoc && stateName) {
+      displayName = `${cleanLoc}, ${districtName}, ${stateName}`;
+    } else if (hasLoc) {
+      displayName = `${cleanLoc}, ${districtName}`;
+    } else if (stateName && stateName.toLowerCase() !== districtName.toLowerCase()) {
+      displayName = `${districtName}, ${stateName}`;
+    }
 
     const newLoc: Location = {
       lat: finalLat,
@@ -302,7 +295,7 @@ export const useAppStore = create<AppState>((set) => ({
       name: displayName,
       stateName,
       districtName,
-      localityName: localityName || undefined,
+      localityName: cleanLoc || undefined,
       hasWardData,
       dataStatus,
       isGpsLive,

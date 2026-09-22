@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { CityData } from '../../types';
 import { useAppStore } from '../../stores/appStore';
@@ -11,7 +11,7 @@ import { MapLoadingOverlay } from './MapLoadingOverlay';
 import { LocationSelector } from '../location/LocationSelector';
 
 import { useAllIndiaLiveTelemetry } from '../../hooks/useAllIndiaLiveTelemetry';
-import { detectRealtimeLocation } from '../../services/locationService';
+import { detectRealtimeLocation, resolveLocationFromCoords } from '../../services/locationService';
 
 interface Props {
   cities: CityData[];
@@ -22,6 +22,16 @@ interface Props {
   onSelectResolution?: (res: string) => void;
   onOpenGuide?: () => void;
 }
+
+// Click handler component to allow clicking anywhere on the map to set location
+const MapClickHandler: React.FC<{ onMapClick: (lat: number, lon: number) => void }> = ({ onMapClick }) => {
+  useMapEvents({
+    click: (e) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+};
 
 // Controller component for smooth cinematic map camera pan/zoom on location shift
 const MapCameraController: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
@@ -125,6 +135,25 @@ export const HeatRiskMap: React.FC<Props> = ({
   const handleResetView = () => {
     if (mapInstance) {
       mapInstance.flyTo([selectedLocation.lat, selectedLocation.lon], 11.5, { duration: 1.2 });
+    }
+  };
+
+  const handleMapClick = async (lat: number, lon: number) => {
+    try {
+      const resolved = await resolveLocationFromCoords(lat, lon, false);
+      setIndiaLocation(
+        resolved.state,
+        resolved.district,
+        lat,
+        lon,
+        true,
+        'LIVE',
+        resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
+        false,
+        true
+      );
+    } catch (err) {
+      console.warn('Failed to resolve clicked map location:', err);
     }
   };
 
@@ -244,6 +273,7 @@ export const HeatRiskMap: React.FC<Props> = ({
         />
 
         <MapCameraController center={targetCenter} zoom={targetZoom} />
+        <MapClickHandler onMapClick={handleMapClick} />
         <MapInstanceRegistrar setMap={setMapInstance} />
 
         {/* ========================================================================= */}
@@ -264,6 +294,12 @@ export const HeatRiskMap: React.FC<Props> = ({
                 fillOpacity: 0.85,
                 color: '#ffffff',
                 weight: 1.8,
+              }}
+              eventHandlers={{
+                click: () => {
+                  setIndiaLocation(dist.state, dist.name, dist.lat, dist.lon, true, 'LIVE', undefined, false, true);
+                  if (onSelectResolution) onSelectResolution('District / City Level Risk');
+                },
               }}
             >
               <Popup className="dark-popup font-sans">
