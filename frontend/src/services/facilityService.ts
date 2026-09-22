@@ -78,15 +78,13 @@ export const facilityService = {
     ambulanceAvailable?: boolean;
   }): Promise<boolean> {
     try {
-      // Auth token should be passed via header, not in request body.
-      // The backend /api/admin/hospital/update endpoint must verify this token.
-      const sessionToken = localStorage.getItem('thermosafe_session_token') || '';
+      // Pass credentials via HttpOnly cookie. Server verifies ADMIN session.
       const res = await fetch(`${API_BASE}/admin/hospital/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${sessionToken}`,
         },
+        credentials: 'same-origin',
         body: JSON.stringify(payload),
       });
       return res.ok;

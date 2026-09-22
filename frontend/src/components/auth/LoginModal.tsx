@@ -17,45 +17,67 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   onSuccess,
 }) => {
   const navigate = useNavigate();
-  const { loginAs } = useAppStore();
+  const { loginOfficer, loginCitizen } = useAppStore();
   const [activeTab, setActiveTab] = useState<AuthRole>(initialRole);
 
   // Form states
   const [userName, setUserName] = useState('');
   const [govId, setGovId] = useState('');
-  const [department, setDepartment] = useState('');
+  const [passcode, setPasscode] = useState('');
   const [govError, setGovError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setActiveTab(initialRole);
       setGovError('');
+      setIsSubmitting(false);
     }
   }, [isOpen, initialRole]);
 
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Gov login requires non-empty Officer ID
-    if (activeTab === 'gov' && govId.trim().length === 0) {
-      setGovError('Officer ID is required for Government access');
-      return;
-    }
-
+    setIsSubmitting(true);
     setGovError('');
-    loginAs(activeTab);
-    if (onSuccess) {
-      onSuccess(activeTab);
-    } else {
-      if (activeTab === 'gov') {
+
+    if (activeTab === 'gov') {
+      if (!govId.trim()) {
+        setGovError('Officer ID is required for Government access');
+        setIsSubmitting(false);
+        return;
+      }
+      if (!passcode.trim()) {
+        setGovError('Security Passcode is required for Government access');
+        setIsSubmitting(false);
+        return;
+      }
+
+      const res = await loginOfficer(govId.trim(), passcode.trim());
+      if (!res.success) {
+        setGovError(res.error || 'Authentication failed. Please verify Officer ID and Passcode.');
+        setIsSubmitting(false);
+        return;
+      }
+
+      setIsSubmitting(false);
+      if (onSuccess) {
+        onSuccess('gov');
+      } else {
         navigate('/government');
+      }
+      onClose();
+    } else {
+      await loginCitizen(userName.trim() || undefined);
+      setIsSubmitting(false);
+      if (onSuccess) {
+        onSuccess('user');
       } else {
         navigate('/dashboard');
       }
+      onClose();
     }
-    onClose();
   };
 
   return (
@@ -191,23 +213,39 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       govError ? 'border-red-500/50' : 'border-white/10'
                     }`}
                   />
-                  <Lock className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
+                  <Shield className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
                 </div>
-                {govError && (
-                  <p className="text-red-400 text-[10px] font-mono mt-1">{govError}</p>
-                )}
               </div>
 
               <div>
                 <label className="block text-xs font-mono font-bold text-gray-300 mb-1.5 uppercase">
-                  Department / Authority
+                  Official Security Passcode
                 </label>
-                <input
-                  type="text"
-                  value={department}
-                  onChange={(e) => setDepartment(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-dark-950/80 border border-white/10 text-white text-sm focus:outline-none focus:border-amber-500 transition-colors"
-                />
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={passcode}
+                    onChange={(e) => { setPasscode(e.target.value); setGovError(''); }}
+                    required
+                    placeholder="Enter official passcode..."
+                    className={`w-full px-4 py-3 rounded-xl bg-dark-950/80 border text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-500 transition-colors ${
+                      govError ? 'border-red-500/50' : 'border-white/10'
+                    }`}
+                  />
+                  <Lock className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
+                </div>
+                {govError && (
+                  <p className="text-red-400 text-[10px] font-mono mt-1.5 bg-red-500/10 p-2 rounded-lg border border-red-500/20">{govError}</p>
+                )}
+              </div>
+
+              {/* AUTHORIZED CREDENTIALS AUDIT HINT */}
+              <div className="p-3 rounded-xl bg-dark-950/90 border border-white/5 text-[11px] font-mono text-gray-400 space-y-1">
+                <p className="text-amber-400/90 font-bold">Authorized Test Credentials:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10px] text-gray-300">
+                  <span>Officer: <strong className="text-white">NDMA-HQ-882</strong> (Pass: NDMA@Secure2026)</span>
+                  <span>Admin: <strong className="text-white">DISASTER-ADMIN-99</strong> (Pass: Admin@ThermoSafe2026)</span>
+                </div>
               </div>
             </div>
 
@@ -224,9 +262,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3.5 px-6 rounded-xl font-mono text-sm font-bold text-dark-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center justify-center gap-2 group cursor-pointer"
+              disabled={isSubmitting}
+              className="w-full py-3.5 px-6 rounded-xl font-mono text-sm font-bold text-dark-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
             >
-              <span>ACCESS GOVERNMENT PORTAL</span>
+              <span>{isSubmitting ? 'VALIDATING CREDENTIALS...' : 'ACCESS GOVERNMENT PORTAL'}</span>
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </button>
           </form>

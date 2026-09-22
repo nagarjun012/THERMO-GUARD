@@ -57,8 +57,8 @@ The platform provides two dedicated, isolated portals with strict tab visibility
 | **USER LOGIN** (Citizen / Field Worker) | **Dashboard**, **Live Map**, **Learn THERMOS**, **About** | ❌ **Gov Portal** | `/dashboard` |
 | **GOV LOGIN** (Disaster Management / Officials) | **Gov Portal**, **Learn THERMOS**, **About** | ❌ **Dashboard & Live Map** | `/government` |
 
-* **Session Persistence**: Session roles saved to `localStorage` with instant role-switching controls in the navigation bar.
-* **Route Guards**: Automated redirection prevents unauthorized cross-role access.
+* **Server-Side Authenticated Sessions**: Cryptographically signed HMAC-SHA256 session tokens stored in `HttpOnly`, `SameSite` cookies. `localStorage` is never trusted for authorization.
+* **Server-Enforced RBAC & Route Guards**: Serverless endpoints (`/api/htss`, `/api/admin/hospital/update`) and client router guards strictly verify role-based permissions (`CITIZEN`, `OFFICER`, `ADMIN`).
 
 ### 4. 🗺️ Interactive GIS & District-Level Heat Mapping
 * Interactive Leaflet maps rendering microclimate zones and Urban Heat Islands (UHI).

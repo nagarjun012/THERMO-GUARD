@@ -10,6 +10,8 @@
 
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
+import { requireRole } from './_lib/auth';
+import { getDistrictPopulation } from './_lib/populations';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SERVICE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -59,6 +61,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  // Server-side RBAC: Requires active OFFICER or ADMIN session
+  const session = requireRole(req, res, 'OFFICER');
+  if (!session) return;
 
   res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=60');
 
@@ -195,6 +201,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         .map((d) => d.state)
     );
 
+    // Authentic Census population calculation across qualifying High & Extreme risk districts
+    let verifiedAffectedPopulation = 0;
+    let qualifyingCount = 0;
+    let unmappedCount = 0;
+
+    for (const d of validDistricts) {
+      if (d.riskCategory === 'EXTREME' || d.riskCategory === 'HIGH') {
+        qualifyingCount++;
+        const pop = getDistrictPopulation(d.district);
+        if (typeof pop === 'number' && pop > 0) {
+          verifiedAffectedPopulation += pop;
+        } else {
+          unmappedCount++;
+        }
+      }
+    }
+
     const counters = {
       totalDistricts: districts.length,
       successfulCount: validDistricts.length,
@@ -204,7 +227,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       moderateCount,
       lowCount,
       statesAffectedCount: affectedStates.size,
-      affectedPopulation: (extremeCount + highCount) * 1250000,
+      affectedPopulation: verifiedAffectedPopulation,
+      populationDataStatus:
+        qualifyingCount > 0 && verifiedAffectedPopulation === 0
+          ? 'DATA_UNAVAILABLE'
+          : unmappedCount > 0
+          ? 'PARTIALLY_MAPPED_CENSUS'
+          : 'VERIFIED_OFFICIAL_CENSUS',
     };
 
     return res.status(200).json({

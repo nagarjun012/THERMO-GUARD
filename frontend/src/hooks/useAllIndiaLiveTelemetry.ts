@@ -8,6 +8,7 @@
  * Now: /api/htss → Supabase → this hook → React components.
  */
 import { useState, useEffect, useMemo } from 'react';
+import { getDistrictPopulation } from '../data/districtPopulations';
 
 export interface LiveDistrictData {
   id: string;
@@ -143,11 +144,15 @@ export function useAllIndiaLiveTelemetry() {
 
   const overviewStats: LiveOverviewStats = useMemo(() => {
     const highRisk = districts.filter((d) => d.level === 'High' || d.level === 'Extreme');
+    const verifiedPop = highRisk.reduce((sum, d) => {
+      const pop = getDistrictPopulation(d.name);
+      return sum + (typeof pop === 'number' ? pop : 0);
+    }, 0);
     return {
       statesAffected: new Set(highRisk.map((d) => d.state)).size,
       highRiskLocations: highRisk.length,
       activeAlerts: districts.reduce((s, d) => s + d.alertsCount, 0),
-      affectedPopulation: highRisk.length * 1250000,
+      affectedPopulation: verifiedPop,
     };
   }, [districts]);
 

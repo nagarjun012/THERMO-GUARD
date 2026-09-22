@@ -4,6 +4,11 @@ import path from 'path'
 import weatherHandler from './api/weather'
 import htssHandler from './api/htss'
 import refreshHandler from './api/refresh'
+import authLoginHandler from './api/auth/login'
+import authLogoutHandler from './api/auth/logout'
+import authSessionHandler from './api/auth/session'
+import hospitalUpdateHandler from './api/admin/hospital/update'
+import facilitiesHandler from './api/facilities'
 
 function localVercelApiPlugin(): Plugin {
   return {
@@ -23,6 +28,20 @@ function localVercelApiPlugin(): Plugin {
         });
         (req as any).query = query;
 
+        // Parse JSON body for POST requests
+        if (req.method === 'POST' && !(req as any).body) {
+          const buffers: any[] = [];
+          for await (const chunk of req) {
+            buffers.push(chunk);
+          }
+          const raw = Buffer.concat(buffers).toString();
+          try {
+            (req as any).body = raw ? JSON.parse(raw) : {};
+          } catch {
+            (req as any).body = {};
+          }
+        }
+
         (res as any).status = function (statusCode: number) {
           res.statusCode = statusCode;
           return res;
@@ -34,12 +53,32 @@ function localVercelApiPlugin(): Plugin {
         };
 
         try {
+          if (pathname === '/api/auth/login') {
+            await authLoginHandler(req as any, res as any);
+            return;
+          }
+          if (pathname === '/api/auth/logout') {
+            await authLogoutHandler(req as any, res as any);
+            return;
+          }
+          if (pathname === '/api/auth/session') {
+            await authSessionHandler(req as any, res as any);
+            return;
+          }
+          if (pathname === '/api/admin/hospital/update') {
+            await hospitalUpdateHandler(req as any, res as any);
+            return;
+          }
           if (pathname === '/api/weather') {
             await weatherHandler(req as any, res as any);
             return;
           }
           if (pathname === '/api/htss') {
             await htssHandler(req as any, res as any);
+            return;
+          }
+          if (pathname.startsWith('/api/facilities') || pathname.startsWith('/api/health')) {
+            await facilitiesHandler(req as any, res as any);
             return;
           }
           if (pathname === '/api/refresh') {

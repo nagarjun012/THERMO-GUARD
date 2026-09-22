@@ -36,7 +36,8 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
       value: (counters.affectedPopulation / 1000000).toFixed(1) + 'M',
       icon: Users,
       color: '#a855f7',
-      sub: 'Citizens Exposed',
+      sub: counters.affectedPopulation > 0 ? 'Census 2011 Official' : 'No High-Risk Districts',
+      badge: 'Census Data',
     },
   ];
 
@@ -83,9 +84,16 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
 
               {/* READOUT */}
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">
-                  {card.title}
-                </p>
+                <div className="flex items-center justify-between gap-1">
+                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">
+                    {card.title}
+                  </p>
+                  {card.badge && (
+                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                      {card.badge}
+                    </span>
+                  )}
+                </div>
                 <h3 className="text-2xl sm:text-3xl font-black font-mono text-white mt-0.5 tracking-tight">
                   {card.value}
                 </h3>

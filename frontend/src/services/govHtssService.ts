@@ -19,6 +19,7 @@ import {
   computeRealThermalRisk,
   calculateHeatIndex,
 } from '../utils/thermalEngine';
+import { getDistrictPopulation } from '../data/districtPopulations';
 
 export interface ProcessedDistrict {
   id: string;
@@ -245,6 +246,17 @@ class GovHtssService {
         .map((d) => d.state)
     );
 
+    // Calculate verified affected population using official Census dataset
+    let verifiedAffectedPopulation = 0;
+    for (const d of valid) {
+      if (d.riskCategory === 'EXTREME' || d.riskCategory === 'HIGH') {
+        const pop = getDistrictPopulation(d.district);
+        if (typeof pop === 'number') {
+          verifiedAffectedPopulation += pop;
+        }
+      }
+    }
+
     const counters: GovSummaryCounters = {
       totalDistricts: sorted.length,
       successfulCount: valid.length,
@@ -254,7 +266,7 @@ class GovHtssService {
       moderateCount,
       lowCount,
       statesAffectedCount: affectedStates.size,
-      affectedPopulation: (extremeCount + highCount) * 1250000,
+      affectedPopulation: verifiedAffectedPopulation,
     };
 
     const result: GovPortalPipelineResult = {

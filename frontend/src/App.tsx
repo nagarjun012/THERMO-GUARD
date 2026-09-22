@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/layout/Header';
@@ -40,7 +41,19 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
 // User Login Route Guard: Available in USER LOGIN. In GOV LOGIN, redirects to /government
 function UserRoute({ children }: { children: React.ReactNode }) {
-  const { userRole, isAuthenticated } = useAppStore();
+  const { userRole, isAuthenticated, isAuthChecking } = useAppStore();
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark-950 text-blue-400 font-mono text-sm">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+          <span>Verifying session...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return <Navigate to="/" replace />;
   }
@@ -53,7 +66,19 @@ function UserRoute({ children }: { children: React.ReactNode }) {
 // Gov Login Route Guard: Available in GOV LOGIN. Requires authenticated session.
 // In USER LOGIN, Gov Portal is hidden and redirects to /dashboard
 function GovRoute({ children }: { children: React.ReactNode }) {
-  const { userRole, isAuthenticated } = useAppStore();
+  const { userRole, isAuthenticated, isAuthChecking } = useAppStore();
+
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-dark-950 text-amber-400 font-mono text-sm">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
+          <span>Verifying Government Session Credentials...</span>
+        </div>
+      </div>
+    );
+  }
+
   if (!isAuthenticated || userRole !== 'gov') {
     return <Navigate to="/" replace />;
   }
@@ -61,6 +86,11 @@ function GovRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
+  const { checkServerSession } = useAppStore();
+
+  useEffect(() => {
+    checkServerSession();
+  }, [checkServerSession]);
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

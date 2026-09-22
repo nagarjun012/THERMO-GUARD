@@ -14,6 +14,13 @@ export interface Location {
   isGpsLive?: boolean;
 }
 
+export interface UserProfile {
+  userId: string;
+  name: string;
+  department?: string;
+  role: 'CITIZEN' | 'OFFICER' | 'ADMIN';
+}
+
 export type AuthRole = 'user' | 'gov';
 export type OfficialModalType = 'privacy' | 'terms' | 'accessibility' | 'ai' | 'governance' | null;
 
@@ -23,7 +30,8 @@ interface AppState {
   activeScenario: string | null;
   userRole: AuthRole;
   isAuthenticated: boolean;
-  sessionToken: string | null;
+  currentUser: UserProfile | null;
+  isAuthChecking: boolean;
   vulnerabilityProfile: VulnerabilityProfile;
   language: Language;
   lowBandwidthMode: boolean;
@@ -37,8 +45,11 @@ interface AppState {
   toggleHighContrastMode: () => void;
   setActiveOfficialModal: (modal: OfficialModalType) => void;
   setUserRole: (role: AuthRole) => void;
+  checkServerSession: () => Promise<boolean>;
+  loginCitizen: (name?: string) => Promise<boolean>;
+  loginOfficer: (officerId: string, passcode: string) => Promise<{ success: boolean; error?: string }>;
   loginAs: (role: AuthRole) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   setLocation: (loc: Location) => void;
   setIsManualSelection: (manual: boolean) => void;
   setIndiaLocation: (
@@ -56,37 +67,6 @@ interface AppState {
   setLocationPermissionDenied: (denied: boolean) => void;
   setScenario: (id: string | null) => void;
 }
-
-const GOV_TOKEN_PREFIX = 'TS-SECURE-GOV-';
-
-function isValidGovSession(token: string | null): boolean {
-  return Boolean(token && token.startsWith(GOV_TOKEN_PREFIX) && token.length > 24);
-}
-
-const getInitialRole = (): AuthRole => {
-  try {
-    const saved = localStorage.getItem('thermosafe_auth_role');
-    const token = localStorage.getItem('thermosafe_session_token');
-    if (saved === 'gov' && isValidGovSession(token)) return 'gov';
-    if (saved === 'user' && token) return 'user';
-  } catch {}
-  return 'user';
-};
-
-const getInitialAuth = (): boolean => {
-  try {
-    const token = localStorage.getItem('thermosafe_session_token');
-    return Boolean(token && token.length > 0);
-  } catch {}
-  return false;
-};
-
-const getInitialToken = (): string | null => {
-  try {
-    return localStorage.getItem('thermosafe_session_token') || null;
-  } catch {}
-  return null;
-};
 
 const getInitialLanguage = (): Language => {
   try {
@@ -109,13 +89,6 @@ const getInitialHighContrast = (): boolean => {
   } catch {}
   return false;
 };
-
-function generateSessionToken(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID();
-  }
-  return `${Date.now()}-${Math.random().toString(36).substring(2)}`;
-}
 
 const getInitialLocation = (): Location => {
   try {
@@ -175,13 +148,14 @@ const getInitialProfile = (): VulnerabilityProfile => {
   return 'GENERAL_CITIZEN';
 };
 
-export const useAppStore = create<AppState>((set) => ({
+export const useAppStore = create<AppState>((set, get) => ({
   selectedLocation: getInitialLocation(),
   isManualSelection: getInitialIsManual(),
   activeScenario: null,
-  userRole: getInitialRole(),
-  isAuthenticated: getInitialAuth(),
-  sessionToken: getInitialToken(),
+  userRole: 'user',
+  isAuthenticated: false,
+  currentUser: null,
+  isAuthChecking: true,
   vulnerabilityProfile: getInitialProfile(),
   language: getInitialLanguage(),
   lowBandwidthMode: getInitialLowBandwidth(),
@@ -233,28 +207,96 @@ export const useAppStore = create<AppState>((set) => ({
   },
   setActiveOfficialModal: (modal) => set({ activeOfficialModal: modal }),
   setIsManualSelection: (manual) => set({ isManualSelection: manual }),
-  setUserRole: (role) => {
+  setUserRole: (role) => set({ userRole: role }),
+
+  checkServerSession: async () => {
     try {
-      localStorage.setItem('thermosafe_auth_role', role);
-    } catch {}
-    set({ userRole: role });
+      const res = await fetch('/api/auth/session', { credentials: 'same-origin' });
+      if (res.ok) {
+        const data = await res.json();
+        if (data.authenticated && data.user) {
+          set({
+            isAuthenticated: true,
+            userRole: data.role || 'user',
+            currentUser: data.user,
+            isAuthChecking: false,
+          });
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('Session check failed:', e);
+    }
+    set({
+      isAuthenticated: false,
+      userRole: 'user',
+      currentUser: null,
+      isAuthChecking: false,
+    });
+    return false;
   },
+
+  loginCitizen: async (name?: string) => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ role: 'user', citizenName: name }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        set({
+          isAuthenticated: true,
+          userRole: 'user',
+          currentUser: data.user,
+        });
+        return true;
+      }
+    } catch (e) {
+      console.warn('Citizen login error:', e);
+    }
+    return false;
+  },
+
+  loginOfficer: async (officerId: string, passcode: string) => {
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'same-origin',
+        body: JSON.stringify({ officerId, passcode }),
+      });
+      const data = await res.json();
+      if (res.ok && data.status === 'authenticated') {
+        set({
+          isAuthenticated: true,
+          userRole: 'gov',
+          currentUser: data.user,
+        });
+        return { success: true };
+      }
+      return { success: false, error: data.message || 'Authentication failed' };
+    } catch (e: any) {
+      return { success: false, error: e?.message || 'Server connection failed' };
+    }
+  },
+
   loginAs: (role) => {
-    const token = role === 'gov'
-      ? `${GOV_TOKEN_PREFIX}${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 14)}`
-      : generateSessionToken();
-    try {
-      localStorage.setItem('thermosafe_auth_role', role);
-      localStorage.setItem('thermosafe_session_token', token);
-    } catch {}
-    set({ userRole: role, isAuthenticated: true, sessionToken: token });
+    if (role === 'user') {
+      get().loginCitizen();
+    }
   },
-  logout: () => {
+
+  logout: async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+    } catch {}
     try {
       localStorage.removeItem('thermosafe_auth_role');
       localStorage.removeItem('thermosafe_session_token');
     } catch {}
-    set({ userRole: 'user', isAuthenticated: false, sessionToken: null });
+    set({ userRole: 'user', isAuthenticated: false, currentUser: null });
   },
   setLocation: (loc) => {
     try {

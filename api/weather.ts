@@ -447,6 +447,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       pm10: airQuality.pm10,
       ozone: airQuality.ozone,
       chpi,
+      scientificMetadata: {
+        methodology: 'THERMOS Scientific Heat Index & Risk Engine',
+        approximations: {
+          twb: 'Stull (2011) psychrometric empirical wet-bulb equation',
+          heatIndex: 'NOAA National Weather Service Rothfusz polynomial regression',
+          wbgt: 'Operational Liljegren/Stull outdoor approximation (0.7*Twb + 0.3*T + solar_radiation adjustment)',
+          utci: 'Polynomial operational approximation without dynamic microclimate bio-heat mannequin',
+          htss: 'Multi-parameter weighted composite: 0.45*WBGT_norm + 0.35*UTCI_norm + 0.20*T_norm',
+        },
+        disclaimer: 'Approximations: WBGT derived via simplified Stull twb and solar parameterization (no black globe thermometer); UTCI derived via operational polynomial approximation; Heat Index uses NOAA Rothfusz regression. HTSS composite: 0.45*WBGT_norm + 0.35*UTCI_norm + 0.20*T_norm.',
+      },
     });
   } catch (err: any) {
     console.error('[/api/weather] Error:', err?.message ?? err);
