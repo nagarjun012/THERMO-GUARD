@@ -25,11 +25,11 @@
     },
     {
       "source": "/api/auth/(.*)",
-      "destination": "/api/auth"
+      "destination": "/api/auth?subpath=$1"
     },
     {
       "source": "/api/admin/(.*)",
-      "destination": "/api/admin"
+      "destination": "/api/admin?subpath=$1"
     },
     {
       "source": "/((?!api/).*)",

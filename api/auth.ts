@@ -148,7 +148,12 @@ export function getSession(req: VercelRequest): UserSession | null {
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rawUrl = req.url || '';
-  const pathname = rawUrl.split('?')[0].toLowerCase();
+  const subpath = String(
+    req.query.subpath ||
+    req.headers['x-matched-path'] ||
+    req.headers['x-invoke-path'] ||
+    rawUrl
+  ).toLowerCase();
 
   // Helper to get parsed JSON body
   let body = req.body;
@@ -162,7 +167,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   body = body || {};
 
   // 1. POST /api/auth/login
-  if (pathname.endsWith('/login') || req.method === 'POST' && (body.role || body.officerId)) {
+  if (subpath.includes('login') || (req.method === 'POST' && !subpath.includes('logout'))) {
     if (req.method !== 'POST') {
       res.setHeader('Allow', 'POST');
       return res.status(405).json({ error: 'METHOD_NOT_ALLOWED', message: 'Only POST supported for login.' });
@@ -245,7 +250,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // 2. POST /api/auth/logout
-  if (pathname.endsWith('/logout')) {
+  if (subpath.includes('logout')) {
     res.setHeader('Set-Cookie', buildClearCookieHeader());
     return res.status(200).json({
       status: 'logged_out',
@@ -254,8 +259,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // 3. GET /api/auth/session
-  if (pathname.endsWith('/session') || req.method === 'GET') {
+  // 3. GET /api/auth/session (or default GET on /api/auth)
+  if (subpath.includes('session') || req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     const session = getSession(req);
     if (!session) {
