@@ -42,7 +42,7 @@ const navSections: NavSection[] = [
   { id: 'comparison', label: 'Indices Compared' },
   { id: 'risk-score', label: 'Risk Score' },
   { id: 'map', label: 'GIS Map' },
-  { id: 'ward-risk', label: 'Ward Risk System' },
+  { id: 'district-risk', label: 'District Risk System' },
   { id: 'forecast', label: 'Forecasts' },
   { id: 'alerts', label: 'Alerts' },
   { id: 'vulnerability', label: 'Vulnerability' },
@@ -175,8 +175,8 @@ export const LearnPage: React.FC = () => {
     { term: 'Heat Stress', def: 'The net heat load placed on the human body from environmental factors, physical activity, and clothing.' },
     { term: 'Heatwave', def: 'A period of abnormally hot weather lasting two or more consecutive days according to IMD criteria.' },
     { term: 'HTSS (Human Thermal Stress Score)', def: 'THERMOS’s unified 0–100 risk score combining HI, WBGT, UTCI, and demographic vulnerability.' },
-    { term: 'GIS (Geographic Information System)', def: 'Mapping technology that visualizes spatial data, allowing risk analysis across states, cities, and wards.' },
-    { term: 'Ward / District Level', def: 'Sub-city or administrative regional division used to localize heat risk warnings.' },
+    { term: 'GIS (Geographic Information System)', def: 'Mapping technology that visualizes spatial data, allowing risk analysis across states, cities, and districts.' },
+    { term: 'District / Regional Level', def: 'Administrative regional division used to localize heat risk warnings.' },
     { term: 'Early Warning System', def: 'An integrated system of monitoring, forecasting, and communication that alerts people to upcoming environmental hazards.' },
     { term: 'Vulnerable Population', def: 'Demographic groups (elderly, infants, outdoor workers, impoverished) at higher risk of severe heat illness.' },
     { term: 'Cooling Centre', def: 'An air-conditioned or shaded public facility designated for citizens to take refuge during extreme heatwaves.' },
@@ -732,7 +732,7 @@ export const LearnPage: React.FC = () => {
 
           <div className="glass-card p-6 md:p-8 space-y-6">
             <p className="text-gray-200 text-sm md:text-base leading-relaxed">
-              The THERMOS GIS Map uses satellite basemaps and meteorological data to color-code risk intensity across Indian states, cities, and wards in real time.
+              The THERMOS GIS Map uses satellite basemaps and meteorological data to color-code risk intensity across Indian states, cities, and districts in real time.
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold">
@@ -742,7 +742,7 @@ export const LearnPage: React.FC = () => {
               </div>
               <div className="p-3 bg-dark-700 rounded-xl border border-dark-600 flex items-center gap-2">
                 <Activity className="w-4 h-4 text-orange-400" />
-                <span>📊 Ward Risk Score</span>
+                <span>📊 District Risk Score</span>
               </div>
               <div className="p-3 bg-dark-700 rounded-xl border border-dark-600 flex items-center gap-2">
                 <Flame className="w-4 h-4 text-red-400" />
@@ -756,31 +756,31 @@ export const LearnPage: React.FC = () => {
           </div>
         </section>
 
-        {/* WARD-LEVEL HEAT RISK SYSTEM SECTION */}
-        <section id="ward-risk" className="space-y-8">
+        {/* DISTRICT-LEVEL HEAT RISK SYSTEM SECTION */}
+        <section id="district-risk" className="space-y-8">
           <div className="border-l-4 border-accent pl-4">
             <h2 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight">
-              Why Ward-Level Heat Risk?
+              Why District-Level Heat Risk?
             </h2>
             <p className="text-gray-300 text-sm md:text-base mt-1 max-w-3xl">
-              Heat risk is not the same everywhere. THERMOS identifies risk at the local ward level so that action can be targeted where it is needed most.
+              Heat risk is not uniform across a state or country. THERMOS identifies risk at the local district and city level so that disaster management and relief actions can be targeted where they are needed most.
             </p>
           </div>
 
           {/* VISUAL STORY FLOW BANNER */}
           <div className="glass-card p-6 border-accent/30 bg-gradient-to-r from-dark-800 via-dark-700 to-dark-800">
             <p className="text-xs font-extrabold uppercase text-accent tracking-wider mb-4 text-center">
-              Visual System Story Flow: From City to Targeted Action
+              Visual System Story Flow: From State to Targeted Action
             </p>
             <div className="grid grid-cols-2 md:grid-cols-7 gap-2 text-center text-xs font-semibold">
               <div className="p-3 bg-dark-700/80 rounded-xl border border-dark-600 flex flex-col items-center justify-center">
                 <span className="text-lg mb-1">🏢</span>
-                <span>CITY</span>
+                <span>STATE</span>
               </div>
               <div className="hidden md:flex items-center justify-center text-gray-500">➔</div>
               <div className="p-3 bg-dark-700/80 rounded-xl border border-dark-600 flex flex-col items-center justify-center">
                 <span className="text-lg mb-1">🗺️</span>
-                <span>WARD DIVISION</span>
+                <span>DISTRICT TELEMETRY</span>
               </div>
               <div className="hidden md:flex items-center justify-center text-gray-500">➔</div>
               <div className="p-3 bg-dark-700/80 rounded-xl border border-dark-600 flex flex-col items-center justify-center">
@@ -801,11 +801,11 @@ export const LearnPage: React.FC = () => {
               <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
                 🇮🇳 India-Wide Location Hierarchy
               </h3>
-              <p className="text-xs text-gray-400">National to Ward-level multi-scale disaster risk mapping</p>
+              <p className="text-xs text-gray-400">National to District-level multi-scale disaster risk mapping</p>
             </div>
 
             <p className="text-gray-200 text-sm md:text-base leading-relaxed">
-              THERMOS organizes thermal-health information geographically, allowing users and decision-makers to move from a broad national or state view toward more localized district and ward risk information where data is available.
+              THERMOS organizes thermal-health information geographically, allowing users and decision-makers to move from a broad national or state overview toward localized district and city risk telemetry.
             </p>
 
             <div className="p-5 bg-dark-800 rounded-xl border border-dark-600 space-y-3 text-xs text-center font-bold">
@@ -821,13 +821,8 @@ export const LearnPage: React.FC = () => {
                 </div>
                 <span className="text-gray-500 font-mono">➔</span>
                 <div className="p-3 bg-orange-950/40 border border-orange-500/40 rounded-xl text-orange-300 w-full">
-                  DISTRICT
-                  <span className="block text-[10px] font-normal text-gray-400">750+ Districts</span>
-                </div>
-                <span className="text-gray-500 font-mono">➔</span>
-                <div className="p-3 bg-red-950/40 border border-red-500/40 rounded-xl text-red-300 w-full">
-                  LOCAL WARD
-                  <span className="block text-[10px] font-normal text-gray-400">Hyper-Local GIS</span>
+                  DISTRICT / CITY
+                  <span className="block text-[10px] font-normal text-gray-400">788+ Districts</span>
                 </div>
                 <span className="text-gray-500 font-mono">➔</span>
                 <div className="p-3 bg-accent text-white rounded-xl shadow-lg w-full">
@@ -838,64 +833,63 @@ export const LearnPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 1. WHAT IS A WARD? */}
+          {/* 1. WHAT IS DISTRICT-LEVEL RISK? */}
           <div className="glass-card p-6 md:p-8 space-y-6">
             <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-              <MapPin className="w-6 h-6 text-accent" /> 1. What is a Ward?
+              <MapPin className="w-6 h-6 text-accent" /> 1. What is District-Level Heat Risk?
             </h3>
             <p className="text-gray-200 text-sm md:text-base leading-relaxed">
-              A ward is a smaller administrative area within a city or municipality. A city can be divided into multiple wards to make local administration and public services easier.
+              A district is the primary operational administrative unit for public health infrastructure, district disaster management authorities (DDMA), and municipal emergency services across India.
             </p>
-
 
             <div className="p-6 bg-dark-800/90 rounded-xl border border-dark-600 text-center space-y-4">
               <div className="inline-block px-6 py-2 bg-accent/20 border border-accent/40 text-accent font-extrabold text-sm rounded-full">
-                CITY
+                STATE
               </div>
               <div className="text-gray-500 text-lg">↓</div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-bold">
-                <div className="p-3 bg-dark-700 rounded-lg border border-dark-600 text-white">WARD 1</div>
-                <div className="p-3 bg-dark-700 rounded-lg border border-dark-600 text-white">WARD 2</div>
-                <div className="p-3 bg-dark-700 rounded-lg border border-dark-600 text-white">WARD 3</div>
-                <div className="p-3 bg-dark-700 rounded-lg border border-dark-600 text-white">WARD 4</div>
+                <div className="p-3 bg-dark-700 rounded-lg border border-dark-600 text-white">Karur</div>
+                <div className="p-3 bg-dark-700 rounded-lg border border-dark-600 text-white">Chennai</div>
+                <div className="p-3 bg-dark-700 rounded-lg border border-dark-600 text-white">Coimbatore</div>
+                <div className="p-3 bg-dark-700 rounded-lg border border-dark-600 text-white">Madurai</div>
               </div>
               <div className="text-gray-500 text-lg">↓</div>
               <p className="text-xs text-gray-300 font-medium italic">
-                Each ward can have different environmental conditions.
+                Each district experiences distinct microclimates, topographical elevations, and solar exposure.
               </p>
             </div>
           </div>
 
-          {/* 2. WHY DOES THERMOS USE WARDS? */}
+          {/* 2. WHY DOES THERMOS USE DISTRICT-LEVEL GRANULARITY? */}
           <div className="glass-card p-6 md:p-8 space-y-6">
             <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-              <Activity className="w-6 h-6 text-orange-400" /> 2. Why Does THERMOS Use Wards?
+              <Activity className="w-6 h-6 text-orange-400" /> 2. Why Does THERMOS Use District Granularity?
             </h3>
             <p className="text-gray-200 text-sm md:text-base leading-relaxed">
-              A single temperature value for an entire city can hide important local differences.
+              A single temperature value for an entire state hides critical regional microclimate differences.
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="glass-card p-5 border-red-500/30 bg-red-950/20 space-y-3">
-                <h4 className="font-bold text-red-400 text-base">Ward A (Concrete Urban Dense)</h4>
+                <h4 className="font-bold text-red-400 text-base">District A (Inland Plain Heat Trap)</h4>
                 <ul className="text-xs text-gray-300 space-y-1.5 list-disc pl-4">
-                  <li>More buildings & asphalt</li>
-                  <li>Less vegetation & shade</li>
-                  <li>Heavy traffic exhaust</li>
-                  <li>Higher heat exposure & heat retention</li>
+                  <li>Higher dry-bulb temperatures</li>
+                  <li>Intense direct solar radiation</li>
+                  <li>Dry winds & low cloud cover</li>
+                  <li>Elevated heat storage in soil and asphalt</li>
                 </ul>
                 <div className="p-2 bg-red-900/40 rounded text-xs font-bold text-red-300 text-center">
-                  ⚠️ Higher Heat Stress Risk
+                  ⚠️ Severe Heat Stress Risk
                 </div>
               </div>
 
               <div className="glass-card p-5 border-emerald-500/30 bg-emerald-950/20 space-y-3">
-                <h4 className="font-bold text-emerald-400 text-base">Ward B (Green Urban Open)</h4>
+                <h4 className="font-bold text-emerald-400 text-base">District B (High Elevation or Coastal Breeze)</h4>
                 <ul className="text-xs text-gray-300 space-y-1.5 list-disc pl-4">
-                  <li>More trees & parks</li>
-                  <li>Open spaces & water bodies</li>
-                  <li>Better air ventilation</li>
-                  <li>Lower heat exposure</li>
+                  <li>Lower baseline temperatures or moderating sea breeze</li>
+                  <li>Higher vegetative tree cover</li>
+                  <li>Active wind ventilation</li>
+                  <li>Lower physiological thermal strain</li>
                 </ul>
                 <div className="p-2 bg-emerald-900/40 rounded text-xs font-bold text-emerald-300 text-center">
                   ✅ Lower Heat Stress Risk
@@ -905,29 +899,29 @@ export const LearnPage: React.FC = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-bold pt-2">
               <div className="p-4 bg-dark-800 rounded-xl border border-red-500/40 text-red-400 flex items-center justify-between">
-                <span>CITY-WIDE RISK</span>
-                <span>❌ One value for everyone</span>
+                <span>STATE-WIDE RISK</span>
+                <span>❌ One generic value for everyone</span>
               </div>
               <div className="p-4 bg-dark-800 rounded-xl border border-emerald-500/40 text-emerald-400 flex items-center justify-between">
-                <span>WARD-LEVEL RISK</span>
-                <span>✅ Localized risk for different areas</span>
+                <span>DISTRICT-LEVEL RISK</span>
+                <span>✅ Localized risk for distinct geographical zones</span>
               </div>
             </div>
           </div>
 
-          {/* 3. HOW THERMOS CALCULATES WARD-LEVEL RISK */}
+          {/* 3. HOW THERMOS CALCULATES DISTRICT-LEVEL RISK */}
           <div className="glass-card p-6 md:p-8 space-y-6">
             <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-              <Sliders className="w-6 h-6 text-yellow-400" /> 3. How THERMOS Calculates Ward-Level Risk
+              <Sliders className="w-6 h-6 text-yellow-400" /> 3. How THERMOS Calculates District-Level Risk
             </h3>
 
             <div className="p-6 bg-dark-800/90 rounded-xl border border-dark-600 space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-center text-xs font-semibold">
                 <div className="p-3 bg-dark-700 rounded-lg text-blue-400 border border-dark-600">
-                  Environmental Data
+                  Environmental Telemetry
                 </div>
                 <div className="p-3 bg-dark-700 rounded-lg text-yellow-400 border border-dark-600">
-                  Location / Ward
+                  District Coordinates
                 </div>
                 <div className="p-3 bg-dark-700 rounded-lg text-orange-400 border border-dark-600">
                   Heat Stress Indices (WBGT, HI, UTCI)
@@ -936,27 +930,27 @@ export const LearnPage: React.FC = () => {
                   THERMOS Risk Engine
                 </div>
                 <div className="p-3 bg-gradient-to-r from-red-600 to-orange-500 text-white rounded-lg font-bold shadow-lg">
-                  Ward Risk Score (0–100)
+                  District Risk Score (0–100)
                 </div>
               </div>
             </div>
 
             <p className="text-gray-200 text-sm md:text-base leading-relaxed">
-              THERMOS processes environmental and heat-related information for a specific geographic area and converts it into a localized heat-health risk score.
+              THERMOS processes real-time environmental telemetry for specific geographic coordinates and converts it into a localized biometeorological heat-health risk score.
             </p>
           </div>
 
-          {/* 4. WARD RISK SCORE DISPLAY */}
+          {/* 4. DISTRICT RISK SCORE DISPLAY */}
           <div className="glass-card p-6 md:p-8 space-y-6 border-red-500/30">
             <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-              <Flame className="w-6 h-6 text-red-500" /> 4. Ward Risk Score Example
+              <Flame className="w-6 h-6 text-red-500" /> 4. District Risk Score Example
             </h3>
 
             <div className="p-6 bg-dark-800 rounded-xl border border-red-500/40 flex flex-col md:flex-row items-center justify-between gap-4">
               <div>
-                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Sample Ward Output</span>
-                <h4 className="text-2xl font-extrabold text-white">WARD 07</h4>
-                <p className="text-xs text-gray-300 mt-1">Densely built market district</p>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider block">Sample District Output</span>
+                <h4 className="text-2xl font-extrabold text-white">KARUR DISTRICT</h4>
+                <p className="text-xs text-gray-300 mt-1">Inland central basin, Tamil Nadu</p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-right">
@@ -970,17 +964,17 @@ export const LearnPage: React.FC = () => {
             </div>
 
             <p className="text-gray-300 text-xs md:text-sm leading-relaxed">
-              The score represents the estimated thermal-health risk for that ward under the conditions being analyzed, calculated using the standard THERMOS threshold ranges.
+              The score represents the estimated thermal-health risk for that district under current meteorological conditions, calculated using the standard THERMOS threshold ranges.
             </p>
           </div>
 
-          {/* 5. WHY ONE WARD CAN BE DIFFERENT FROM ANOTHER */}
+          {/* 5. WHY ONE DISTRICT CAN BE DIFFERENT FROM ANOTHER */}
           <div className="glass-card p-6 md:p-8 space-y-6">
-            <h3 className="text-xl md:text-2xl font-bold text-white">5. Why One Ward Can Be Different From Another</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-white">5. Why One District Can Be Different From Another</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
               <div className="p-5 bg-red-950/20 border border-red-500/40 rounded-xl space-y-3">
-                <h4 className="font-bold text-red-400 text-base">WARD A</h4>
+                <h4 className="font-bold text-red-400 text-base">DISTRICT A (Inland Valley)</h4>
                 <div className="space-y-1.5 text-gray-300">
                   <p>🌡️ Higher temperature (39°C)</p>
                   <p>💧 High humidity (65%)</p>
@@ -994,11 +988,11 @@ export const LearnPage: React.FC = () => {
               </div>
 
               <div className="p-5 bg-emerald-950/20 border border-emerald-500/40 rounded-xl space-y-3">
-                <h4 className="font-bold text-emerald-400 text-base">WARD B</h4>
+                <h4 className="font-bold text-emerald-400 text-base">DISTRICT B (Coastal / Hill)</h4>
                 <div className="space-y-1.5 text-gray-300">
                   <p>🌡️ Lower temperature (34°C)</p>
-                  <p>💧 Lower humidity (40%)</p>
-                  <p>🌳 More park vegetation</p>
+                  <p>💧 Moderate humidity (45%)</p>
+                  <p>🌳 High vegetative tree cover</p>
                   <p>💨 Better airflow (18 km/h)</p>
                   <p>⏱️ Lower exposure duration</p>
                 </div>
@@ -1008,7 +1002,7 @@ export const LearnPage: React.FC = () => {
               </div>
             </div>
             <p className="text-[11px] text-gray-400 italic">
-              Note: The above values serve as illustrative comparisons explaining environmental divergence across municipal sectors.
+              Note: The above values serve as illustrative comparisons explaining environmental divergence across regional sectors.
             </p>
           </div>
 
@@ -1018,17 +1012,17 @@ export const LearnPage: React.FC = () => {
               <MapPin className="w-6 h-6 text-blue-400" /> 6. See Heat Risk on the Map
             </h3>
             <p className="text-gray-200 text-sm leading-relaxed">
-              THERMOS uses a geographic map to show the heat-health risk of different wards in real time.
+              THERMOS uses a geographic map to show the heat-health risk of different districts in real time.
             </p>
 
             <div className="p-6 bg-dark-800 rounded-xl border border-dark-600 space-y-3">
               <p className="text-xs font-bold text-gray-400 uppercase tracking-wider text-center mb-2">
-                Conceptual Ward Boundaries Map
+                Regional District Telemetry Map
               </p>
               <div className="grid grid-cols-2 gap-3 text-xs font-bold">
                 <div className="p-4 bg-emerald-950/40 border border-emerald-500/40 rounded-xl flex justify-between items-center text-emerald-300">
                   <div>
-                    <span className="block text-white font-extrabold text-sm">Ward 01</span>
+                    <span className="block text-white font-extrabold text-sm">District 01</span>
                     <span className="text-[10px] text-gray-400">Score: 28</span>
                   </div>
                   <span className="px-2 py-1 bg-emerald-500 text-dark-900 rounded text-[10px] uppercase font-black">LOW</span>
@@ -1036,7 +1030,7 @@ export const LearnPage: React.FC = () => {
 
                 <div className="p-4 bg-red-950/40 border border-red-500/40 rounded-xl flex justify-between items-center text-red-300">
                   <div>
-                    <span className="block text-white font-extrabold text-sm">Ward 02</span>
+                    <span className="block text-white font-extrabold text-sm">District 02</span>
                     <span className="text-[10px] text-gray-400">Score: 78</span>
                   </div>
                   <span className="px-2 py-1 bg-red-500 text-white rounded text-[10px] uppercase font-black">HIGH</span>
@@ -1044,7 +1038,7 @@ export const LearnPage: React.FC = () => {
 
                 <div className="p-4 bg-orange-950/40 border border-orange-500/40 rounded-xl flex justify-between items-center text-orange-300">
                   <div>
-                    <span className="block text-white font-extrabold text-sm">Ward 03</span>
+                    <span className="block text-white font-extrabold text-sm">District 03</span>
                     <span className="text-[10px] text-gray-400">Score: 65</span>
                   </div>
                   <span className="px-2 py-1 bg-orange-500 text-dark-900 rounded text-[10px] uppercase font-black">MODERATE</span>
@@ -1052,7 +1046,7 @@ export const LearnPage: React.FC = () => {
 
                 <div className="p-4 bg-purple-950/40 border border-purple-500/40 rounded-xl flex justify-between items-center text-purple-300">
                   <div>
-                    <span className="block text-white font-extrabold text-sm">Ward 04</span>
+                    <span className="block text-white font-extrabold text-sm">District 04</span>
                     <span className="text-[10px] text-gray-400">Score: 92</span>
                   </div>
                   <span className="px-2 py-1 bg-purple-600 text-white rounded text-[10px] uppercase font-black">EXTREME</span>
@@ -1061,29 +1055,29 @@ export const LearnPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 7. WHAT CAN AUTHORITIES DO WITH WARD-LEVEL DATA? */}
+          {/* 7. WHAT CAN AUTHORITIES DO WITH DISTRICT-LEVEL DATA? */}
           <div className="glass-card p-6 md:p-8 space-y-6">
             <h3 className="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-              <Shield className="w-6 h-6 text-accent" /> 7. What Can Authorities Do With Ward-Level Data?
+              <Shield className="w-6 h-6 text-accent" /> 7. What Can Authorities Do With District-Level Data?
             </h3>
 
             <div className="p-4 bg-dark-800 rounded-xl border border-dark-600 text-xs text-gray-300 space-y-2">
-              <div className="text-red-400 font-bold">Instead of broad city-wide statements:</div>
-              <p className="italic text-gray-400">"Entire city is at high risk."</p>
+              <div className="text-red-400 font-bold">Instead of broad state-wide statements:</div>
+              <p className="italic text-gray-400">"Entire state is under generic heat advisory."</p>
               <div className="text-emerald-400 font-bold pt-2">THERMOS provides pinpoint actionable intelligence:</div>
-              <p className="font-semibold text-white">"Ward 04 has a significantly higher heat-health risk than surrounding wards."</p>
+              <p className="font-semibold text-white">"District 04 has a significantly higher heat-health risk than neighboring areas."</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
               {[
-                { title: '💧 Water Distribution', desc: 'Deploy water tankers directly to high-risk ward hubs.' },
-                { title: '🏥 Medical Preparedness', desc: 'Stock IV fluids & cooling packs in local ward clinics.' },
-                { title: '❄️ Cooling Centres', desc: 'Open public air-conditioned halls inside Ward 04.' },
-                { title: '👷 Worker Protection', desc: 'Adjust outdoor construction hours for extreme wards.' },
-                { title: '📢 Public Warnings', desc: 'Broadcast targeted loudspeaker alerts in dense wards.' },
-                { title: '🚑 Emergency Response', desc: 'Station ambulances near high-risk ward junctions.' },
-                { title: '📱 Location Alerts', desc: 'Send targeted push advisories to Ward 04 residents.' },
-                { title: '🤝 Vulnerable Check-ins', desc: 'Send health volunteers to check elderly citizens.' },
+                { title: '💧 Water Distribution', desc: 'Deploy water tankers directly to high-risk district hubs.' },
+                { title: '🏥 Medical Preparedness', desc: 'Stock IV fluids & cooling packs in local district hospitals.' },
+                { title: '❄️ Cooling Centres', desc: 'Open public air-conditioned facilities in vulnerable sectors.' },
+                { title: '👷 Worker Protection', desc: 'Adjust outdoor construction hours for high-risk zones.' },
+                { title: '📢 Public Warnings', desc: 'Broadcast targeted alerts across district radio and SMS.' },
+                { title: '🚑 Emergency Response', desc: 'Station ambulances near heat-stroke vulnerable intersections.' },
+                { title: '📱 Location Alerts', desc: 'Send targeted push advisories to local district residents.' },
+                { title: '🤝 Vulnerable Check-ins', desc: 'Mobilize ASHA workers to check on elders and outdoor workers.' },
               ].map((item, idx) => (
                 <div key={idx} className="p-3 bg-dark-700/60 rounded-xl border border-dark-600">
                   <h4 className="font-bold text-white mb-1">{item.title}</h4>
@@ -1101,26 +1095,26 @@ export const LearnPage: React.FC = () => {
           <div className="glass-card p-6 md:p-8 space-y-6">
             <h3 className="text-xl md:text-2xl font-bold text-white">8. Example Scenario</h3>
             <p className="text-gray-200 text-sm">
-              Imagine a city with <strong>20 wards</strong> operating simultaneously on a summer afternoon:
+              Imagine a state with multiple distinct districts operating simultaneously on a summer afternoon:
             </p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs font-bold text-center">
               <div className="p-3 bg-emerald-950/30 border border-emerald-500/30 rounded-xl text-emerald-300">
-                Ward 3 ➔ LOW
+                Nilgiris ➔ LOW
               </div>
               <div className="p-3 bg-orange-950/30 border border-orange-500/30 rounded-xl text-orange-300">
-                Ward 7 ➔ MODERATE
+                Coimbatore ➔ MODERATE
               </div>
               <div className="p-3 bg-red-950/30 border border-red-500/30 rounded-xl text-red-300">
-                Ward 11 ➔ HIGH
+                Chennai ➔ HIGH
               </div>
               <div className="p-3 bg-purple-950/30 border border-purple-500/30 rounded-xl text-purple-300">
-                Ward 15 ➔ EXTREME
+                Karur ➔ EXTREME
               </div>
             </div>
 
             <div className="p-4 bg-dark-800 rounded-xl border border-dark-600 text-xs text-gray-300 space-y-2">
-              <p className="font-bold text-white">The entire city does NOT need to be treated identically.</p>
+              <p className="font-bold text-white">The entire state does NOT need to be treated identically.</p>
               <p className="text-gray-300">THERMOS answers four critical questions for disaster management:</p>
               <ul className="list-disc pl-4 space-y-1 text-accent font-semibold">
                 <li>Where is the risk highest?</li>
@@ -1131,17 +1125,17 @@ export const LearnPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 9. WARD -> PERSON CONNECTION */}
+          {/* 9. DISTRICT -> PERSON CONNECTION */}
           <div className="glass-card p-6 md:p-8 space-y-6 border-purple-500/30">
-            <h3 className="text-xl md:text-2xl font-bold text-white">9. Ward → Person Connection</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-white">9. District → Person Connection</h3>
             <p className="text-gray-200 text-sm">
-              Ward-level risk acts as a bridge between environmental weather data and individual citizens.
+              District-level risk acts as a bridge between environmental weather telemetry and individual citizens.
             </p>
 
             <div className="flex flex-col md:flex-row items-center justify-between gap-2 text-center text-xs font-bold">
               <div className="p-2.5 bg-dark-700 rounded-lg text-blue-400 border border-dark-600 w-full">ENVIRONMENT</div>
               <span className="text-gray-500">➔</span>
-              <div className="p-2.5 bg-dark-700 rounded-lg text-yellow-400 border border-dark-600 w-full">WARD</div>
+              <div className="p-2.5 bg-dark-700 rounded-lg text-yellow-400 border border-dark-600 w-full">DISTRICT</div>
               <span className="text-gray-500">➔</span>
               <div className="p-2.5 bg-dark-700 rounded-lg text-orange-400 border border-dark-600 w-full">RISK SCORE</div>
               <span className="text-gray-500">➔</span>
@@ -1153,7 +1147,7 @@ export const LearnPage: React.FC = () => {
             <div className="p-4 bg-dark-800 rounded-xl border border-dark-600 text-xs text-gray-300">
               <p className="font-bold text-white mb-1">Example Citizen Flow:</p>
               <p>
-                A person located in <strong>Ward 11</strong> (HIGH RISK) automatically receives targeted heat-safety advisories for their immediate neighborhood.
+                A person located in <strong>Karur District</strong> (HIGH/EXTREME RISK) automatically receives targeted heat-safety advisories for their immediate locality.
               </p>
               <p className="mt-2 text-[11px] text-gray-400 italic">
                 * Note: Location-based automated SMS broadcasting is currently a planned / future feature.
@@ -1161,22 +1155,22 @@ export const LearnPage: React.FC = () => {
             </div>
           </div>
 
-          {/* 10. WHY WARD LEVEL IS BETTER THAN ONLY CITY LEVEL */}
+          {/* 10. WHY DISTRICT LEVEL IS BETTER THAN ONLY STATE LEVEL */}
           <div className="glass-card p-6 md:p-8 space-y-6">
-            <h3 className="text-xl md:text-2xl font-bold text-white">10. Why Ward Level is Better Than Only City Level</h3>
+            <h3 className="text-xl md:text-2xl font-bold text-white">10. Why District Level is Better Than Only State Level</h3>
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left text-gray-300 border border-dark-600 rounded-xl overflow-hidden">
                 <thead className="bg-dark-800 text-gray-400 font-semibold uppercase">
                   <tr>
-                    <th className="px-4 py-3 border-b border-dark-600">City-Level Only</th>
-                    <th className="px-4 py-3 border-b border-dark-600 text-accent">Ward-Level THERMOS</th>
+                    <th className="px-4 py-3 border-b border-dark-600">State-Level Only</th>
+                    <th className="px-4 py-3 border-b border-dark-600 text-accent">District-Level THERMOS</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-dark-600">
                   <tr className="hover:bg-dark-700/50">
                     <td className="px-4 py-3 text-red-400">One risk value for everyone</td>
-                    <td className="px-4 py-3 text-emerald-400 font-bold">Localized risk per neighborhood</td>
+                    <td className="px-4 py-3 text-emerald-400 font-bold">Localized risk per district microclimate</td>
                   </tr>
                   <tr className="hover:bg-dark-700/50">
                     <td className="px-4 py-3 text-red-400">Broad, generic warnings</td>
@@ -1188,7 +1182,7 @@ export const LearnPage: React.FC = () => {
                   </tr>
                   <tr className="hover:bg-dark-700/50">
                     <td className="px-4 py-3 text-red-400">Difficult to prioritize resources</td>
-                    <td className="px-4 py-3 text-emerald-400 font-bold">Easier municipal prioritization</td>
+                    <td className="px-4 py-3 text-emerald-400 font-bold">Easier municipal and DDMA prioritization</td>
                   </tr>
                   <tr className="hover:bg-dark-700/50">
                     <td className="px-4 py-3 text-red-400">Low spatial detail</td>
@@ -1205,10 +1199,10 @@ export const LearnPage: React.FC = () => {
               <Info className="w-5 h-5" /> Important Clarification
             </h4>
             <p className="text-xs text-gray-200 leading-relaxed">
-              Ward-level risk does <strong>NOT</strong> mean every person inside the ward has exactly the same personal health risk.
+              District-level risk does <strong>NOT</strong> mean every person inside the district has exactly the same personal health risk.
             </p>
             <p className="text-xs text-gray-300 leading-relaxed">
-              Individual risk depends on personal factors like age, physical activity, exposure time, hydration, access to shade, and pre-existing medical conditions. The ward score represents <strong>area-level environmental heat risk</strong>, not an individual medical diagnosis.
+              Individual risk depends on personal factors like age, physical activity, exposure time, hydration, access to shade, and pre-existing medical conditions. The district score represents <strong>area-level environmental heat risk</strong>, not an individual medical diagnosis.
             </p>
           </div>
 
@@ -1393,7 +1387,7 @@ export const LearnPage: React.FC = () => {
               <span className="text-3xl">💡</span>
               <h4 className="text-xl font-bold text-white">Think of it this way:</h4>
               <p className="text-sm text-gray-200 leading-relaxed">
-                A city is made up of many smaller areas. Heat conditions can be different in each area. THERMOS breaks the city into wards, evaluates heat-related risk locally, and shows where the risk is higher. That makes heat warnings and resource planning more targeted and useful.
+                India is vast with diverse microclimates. Heat conditions differ drastically across regions. THERMOS evaluates heat-related risk at the local district and city level, showing where the danger is highest. That makes heat warnings and resource planning targeted, actionable, and life-saving.
               </p>
             </div>
 

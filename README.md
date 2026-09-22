@@ -60,7 +60,7 @@ The platform provides two dedicated, isolated portals with strict tab visibility
 * **Session Persistence**: Session roles saved to `localStorage` with instant role-switching controls in the navigation bar.
 * **Route Guards**: Automated redirection prevents unauthorized cross-role access.
 
-### 4. 🗺️ Interactive GIS & Ward-Level Heat Mapping
+### 4. 🗺️ Interactive GIS & District-Level Heat Mapping
 * Interactive Leaflet maps rendering microclimate zones and Urban Heat Islands (UHI).
 * Dynamic hospital bed status and cooling shelter availability broadcast system.
 * Real-time GPS location lock with reverse geocoding across Indian districts and taluks.
@@ -103,8 +103,8 @@ THERMO-GUARD/
 │   │   │   ├── dashboard/        # Instruments, dials, cards, gauges
 │   │   │   ├── government/       # 788-district table, risk inspector, overview cards
 │   │   │   ├── layout/           # Navbar, Header, district search bar
-│   │   │   └── map/              # GIS Leaflet heat risk map & ward layers
-│   │   ├── data/                 # 788 districts, telemetry baselines, GIS data
+│   │   │   └── map/              # GIS Leaflet heat risk map & district telemetry layers
+│   │   ├── data/                 # 788 districts, telemetry baselines, district coordinates
 │   │   ├── hooks/                # React Query hooks for real-time telemetry
 │   │   ├── pages/                # CitizenDashboard, GovDashboard, Map, Learn, About, Landing
 │   │   ├── services/             # API services, GPS location, district telemetry

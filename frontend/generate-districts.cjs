@@ -14,9 +14,7 @@ const jsCode = raw
   // Remove export interface blocks (multi-line)
   .replace(/export\s+interface\s+\w+\s*\{[\s\S]*?\}\s*/g, '')
   // Turn "export const INDIA_LOCATIONS: StateUT[] = " into "const INDIA_LOCATIONS = "
-  .replace(/export\s+const\s+(\w+)\s*:\s*[\w\[\]]+\s*=\s*/g, 'const $1 = ')
-  // Remove hasWardData optional marker (?: is not valid in plain JS values, but it appears in type defs only)
-  ;
+  .replace(/export\s+const\s+(\w+)\s*:\s*[\w\[\]]+\s*=\s*/g, 'const $1 = ');
 
 // Evaluate in an isolated context
 let INDIA_LOCATIONS;

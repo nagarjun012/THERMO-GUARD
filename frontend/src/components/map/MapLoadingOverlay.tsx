@@ -13,7 +13,7 @@ export const MapLoadingOverlay: React.FC<Props> = ({ onComplete }) => {
     'Initializing GIS Spatial Engine...',
     'Ingesting Real-Time Environmental Telemetry...',
     'Computing WBGT, Heat Index & HTSS Risk...',
-    'Rendering Municipal Ward Boundaries & Heat Layers...',
+    'Rendering District Heat Risk Zones & Telemetry Layers...',
     'THERMOS Intelligence Ready!',
   ];
 

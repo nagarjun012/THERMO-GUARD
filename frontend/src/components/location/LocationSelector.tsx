@@ -62,7 +62,7 @@ export const LocationSelector: React.FC = () => {
         firstDistrict.name,
         firstDistrict.lat,
         firstDistrict.lon,
-        firstDistrict.hasWardData || false,
+        undefined,
         'LIVE',
         undefined,
         false,
@@ -82,7 +82,7 @@ export const LocationSelector: React.FC = () => {
         newDistrict,
         distObj.lat,
         distObj.lon,
-        distObj.hasWardData || false,
+        undefined,
         'LIVE',
         undefined,
         false,
@@ -103,7 +103,7 @@ export const LocationSelector: React.FC = () => {
     setSearchResults([]);
     setIsSearchFocused(false);
 
-    setIndiaLocation(stName, distName, res.lat, res.lon, res.hasWardData || false, 'LIVE', locName, false, true);
+    setIndiaLocation(stName, distName, res.lat, res.lon, undefined, 'LIVE', locName, false, true);
   };
 
   const htssScore = thermal?.htss ?? 75;

@@ -2,7 +2,6 @@ export interface District {
   name: string;
   lat: number;
   lon: number;
-  hasWardData?: boolean;
   dataStatus?: 'LIVE' | 'DEMO' | 'LIMITED' | 'UNAVAILABLE';
 }
 
@@ -2927,8 +2926,7 @@ export const INDIA_LOCATIONS: StateUT[] = [
       {
         "name": "Chennai",
         "lat": 13.08,
-        "lon": 80.27,
-        "hasWardData": true
+        "lon": 80.27
       },
       {
         "name": "Coimbatore",
@@ -2973,8 +2971,7 @@ export const INDIA_LOCATIONS: StateUT[] = [
       {
         "name": "Karur",
         "lat": 10.96,
-        "lon": 78.08,
-        "hasWardData": true
+        "lon": 78.08
       },
       {
         "name": "Krishnagiri",
@@ -3958,68 +3955,57 @@ export const INDIA_LOCATIONS: StateUT[] = [
       {
         "name": "Central Delhi",
         "lat": 28.64,
-        "lon": 77.22,
-        "hasWardData": true
+        "lon": 77.22
       },
       {
         "name": "East Delhi",
         "lat": 28.63,
-        "lon": 77.29,
-        "hasWardData": true
+        "lon": 77.29
       },
       {
         "name": "New Delhi",
         "lat": 28.61,
-        "lon": 77.21,
-        "hasWardData": true
+        "lon": 77.21
       },
       {
         "name": "North Delhi",
         "lat": 28.71,
-        "lon": 77.17,
-        "hasWardData": true
+        "lon": 77.17
       },
       {
         "name": "North East Delhi",
         "lat": 28.7,
-        "lon": 77.26,
-        "hasWardData": true
+        "lon": 77.26
       },
       {
         "name": "North West Delhi",
         "lat": 28.74,
-        "lon": 77.1,
-        "hasWardData": true
+        "lon": 77.1
       },
       {
         "name": "Shahdara",
         "lat": 28.67,
-        "lon": 77.29,
-        "hasWardData": true
+        "lon": 77.29
       },
       {
         "name": "South Delhi",
         "lat": 28.52,
-        "lon": 77.21,
-        "hasWardData": true
+        "lon": 77.21
       },
       {
         "name": "South East Delhi",
         "lat": 28.54,
-        "lon": 77.26,
-        "hasWardData": true
+        "lon": 77.26
       },
       {
         "name": "South West Delhi",
         "lat": 28.58,
-        "lon": 77.06,
-        "hasWardData": true
+        "lon": 77.06
       },
       {
         "name": "West Delhi",
         "lat": 28.65,
-        "lon": 77.1,
-        "hasWardData": true
+        "lon": 77.1
       }
     ]
   },
@@ -4193,7 +4179,6 @@ export interface SearchResult {
   type: string;
   lat: number;
   lon: number;
-  hasWardData?: boolean;
   dataStatus?: 'LIVE' | 'DEMO' | 'LIMITED' | 'UNAVAILABLE';
 }
 
@@ -4217,8 +4202,7 @@ export function searchLocations(query: string): SearchResult[] {
           type: state.type || 'District',
           lat: district.lat,
           lon: district.lon,
-          hasWardData: district.hasWardData,
-          dataStatus: district.dataStatus || (district.hasWardData ? 'LIVE' : 'DEMO'),
+          dataStatus: district.dataStatus || 'LIVE',
         });
       }
       if (results.length >= 25) break;
@@ -4242,8 +4226,7 @@ export function findLocation(stateName: string, districtName: string): SearchRes
     type: state.type || 'State',
     lat: district.lat,
     lon: district.lon,
-    hasWardData: district.hasWardData,
-    dataStatus: district.dataStatus || (district.hasWardData ? 'LIVE' : 'DEMO'),
+    dataStatus: district.dataStatus || 'LIVE',
   };
 }
 
@@ -4266,7 +4249,6 @@ export function findNearestDistrict(lat: number, lon: number): SearchResult {
           type: state.type || 'District',
           lat: district.lat,
           lon: district.lon,
-          hasWardData: district.hasWardData,
           dataStatus: 'LIVE',
         };
       }
@@ -4282,7 +4264,6 @@ export function findNearestDistrict(lat: number, lon: number): SearchResult {
       type: 'District',
       lat: 28.6139,
       lon: 77.2090,
-      hasWardData: true,
       dataStatus: 'LIVE',
     }
   );

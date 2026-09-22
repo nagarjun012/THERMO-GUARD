@@ -10,7 +10,6 @@ export interface Location {
   stateName?: string;
   districtName?: string;
   localityName?: string;
-  hasWardData?: boolean;
   dataStatus?: 'LIVE' | 'DEMO' | 'LIMITED' | 'UNAVAILABLE';
   isGpsLive?: boolean;
 }
@@ -47,7 +46,7 @@ interface AppState {
     districtName: string,
     lat: number,
     lon: number,
-    hasWardData?: boolean,
+    _legacyUnused?: any,
     dataStatus?: 'LIVE' | 'DEMO' | 'LIMITED' | 'UNAVAILABLE',
     localityName?: string,
     isGpsLive?: boolean,
@@ -145,7 +144,6 @@ const getInitialLocation = (): Location => {
     stateName: 'Tamil Nadu',
     districtName: 'Karur',
     localityName: 'Karur',
-    hasWardData: true,
     dataStatus: 'LIVE',
     isGpsLive: true,
   };
@@ -264,7 +262,7 @@ export const useAppStore = create<AppState>((set) => ({
     districtName,
     lat,
     lon,
-    hasWardData = true,
+    _legacyUnused,
     dataStatus = 'LIVE',
     localityName,
     isGpsLive = true,
@@ -300,7 +298,6 @@ export const useAppStore = create<AppState>((set) => ({
       stateName,
       districtName,
       localityName: cleanLoc || undefined,
-      hasWardData,
       dataStatus,
       isGpsLive,
     };

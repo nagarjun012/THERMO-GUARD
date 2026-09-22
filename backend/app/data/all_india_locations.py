@@ -2914,8 +2914,7 @@ ALL_INDIA_LOCATIONS = [
       {
         "name": "Chennai",
         "lat": 13.08,
-        "lon": 80.27,
-        "hasWardData": True
+        "lon": 80.27
       },
       {
         "name": "Coimbatore",
@@ -2960,8 +2959,7 @@ ALL_INDIA_LOCATIONS = [
       {
         "name": "Karur",
         "lat": 10.96,
-        "lon": 78.08,
-        "hasWardData": True
+        "lon": 78.08
       },
       {
         "name": "Krishnagiri",
@@ -3945,68 +3943,57 @@ ALL_INDIA_LOCATIONS = [
       {
         "name": "Central Delhi",
         "lat": 28.64,
-        "lon": 77.22,
-        "hasWardData": True
+        "lon": 77.22
       },
       {
         "name": "East Delhi",
         "lat": 28.63,
-        "lon": 77.29,
-        "hasWardData": True
+        "lon": 77.29
       },
       {
         "name": "New Delhi",
         "lat": 28.61,
-        "lon": 77.21,
-        "hasWardData": True
+        "lon": 77.21
       },
       {
         "name": "North Delhi",
         "lat": 28.71,
-        "lon": 77.17,
-        "hasWardData": True
+        "lon": 77.17
       },
       {
         "name": "North East Delhi",
         "lat": 28.7,
-        "lon": 77.26,
-        "hasWardData": True
+        "lon": 77.26
       },
       {
         "name": "North West Delhi",
         "lat": 28.74,
-        "lon": 77.1,
-        "hasWardData": True
+        "lon": 77.1
       },
       {
         "name": "Shahdara",
         "lat": 28.67,
-        "lon": 77.29,
-        "hasWardData": True
+        "lon": 77.29
       },
       {
         "name": "South Delhi",
         "lat": 28.52,
-        "lon": 77.21,
-        "hasWardData": True
+        "lon": 77.21
       },
       {
         "name": "South East Delhi",
         "lat": 28.54,
-        "lon": 77.26,
-        "hasWardData": True
+        "lon": 77.26
       },
       {
         "name": "South West Delhi",
         "lat": 28.58,
-        "lon": 77.06,
-        "hasWardData": True
+        "lon": 77.06
       },
       {
         "name": "West Delhi",
         "lat": 28.65,
-        "lon": 77.1,
-        "hasWardData": True
+        "lon": 77.1
       }
     ]
   },

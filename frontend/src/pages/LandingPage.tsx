@@ -54,7 +54,7 @@ export const LandingPage: React.FC = () => {
     {
       icon: Globe,
       title: 'Interactive GIS Mapping',
-      desc: 'Visualizing municipal wards, urban heat islands, and local thermal zones.',
+      desc: 'Visualizing district hotspots, urban heat islands, and local thermal zones.',
     },
     {
       icon: BarChart3,
