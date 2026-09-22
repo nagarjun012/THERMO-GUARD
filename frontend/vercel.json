@@ -6,6 +6,14 @@
   },
   "rewrites": [
     {
+      "source": "/api/facilities/(.*)",
+      "destination": "/api/facilities"
+    },
+    {
+      "source": "/api/health/(.*)",
+      "destination": "/api/facilities"
+    },
+    {
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }

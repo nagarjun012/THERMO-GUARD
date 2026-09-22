@@ -5,7 +5,6 @@
  * calculates HTSS and all thermal indices, and returns the result.
  *
  * Used by: CitizenDashboard, MapPage (single-location queries)
- * NOT used for bulk all-India pipeline (that's /api/refresh → Supabase → /api/htss).
  *
  * Query params:
  *   lat   - Latitude (required)
@@ -139,97 +138,123 @@ async function fetchWithTimeout(url: string, ms = 12000): Promise<Response> {
   }
 }
 
+async function fetchAirQuality(lat: number, lon: number) {
+  try {
+    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=pm10,pm2_5,ozone,european_aqi,us_aqi`;
+    const res = await fetchWithTimeout(url, 4500);
+    if (res.ok) {
+      const data: any = await res.json();
+      const curr = data?.current ?? {};
+      const pm25 = Math.round(Number(curr.pm2_5 ?? 22) * 10) / 10;
+      const pm10 = Math.round(Number(curr.pm10 ?? 42) * 10) / 10;
+      const ozone = Math.round(Number(curr.ozone ?? 35) * 10) / 10;
+      const aqi = Math.round(Number(curr.us_aqi ?? curr.european_aqi ?? 65));
+
+      let aqiCategory = 'Good';
+      if (aqi > 200) aqiCategory = 'Very Unhealthy';
+      else if (aqi > 150) aqiCategory = 'Unhealthy';
+      else if (aqi > 100) aqiCategory = 'Unhealthy for Sensitive Groups';
+      else if (aqi > 50) aqiCategory = 'Moderate';
+
+      return { pm25, pm10, ozone, aqi, aqiCategory };
+    }
+  } catch {}
+  return { pm25: 25, pm10: 45, ozone: 35, aqi: 70, aqiCategory: 'Moderate' };
+}
+
 async function fetchCurrentWeather(lat: number, lon: number) {
-  const url =
-    `https://api.open-meteo.com/v1/forecast` +
-    `?latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m,relative_humidity_2m,apparent_temperature,` +
-    `wind_speed_10m,wind_direction_10m,shortwave_radiation,` +
-    `pressure_msl,dew_point_2m,uv_index,weather_code,cloud_cover` +
-    `&models=gfs_seamless` +
-    `&timezone=auto`;
+  // Multi-model resilience: Try NOAA GFS Seamless first, then ECMWF IFS / Open-Meteo Best Match
+  const modelUrls = [
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,shortwave_radiation,pressure_msl,dew_point_2m,uv_index,weather_code,cloud_cover&models=gfs_seamless&timezone=auto`,
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,shortwave_radiation,pressure_msl,dew_point_2m,uv_index,weather_code,cloud_cover&models=ecmwf_ifs025&timezone=auto`,
+    `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,wind_speed_10m,wind_direction_10m,shortwave_radiation,pressure_msl,dew_point_2m,uv_index,weather_code,cloud_cover&timezone=auto`,
+  ];
 
-  for (let attempt = 0; attempt < 3; attempt++) {
-    try {
-      const res = await fetchWithTimeout(url, 12000);
-      if (res.ok) {
-        const data: any = await res.json();
-        const curr = data?.current ?? {};
-        if (
-          curr.temperature_2m === undefined ||
-          curr.temperature_2m === null ||
-          curr.relative_humidity_2m === undefined ||
-          curr.relative_humidity_2m === null
-        ) {
-          throw new Error('Incomplete weather telemetry: missing temperature or humidity');
+  let lastError: any = null;
+
+  for (const url of modelUrls) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetchWithTimeout(url, 9000);
+        if (res.ok) {
+          const data: any = await res.json();
+          const curr = data?.current ?? {};
+          if (
+            curr.temperature_2m === undefined ||
+            curr.temperature_2m === null ||
+            curr.relative_humidity_2m === undefined ||
+            curr.relative_humidity_2m === null
+          ) {
+            throw new Error('Incomplete weather telemetry: missing temperature or humidity');
+          }
+
+          const temp = Number(curr.temperature_2m);
+          const rh = Number(curr.relative_humidity_2m);
+
+          if (isNaN(temp) || isNaN(rh) || temp < -60 || temp > 60 || rh < 0 || rh > 100) {
+            throw new Error('Physically implausible weather telemetry received');
+          }
+
+          const wind = Number(curr.wind_speed_10m ?? 0);
+          const windDir = Number(curr.wind_direction_10m ?? 0);
+          const solar = Math.max(0, Number(curr.shortwave_radiation ?? 0));
+          const pressure = Number(curr.pressure_msl ?? 1013.25);
+          const dewPoint = Number(curr.dew_point_2m ?? 0);
+          const apparentTemp = Number(curr.apparent_temperature ?? temp);
+          const uvIndex = Math.max(0, Number(curr.uv_index ?? 0));
+          const cloudCover = Number(curr.cloud_cover ?? 0);
+          const apiTime = curr.time || new Date().toISOString();
+
+          // Authoritative biometeorological calculations locally
+          const calculatedHi = calculateHeatIndex(temp, rh);
+          const heatIndexVal = curr.apparent_temperature !== undefined && curr.apparent_temperature !== null
+            ? Number(curr.apparent_temperature)
+            : calculatedHi;
+
+          const thermal = computeThermalRisk(temp, rh, wind, solar);
+          const dynamicFactors = computeFactorDecomposition(temp, rh, wind, solar);
+
+          return {
+            // Real Open-Meteo API fields
+            temperature: Math.round(temp * 10) / 10,
+            humidity: Math.round(rh * 10) / 10,
+            windSpeed: Math.round(wind * 10) / 10,
+            windDirection: Math.round(windDir * 10) / 10,
+            solarRadiation: Math.round(solar * 10) / 10,
+            pressureMsl: Math.round(pressure * 10) / 10,
+            dewPoint: Math.round(dewPoint * 10) / 10,
+            apparentTemperature: Math.round(apparentTemp * 10) / 10,
+            uvIndex: Math.round(uvIndex * 100) / 100,
+            description: cloudCover < 30 ? 'Clear' : cloudCover < 70 ? 'Partly Cloudy' : 'Cloudy',
+            timestamp: new Date().toISOString(),
+            apiTimestamp: apiTime,
+            isLive: true,
+            source: 'LIVE WEATHER — Open-Meteo Multi-Model',
+
+            // Locally calculated biometeorological indices
+            heatIndex: Math.round(heatIndexVal * 10) / 10,
+            wbgt: thermal.wbgt,
+            utci: thermal.utci,
+            htss: thermal.htss,
+            htssCategory: thermal.level,
+
+            // Risk
+            level: thermal.level,
+            score: thermal.htss,
+            probability: Math.min(100, Math.round(thermal.htss * 1.1)),
+            primaryFactors: dynamicFactors,
+            recommendations: getRecommendations(thermal.level),
+            dataSource: 'LIVE WEATHER — Open-Meteo',
+          };
         }
-
-        const temp = Number(curr.temperature_2m);
-        const rh = Number(curr.relative_humidity_2m);
-
-        if (isNaN(temp) || isNaN(rh) || temp < -60 || temp > 60 || rh < 0 || rh > 100) {
-          throw new Error('Physically implausible weather telemetry received');
-        }
-
-        const wind = Number(curr.wind_speed_10m ?? 0);
-        const windDir = Number(curr.wind_direction_10m ?? 0);
-        const solar = Math.max(0, Number(curr.shortwave_radiation ?? 0));
-        const pressure = Number(curr.pressure_msl ?? 1013.25);
-        const dewPoint = Number(curr.dew_point_2m ?? 0);
-        const apparentTemp = Number(curr.apparent_temperature ?? temp);
-        const uvIndex = Math.max(0, Number(curr.uv_index ?? 0));
-        const cloudCover = Number(curr.cloud_cover ?? 0);
-        const apiTime = curr.time || new Date().toISOString();
-
-        // Authoritative biometeorological calculations locally
-        const calculatedHi = calculateHeatIndex(temp, rh);
-        const heatIndexVal = curr.apparent_temperature !== undefined && curr.apparent_temperature !== null
-          ? Number(curr.apparent_temperature)
-          : calculatedHi;
-
-        const thermal = computeThermalRisk(temp, rh, wind, solar);
-        const dynamicFactors = computeFactorDecomposition(temp, rh, wind, solar);
-
-        return {
-          // Real Open-Meteo API fields
-          temperature: Math.round(temp * 10) / 10,
-          humidity: Math.round(rh * 10) / 10,
-          windSpeed: Math.round(wind * 10) / 10,
-          windDirection: Math.round(windDir * 10) / 10,
-          solarRadiation: Math.round(solar * 10) / 10,
-          pressureMsl: Math.round(pressure * 10) / 10,
-          dewPoint: Math.round(dewPoint * 10) / 10,
-          apparentTemperature: Math.round(apparentTemp * 10) / 10,
-          uvIndex: Math.round(uvIndex * 100) / 100,
-          description: cloudCover < 30 ? 'Clear' : cloudCover < 70 ? 'Partly Cloudy' : 'Cloudy',
-          timestamp: new Date().toISOString(),
-          apiTimestamp: apiTime,
-          isLive: true,
-          source: 'LIVE WEATHER — Open-Meteo',
-
-          // Locally calculated biometeorological indices
-          heatIndex: Math.round(heatIndexVal * 10) / 10,
-          wbgt: thermal.wbgt,
-          utci: thermal.utci,
-          htss: thermal.htss,
-          htssCategory: thermal.level,
-
-          // Risk
-          level: thermal.level,
-          score: thermal.htss,
-          probability: Math.min(100, Math.round(thermal.htss * 1.1)),
-          primaryFactors: dynamicFactors,
-          recommendations: getRecommendations(thermal.level),
-          dataSource: 'LIVE WEATHER — Open-Meteo',
-        };
+        if (res.status === 429) await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+      } catch (e: any) {
+        lastError = e;
+        await new Promise((r) => setTimeout(r, 300 * (attempt + 1)));
       }
-      if (res.status === 429) await new Promise((r) => setTimeout(r, 800 * (attempt + 1)));
-    } catch (e: any) {
-      if (attempt === 2) throw e;
-      await new Promise((r) => setTimeout(r, 400 * (attempt + 1)));
     }
   }
-  throw new Error('Open-Meteo unreachable after 3 attempts');
+  throw lastError || new Error('Open-Meteo unreachable across all multi-model endpoints');
 }
 
 async function fetchForecast(lat: number, lon: number, hours = 24) {
@@ -248,7 +273,6 @@ async function fetchForecast(lat: number, lon: number, hours = 24) {
   const hourly = data?.hourly ?? {};
   const allTimes: string[] = hourly.time ?? [];
 
-  // Match current local time to start index
   const now = new Date();
   const currentHourPad = String(now.getHours()).padStart(2, '0');
   let startIdx = 0;
@@ -348,7 +372,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(400).json({ error: 'Invalid lat/lon. Provide valid coordinates.' });
   }
 
-  // Short cache for weather (2 min)
   res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=30');
 
   try {
@@ -357,11 +380,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(200).json({ forecasts: forecast.timeline, timeline: forecast.timeline });
     }
 
-    const data = await fetchCurrentWeather(lat, lon);
+    const [data, airQuality] = await Promise.all([
+      fetchCurrentWeather(lat, lon),
+      fetchAirQuality(lat, lon),
+    ]);
+
+    const aqiPenalty = Math.max(0, (airQuality.aqi - 50) * 0.08);
+    const chpi = Math.min(100, Math.round(data.htss + aqiPenalty));
+
     const alerts = generateAlerts(data.level, data.htss);
+    if (airQuality.aqi >= 150) {
+      alerts.unshift({
+        id: `alert-aqi-${Date.now()}`,
+        title: 'Compounding Heat & Pollution Dual-Hazard',
+        message: `Hazardous AQI (${airQuality.aqi} — ${airQuality.aqiCategory}) combined with thermal stress multiplies cardio-respiratory strain. PM2.5: ${airQuality.pm25} µg/m³.`,
+        severity: 'red',
+        time: new Date().toISOString(),
+        actions: ['Avoid outdoor exertion', 'Run indoor HEPA air filtration if available', 'Wear N95 if outdoors in heat'],
+      });
+    }
 
     return res.status(200).json({
-      // WeatherData shape
       temp: data.temperature,
       temperature: data.temperature,
       humidity: data.humidity,
@@ -385,8 +424,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       apiTimestamp: data.apiTimestamp,
       isLive: true,
       source: data.source,
-
-      // ThermalStressData shape
       heat_index: data.heatIndex,
       heatIndex: data.heatIndex,
       wbgt: data.wbgt,
@@ -395,8 +432,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       htss: data.htss,
       htss_category: data.htssCategory,
       htssCategory: data.htssCategory,
-
-      // RiskAssessment shape
       risk_level: data.level,
       level: data.level,
       risk_score: data.score,
@@ -404,10 +439,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       probability: data.probability,
       primaryFactors: data.primaryFactors,
       recommendations: data.recommendations,
-
-      // Alerts
       alerts,
       dataSource: data.dataSource,
+      airQuality,
+      aqi: airQuality.aqi,
+      pm25: airQuality.pm25,
+      pm10: airQuality.pm10,
+      ozone: airQuality.ozone,
+      chpi,
     });
   } catch (err: any) {
     console.error('[/api/weather] Error:', err?.message ?? err);

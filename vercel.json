@@ -10,12 +10,12 @@
   },
   "rewrites": [
     {
-      "source": "/api/facilities/:path*",
-      "destination": "/api/facilities?subpath=:path*"
+      "source": "/api/facilities/(.*)",
+      "destination": "/api/facilities"
     },
     {
-      "source": "/api/health/:path*",
-      "destination": "/api/facilities?subpath=health-:path*"
+      "source": "/api/health/(.*)",
+      "destination": "/api/facilities"
     },
     {
       "source": "/((?!api/).*)",
