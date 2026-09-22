@@ -150,6 +150,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const rawUrl = req.url || '';
   const subpath = String(
     req.query.subpath ||
+    req.query.action ||
     req.headers['x-matched-path'] ||
     req.headers['x-invoke-path'] ||
     rawUrl
@@ -166,13 +167,18 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
   body = body || {};
 
-  // 1. POST /api/auth/login
-  if (subpath.includes('login') || (req.method === 'POST' && !subpath.includes('logout'))) {
-    if (req.method !== 'POST') {
-      res.setHeader('Allow', 'POST');
-      return res.status(405).json({ error: 'METHOD_NOT_ALLOWED', message: 'Only POST supported for login.' });
-    }
+  // 1. LOGOUT: POST /api/auth?action=logout or /api/auth/logout
+  if (subpath.includes('logout') || req.query.action === 'logout') {
+    res.setHeader('Set-Cookie', buildClearCookieHeader());
+    return res.status(200).json({
+      status: 'logged_out',
+      authenticated: false,
+      message: 'Session successfully invalidated and cookie cleared.',
+    });
+  }
 
+  // 2. LOGIN: POST /api/auth or /api/auth/login
+  if (req.method === 'POST') {
     const { role, officerId, passcode, citizenName } = body;
 
     // Case A: Citizen login
@@ -249,18 +255,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  // 2. POST /api/auth/logout
-  if (subpath.includes('logout')) {
-    res.setHeader('Set-Cookie', buildClearCookieHeader());
-    return res.status(200).json({
-      status: 'logged_out',
-      authenticated: false,
-      message: 'Session successfully invalidated and cookie cleared.',
-    });
-  }
-
-  // 3. GET /api/auth/session (or default GET on /api/auth)
-  if (subpath.includes('session') || req.method === 'GET') {
+  // 3. SESSION: GET /api/auth or /api/auth/session
+  if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
     const session = getSession(req);
     if (!session) {
@@ -285,5 +281,5 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
 
-  return res.status(404).json({ error: 'NOT_FOUND', message: 'Unknown auth endpoint' });
+  return res.status(405).json({ error: 'METHOD_NOT_ALLOWED', message: 'Method not supported.' });
 }

@@ -211,7 +211,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   checkServerSession: async () => {
     try {
-      const res = await fetch('/api/auth/session', { credentials: 'same-origin' });
+      const res = await fetch('/api/auth', { credentials: 'same-origin' });
       if (res.ok) {
         const data = await res.json();
         if (data.authenticated && data.user) {
@@ -238,7 +238,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loginCitizen: async (name?: string) => {
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
@@ -261,7 +261,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   loginOfficer: async (officerId: string, passcode: string) => {
     try {
-      const res = await fetch('/api/auth/login', {
+      const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'same-origin',
@@ -290,7 +290,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   logout: async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'same-origin' });
+      await fetch('/api/auth?action=logout', { method: 'POST', credentials: 'same-origin' });
     } catch {}
     try {
       localStorage.removeItem('thermosafe_auth_role');
