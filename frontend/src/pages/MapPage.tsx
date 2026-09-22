@@ -15,7 +15,7 @@ export const MapPage: React.FC = () => {
 
   const [isEduModalOpen, setIsEduModalOpen] = useState(false);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
-  const [gisResolution, setGisResolution] = useState('Hyper-Local Ward GIS Risk');
+  const [gisResolution, setGisResolution] = useState('District / City Level Risk');
   const [layerFilter, setLayerFilter] = useState<'all' | 'risk' | 'temp' | 'wbgt' | 'hi'>('all');
 
   if (isLoading || !data) {
@@ -78,10 +78,9 @@ export const MapPage: React.FC = () => {
                 onChange={(e) => setGisResolution(e.target.value)}
                 className="bg-dark-800 text-white font-semibold rounded-lg px-2 py-1 border border-dark-600 text-xs focus:outline-none focus:border-accent cursor-pointer"
               >
-                <option value="Hyper-Local Ward GIS Risk">🏙️ Ward Level</option>
-                <option value="All-India District Overview">🌐 All-India</option>
-                <option value="District / City Level Risk">🌆 City Level</option>
-                <option value="State / Regional Level Risk">🗺️ State Level</option>
+                <option value="District / City Level Risk">🌆 District / City Level</option>
+                <option value="All-India District Overview">🌐 All-India Districts</option>
+                <option value="State / Regional Level Risk">🗺️ State / Regional Level</option>
               </select>
             </div>
 
@@ -96,7 +95,7 @@ export const MapPage: React.FC = () => {
                 onChange={(e) => setLayerFilter(e.target.value as any)}
                 className="bg-dark-800 text-white font-semibold rounded-lg px-2 py-1 border border-dark-600 text-xs focus:outline-none focus:border-accent cursor-pointer"
               >
-                <option value="all">Ward Risk Overlay</option>
+                <option value="all">District Risk Overlay</option>
                 <option value="risk">Thermal Heatmap</option>
                 <option value="temp">Air Temp (°C)</option>
                 <option value="wbgt">WBGT Index</option>

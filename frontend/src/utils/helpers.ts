@@ -7,6 +7,15 @@ export const getRiskColor = (level: string) => {
   return '#10b981';
 };
 
+export const getRiskColorByCategory = (category: string) => {
+  const c = category?.toUpperCase() || 'LOW';
+  if (c === 'EXTREME') return '#ef4444';
+  if (c === 'HIGH') return '#f97316';
+  if (c === 'MODERATE') return '#f59e0b';
+  if (c === 'LOW' || c === 'SAFE') return '#10b981';
+  return '#6b7280';
+};
+
 export const getRiskGlowClass = (level: string) => {
   const l = level.toLowerCase();
   if (l === 'safe') return 'glow-safe';

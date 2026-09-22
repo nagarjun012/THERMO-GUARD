@@ -226,7 +226,7 @@ export const LocationSelector: React.FC = () => {
             >
               {availableDistricts.map((d) => (
                 <option key={d.name} value={d.name}>
-                  {d.name} {d.hasWardData ? '★ (Ward GIS Ready)' : ''}
+                  {d.name}
                 </option>
               ))}
             </select>
@@ -272,14 +272,10 @@ export const LocationSelector: React.FC = () => {
           </div>
         </div>
 
-        {/* WARD GIS DATA NOTICE */}
+        {/* DISTRICT TELEMETRY NOTICE */}
         <div className="pt-1 flex items-center gap-1.5 text-[11px] text-gray-400">
           <Info className="w-3.5 h-3.5 text-accent flex-shrink-0" />
-          {selectedLocation.hasWardData ? (
-            <span className="text-emerald-400 font-medium">Hyper-local Ward GIS data is active for this district.</span>
-          ) : (
-            <span>District-level biometeorological data active. Ward-level GIS boundaries are currently in demo mode.</span>
-          )}
+          <span className="text-emerald-400 font-medium">Official district-level meteorological &amp; telemetry monitoring active.</span>
         </div>
       </div>
     </div>

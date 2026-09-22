@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { getRiskColorByCategory } from '../../data/wardGisData';
+import { getRiskColorByCategory } from '../../utils/helpers';
 import { Info, ChevronUp, ChevronDown } from 'lucide-react';
 
 interface Props {

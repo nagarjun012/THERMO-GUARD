@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getRiskColorByCategory } from '../../data/wardGisData';
+import { getRiskColorByCategory } from '../../utils/helpers';
 
 interface Props {
   score: number; // 0 to 100

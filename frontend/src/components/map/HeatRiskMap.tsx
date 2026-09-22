@@ -1,11 +1,10 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Polygon, CircleMarker, Popup, useMap } from 'react-leaflet';
+import React, { useEffect, useState } from 'react';
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { CityData } from '../../types';
 import { useAppStore } from '../../stores/appStore';
 import { useWeather, useThermalStress, useRisk } from '../../hooks/useApi';
-import { generateWardsForLocation, WardGisData, getRiskColorByCategory } from '../../data/wardGisData';
-import { WardDetailPanel } from './WardDetailPanel';
+import { getRiskColorByCategory } from '../../utils/helpers';
 import { MapControls } from './MapControls';
 import { MapLayerSwitcherModal, ActiveMapLayers } from './MapLayerSwitcherModal';
 import { MapLoadingOverlay } from './MapLoadingOverlay';
@@ -55,7 +54,7 @@ export const HeatRiskMap: React.FC<Props> = ({
   center,
   zoom,
   activeLayer = 'all',
-  gisResolution = 'Hyper-Local Ward GIS Risk',
+  gisResolution = 'District / City Level Risk',
   onSelectResolution,
   onOpenGuide,
 }) => {
@@ -71,7 +70,7 @@ export const HeatRiskMap: React.FC<Props> = ({
   const isAllIndiaView = gisResolution === 'All-India District Overview';
 
   // Dynamic zoom & center calculation based on GIS Resolution selection
-  let targetZoom = zoom || 13.5;
+  let targetZoom = zoom || 11.5;
   let targetCenter: [number, number] = currentCenter;
 
   if (isAllIndiaView) {
@@ -81,28 +80,18 @@ export const HeatRiskMap: React.FC<Props> = ({
     targetZoom = 7;
   } else if (gisResolution.includes('City')) {
     targetZoom = 12.8;
-  } else if (gisResolution.includes('Ward')) {
-    targetZoom = 13.5;
   } else if (gisResolution.includes('District')) {
     targetZoom = 11.0;
   }
 
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
-  const [selectedWard, setSelectedWard] = useState<WardGisData | null>(null);
-  const [hoveredWard, setHoveredWard] = useState<WardGisData | null>(null);
   const [isLayerModalOpen, setIsLayerModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Clear selected ward when location shifts so side-panel updates cleanly
-  useEffect(() => {
-    setSelectedWard(null);
-  }, [selectedLocation.lat, selectedLocation.lon]);
-
   // Active Map Layer States
   const [mapLayers, setMapLayers] = useState<ActiveMapLayers>({
     thermalRisk: true,
-    wardBoundaries: false,
     districtBoundaries: true,
     stateBoundaries: true,
     heatPulseGradient: false,
@@ -130,34 +119,14 @@ export const HeatRiskMap: React.FC<Props> = ({
 
   const handleLocateMe = () => {
     detectRealtimeLocation(true);
-    if (onSelectResolution) onSelectResolution('Hyper-Local Ward GIS Risk');
+    if (onSelectResolution) onSelectResolution('District / City Level Risk');
   };
 
   const handleResetView = () => {
     if (mapInstance) {
-      mapInstance.flyTo([selectedLocation.lat, selectedLocation.lon], 13.5, { duration: 1.2 });
+      mapInstance.flyTo([selectedLocation.lat, selectedLocation.lon], 11.5, { duration: 1.2 });
     }
   };
-
-  // Generate 5 Real Ward Geometries dynamically with Real-Time Weather Telemetry
-  const wardDataList = useMemo(() => {
-    const liveTemp = weather?.temperature ?? 38.5;
-    const liveHumidity = weather?.humidity ?? 52;
-    const liveWind = weather?.windSpeed ?? 10.0;
-    const liveSolar = weather?.solarRadiation ?? 750;
-
-    return generateWardsForLocation(
-      selectedLocation.districtName || selectedLocation.name,
-      selectedLocation.stateName || 'Tamil Nadu',
-      selectedLocation.lat,
-      selectedLocation.lon,
-      liveTemp,
-      liveHumidity,
-      liveWind,
-      liveSolar,
-      selectedLocation.localityName
-    );
-  }, [selectedLocation, weather]);
 
   if (lowBandwidthMode) {
     return (
@@ -211,42 +180,45 @@ export const HeatRiskMap: React.FC<Props> = ({
           </div>
         </div>
 
-        {/* Hyper-Local / District Grid */}
+        {/* District Telemetry Grid */}
         <div className="space-y-3">
           <h3 className="text-sm font-bold text-white flex items-center justify-between">
-            <span>Local Wards &amp; Sub-Districts Telemetry</span>
-            <span className="text-xs text-slate-400 font-normal">{wardDataList.length} monitoring points</span>
+            <span>District Monitoring Telemetry Network</span>
+            <span className="text-xs text-slate-400 font-normal">{liveDistricts.slice(0, 6).length} stations</span>
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {wardDataList.map((ward) => (
-              <div
-                key={ward.id}
-                className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-3"
-              >
-                <div>
-                  <h4 className="text-xs font-bold text-white">{ward.wardName}</h4>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    {ward.weather.temperature}°C • {ward.weather.humidity}% RH
-                  </p>
+            {liveDistricts.slice(0, 6).map((dist, idx) => {
+              const riskCategory = (dist.level.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
+              return (
+                <div
+                  key={`${dist.name}-${idx}`}
+                  className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-3"
+                >
+                  <div>
+                    <h4 className="text-xs font-bold text-white">{dist.name} District</h4>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      {dist.temperature}°C • {dist.rh}% RH
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span
+                      className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
+                        riskCategory === 'EXTREME'
+                          ? 'bg-red-500/20 text-red-300 border border-red-500'
+                          : riskCategory === 'HIGH'
+                          ? 'bg-orange-500/20 text-orange-300 border border-orange-500'
+                          : riskCategory === 'MODERATE'
+                          ? 'bg-amber-500/20 text-amber-300 border border-amber-500'
+                          : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500'
+                      }`}
+                    >
+                      HTSS {dist.htss}
+                    </span>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
-                      ward.riskCategory === 'EXTREME'
-                        ? 'bg-red-500/20 text-red-300 border border-red-500'
-                        : ward.riskCategory === 'HIGH'
-                        ? 'bg-orange-500/20 text-orange-300 border border-orange-500'
-                        : ward.riskCategory === 'MODERATE'
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500'
-                    }`}
-                  >
-                    HTSS {ward.htssScore}
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>
@@ -275,146 +247,58 @@ export const HeatRiskMap: React.FC<Props> = ({
         <MapInstanceRegistrar setMap={setMapInstance} />
 
         {/* ========================================================================= */}
-        {/* ALL-INDIA STATE & DISTRICT HIGH-LEVEL REAL HTSS OVERLAY                  */}
+        {/* ALL-INDIA & DISTRICT LEVEL REAL HTSS TELEMETRY OVERLAY                     */}
         {/* ========================================================================= */}
-        {isAllIndiaView &&
-          liveDistricts.map((dist, i) => {
-            const riskCategory = (dist.level.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
-            const color = getRiskColorByCategory(riskCategory);
-            const radius = 8 + dist.htss / 10;
+        {liveDistricts.map((dist, i) => {
+          const riskCategory = (dist.level.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
+          const color = getRiskColorByCategory(riskCategory);
+          const radius = 8 + dist.htss / 10;
 
-            return (
-              <CircleMarker
-                key={`${dist.state}-${dist.name}-${i}`}
-                center={[dist.lat, dist.lon]}
-                radius={radius}
-                pathOptions={{
-                  fillColor: color,
-                  fillOpacity: 0.85,
-                  color: '#ffffff',
-                  weight: 1.8,
-                }}
-              >
-                <Popup className="dark-popup font-sans">
-                  <div className="p-1 min-w-[220px]">
-                    <div className="flex items-center justify-between gap-2 border-b border-dark-600 pb-1 mb-1.5">
-                      <span className="text-[10px] font-black uppercase text-orange-400">{dist.state}</span>
-                      <span
-                        className="text-[10px] font-black uppercase px-2 py-0.5 rounded"
-                        style={{ color, backgroundColor: `${color}20` }}
-                      >
-                        {riskCategory}
-                      </span>
-                    </div>
-
-                    <h4 className="font-extrabold text-sm text-white">{dist.name} District</h4>
-                    <div className="text-xs text-gray-300 mt-1 space-y-0.5">
-                      <div>HTSS Risk Score: <strong style={{ color }}>{dist.htss} / 100</strong></div>
-                      <div>Live Open-Meteo Temp: <strong>{dist.temperature}°C</strong> | RH: <strong>{dist.rh}%</strong></div>
-                      <div>WBGT: <strong>{dist.wbgt}°C</strong> | UTCI: <strong>{dist.utci}°C</strong></div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setIndiaLocation(dist.state, dist.name, dist.lat, dist.lon, true, 'LIVE', undefined, false, true);
-                        if (onSelectResolution) onSelectResolution('Hyper-Local Ward GIS Risk');
-                      }}
-                      className="mt-3 w-full py-1.5 px-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black text-xs rounded-lg shadow-md transition-all cursor-pointer text-center"
+          return (
+            <CircleMarker
+              key={`${dist.state}-${dist.name}-${i}`}
+              center={[dist.lat, dist.lon]}
+              radius={radius}
+              pathOptions={{
+                fillColor: color,
+                fillOpacity: 0.85,
+                color: '#ffffff',
+                weight: 1.8,
+              }}
+            >
+              <Popup className="dark-popup font-sans">
+                <div className="p-1 min-w-[220px]">
+                  <div className="flex items-center justify-between gap-2 border-b border-dark-600 pb-1 mb-1.5">
+                    <span className="text-[10px] font-black uppercase text-orange-400">{dist.state}</span>
+                    <span
+                      className="text-[10px] font-black uppercase px-2 py-0.5 rounded"
+                      style={{ color, backgroundColor: `${color}20` }}
                     >
-                      🎯 Select & View Ward GIS Risk
-                    </button>
+                      {riskCategory}
+                    </span>
                   </div>
-                </Popup>
-              </CircleMarker>
-            );
-          })}
 
-        {/* ========================================================================= */}
-        {/* HYPER-LOCAL WARD POLYGON BOUNDARIES & HEAT RISK OVERLAY FOR ACTIVE CITY   */}
-        {/* ========================================================================= */}
-        {!isAllIndiaView &&
-          mapLayers.wardBoundaries &&
-          wardDataList.map((ward) => {
-            const isSelected = selectedWard?.id === ward.id;
-            const isHovered = hoveredWard?.id === ward.id;
-            const color = getRiskColorByCategory(ward.riskCategory);
+                  <h4 className="font-extrabold text-sm text-white">{dist.name} District</h4>
+                  <div className="text-xs text-gray-300 mt-1 space-y-0.5">
+                    <div>HTSS Risk Score: <strong style={{ color }}>{dist.htss} / 100</strong></div>
+                    <div>Live Open-Meteo Temp: <strong>{dist.temperature}°C</strong> | RH: <strong>{dist.rh}%</strong></div>
+                    <div>WBGT: <strong>{dist.wbgt}°C</strong> | UTCI: <strong>{dist.utci}°C</strong></div>
+                  </div>
 
-            return (
-              <React.Fragment key={ward.id}>
-                {/* WARD POLYGON */}
-                <Polygon
-                  positions={ward.polygon}
-                  pathOptions={{
-                    fillColor: color,
-                    fillOpacity: isSelected ? 0.75 : isHovered ? 0.65 : activeLayer === 'risk' ? 0.65 : 0.45,
-                    color: isSelected ? '#ffffff' : isHovered ? '#fbbf24' : color,
-                    weight: isSelected ? 3.5 : isHovered ? 2.5 : 1.8,
-                    dashArray: isSelected ? '4 4' : undefined,
-                  }}
-                  eventHandlers={{
-                    mouseover: () => setHoveredWard(ward),
-                    mouseout: () => setHoveredWard(null),
-                    click: () => {
-                      setSelectedWard(ward);
-                    },
-                  }}
-                />
-
-                {/* ANIMATED PULSE CENTER CIRCLE FOR HIGH & EXTREME RISK WARDS */}
-                {(mapLayers.heatPulseGradient || activeLayer === 'risk') && (ward.riskCategory === 'HIGH' || ward.riskCategory === 'EXTREME') && (
-                  <CircleMarker
-                    center={[ward.lat, ward.lon]}
-                    radius={ward.htssScore >= 75 ? 24 : 16}
-                    pathOptions={{
-                      fillColor: color,
-                      fillOpacity: 0.35,
-                      color,
-                      weight: 1.5,
+                  <button
+                    onClick={() => {
+                      setIndiaLocation(dist.state, dist.name, dist.lat, dist.lon, true, 'LIVE', undefined, false, true);
+                      if (onSelectResolution) onSelectResolution('District / City Level Risk');
                     }}
-                  />
-                )}
-
-                {/* TEMPERATURE LAYER TELEMETRY BADGE */}
-                {(activeLayer === 'temp' || mapLayers.temperature) && (
-                  <CircleMarker
-                    center={[ward.lat, ward.lon]}
-                    radius={14}
-                    pathOptions={{ fillColor: '#f97316', fillOpacity: 0.9, color: '#ffffff', weight: 2 }}
+                    className="mt-3 w-full py-1.5 px-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black text-xs rounded-lg shadow-md transition-all cursor-pointer text-center"
                   >
-                    <Popup className="dark-popup font-bold text-xs">
-                      🔴 {ward.wardName}: {ward.weather.temperature}°C (Live Telemetry)
-                    </Popup>
-                  </CircleMarker>
-                )}
-
-                {/* WBGT INDEX LAYER BADGE */}
-                {(activeLayer === 'wbgt' || mapLayers.wbgt) && (
-                  <CircleMarker
-                    center={[ward.lat, ward.lon]}
-                    radius={14}
-                    pathOptions={{ fillColor: '#a855f7', fillOpacity: 0.9, color: '#ffffff', weight: 2 }}
-                  >
-                    <Popup className="dark-popup font-bold text-xs">
-                      🟣 {ward.wardName}: WBGT {ward.indices.wbgt}°C (Occupational Strain)
-                    </Popup>
-                  </CircleMarker>
-                )}
-
-                {/* HEAT INDEX LAYER BADGE */}
-                {(activeLayer === 'hi' || mapLayers.heatIndex) && (
-                  <CircleMarker
-                    center={[ward.lat, ward.lon]}
-                    radius={14}
-                    pathOptions={{ fillColor: '#ef4444', fillOpacity: 0.9, color: '#ffffff', weight: 2 }}
-                  >
-                    <Popup className="dark-popup font-bold text-xs">
-                      🔥 {ward.wardName}: Heat Index {ward.indices.heatIndex}°C (Apparent Temperature)
-                    </Popup>
-                  </CircleMarker>
-                )}
-              </React.Fragment>
-            );
-          })}
+                    🎯 Monitor This District
+                  </button>
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
 
         {/* ========================================================================= */}
         {/* LIVE REAL-TIME LOCATION BEACON & HIGH-PRECISION GPS PULSE MARKER          */}
@@ -480,50 +364,6 @@ export const HeatRiskMap: React.FC<Props> = ({
         <MapCameraController center={targetCenter} zoom={targetZoom} />
       </MapContainer>
 
-      {/* HOVER GLASS TOOLTIP CARD FOR WARD VIEW */}
-      {!isAllIndiaView && hoveredWard && !selectedWard && (
-        <div className="absolute top-[68px] left-4 z-[420] pointer-events-none glass-card p-3.5 bg-dark-900/95 backdrop-blur-xl border border-dark-600 shadow-2xl rounded-2xl w-72 animate-fadeIn">
-          <div className="flex items-center justify-between border-b border-dark-700 pb-2 mb-2">
-            <span className="text-[10px] font-black uppercase text-orange-400 tracking-wider">
-              {hoveredWard.wardCode}
-            </span>
-            <span
-              className="text-[10px] font-black uppercase px-2 py-0.5 rounded border"
-              style={{
-                color: getRiskColorByCategory(hoveredWard.riskCategory),
-                borderColor: `${getRiskColorByCategory(hoveredWard.riskCategory)}60`,
-                backgroundColor: `${getRiskColorByCategory(hoveredWard.riskCategory)}15`,
-              }}
-            >
-              {hoveredWard.riskCategory}
-            </span>
-          </div>
-
-          <h4 className="font-black text-sm text-white">{hoveredWard.wardName}</h4>
-          <p className="text-[11px] text-gray-400">{hoveredWard.district}, {hoveredWard.state}</p>
-
-          <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-dark-700/60 text-xs">
-            <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-bold">HTSS Risk</span>
-              <span className="font-mono font-black text-sm text-white">{hoveredWard.htssScore} / 100</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-bold">WBGT</span>
-              <span className="font-mono font-black text-sm text-orange-400">{hoveredWard.indices.wbgt}°C</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-bold">Temperature</span>
-              <span className="font-mono font-bold text-gray-200">{hoveredWard.weather.temperature}°C</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-bold">Humidity</span>
-              <span className="font-mono font-bold text-gray-200">{hoveredWard.weather.humidity}%</span>
-            </div>
-          </div>
-          <p className="text-[9px] text-orange-400 italic mt-2 text-center">Click ward to open detailed risk command center</p>
-        </div>
-      )}
-
       {/* FLOATING MAP CONTROLS TOOLBAR */}
       <MapControls
         onZoomIn={handleZoomIn}
@@ -561,9 +401,6 @@ export const HeatRiskMap: React.FC<Props> = ({
         layers={mapLayers}
         onToggleLayer={handleToggleLayer}
       />
-
-      {/* SLIDING WARD RISK COMMAND CENTER PANEL */}
-      <WardDetailPanel ward={selectedWard} onClose={() => setSelectedWard(null)} />
     </div>
   );
 };

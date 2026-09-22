@@ -3,7 +3,6 @@ import { X, Layers, Check } from 'lucide-react';
 
 export interface ActiveMapLayers {
   thermalRisk: boolean;
-  wardBoundaries: boolean;
   districtBoundaries: boolean;
   stateBoundaries: boolean;
   heatPulseGradient: boolean;
@@ -35,7 +34,6 @@ export const MapLayerSwitcherModal: React.FC<Props> = ({
 
   const layerItems: { key: keyof ActiveMapLayers; label: string; icon: string; group: string }[] = [
     { key: 'thermalRisk', label: 'Thermal Risk Score Layer', icon: '🔥', group: 'Core GIS' },
-    { key: 'wardBoundaries', label: 'Ward Boundaries', icon: '🏙️', group: 'Core GIS' },
     { key: 'districtBoundaries', label: 'District Boundaries', icon: '📍', group: 'Core GIS' },
     { key: 'stateBoundaries', label: 'State Boundaries', icon: '🇮🇳', group: 'Core GIS' },
     { key: 'heatPulseGradient', label: 'Animated Heat Pulse Gradient', icon: '🌀', group: 'Visual Effects' },
