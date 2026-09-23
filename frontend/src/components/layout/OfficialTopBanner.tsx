@@ -8,20 +8,6 @@ export const OfficialTopBanner: React.FC = () => {
   const { language, setLanguage, lowBandwidthMode, toggleLowBandwidthMode } = useAppStore();
   const tr = translations[language];
 
-  const readinessLabel =
-    GOV_CONFIG.agency.portalReadiness === 'OFFICIAL'
-      ? tr.banner.official
-      : GOV_CONFIG.agency.portalReadiness === 'PILOT'
-        ? tr.banner.pilot
-        : tr.banner.preDeployment;
-
-  const readinessColor =
-    GOV_CONFIG.agency.portalReadiness === 'OFFICIAL'
-      ? 'bg-green-700/80 text-green-100 border-green-500/40'
-      : GOV_CONFIG.agency.portalReadiness === 'PILOT'
-        ? 'bg-amber-700/80 text-amber-100 border-amber-500/40'
-        : 'bg-gray-700/80 text-gray-200 border-gray-500/40';
-
   return (
     <>
       {/* Accessibility: skip-to-content link */}
@@ -95,9 +81,7 @@ export const OfficialTopBanner: React.FC = () => {
               <span className="hidden sm:inline">{tr.nav.lowBandwidth}</span>
             </button>
 
-            <span className={`px-2 py-0.5 rounded-md border font-semibold ${readinessColor}`} role="status">
-              {readinessLabel}
-            </span>
+
           </div>
         </div>
       </div>

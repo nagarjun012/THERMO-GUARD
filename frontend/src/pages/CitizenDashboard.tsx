@@ -9,12 +9,10 @@ import { RiskContributionBar } from '../components/dashboard/RiskContributionBar
 import { AlertPanel } from '../components/dashboard/AlertPanel';
 import { RecommendationCard } from '../components/dashboard/RecommendationCard';
 import { HeatwaveProbability } from '../components/dashboard/HeatwaveProbability';
-import { DataProvenancePanel } from '../components/dashboard/DataProvenancePanel';
 import { HTSSDetailPanel } from '../components/dashboard/HTSSDetailPanel';
 import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
 import { OfficialThresholdReconciliation } from '../components/common/OfficialThresholdReconciliation';
 import { useAppStore } from '../stores/appStore';
-import { buildWeatherProvenance } from '../lib/dataProvenance';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
 import { MapPin, RefreshCw, AlertTriangle, Activity, Users, Crosshair } from 'lucide-react';
 
@@ -205,25 +203,6 @@ export const CitizenDashboard: React.FC = () => {
     );
   }, [weather, vulnerabilityProfile]);
 
-  // Compute provenance from weather data
-  const provenance = useMemo(() => {
-    const locName = currentLocation?.displayName || 'Real-time GPS Location';
-    if (!weather || !weather.isLive) {
-      return buildWeatherProvenance({
-        location: locName,
-        apiStatus: 'FAILED',
-        dataType: 'LIVE_WEATHER',
-      });
-    }
-    return buildWeatherProvenance({
-      source: weather.source || 'Open-Meteo',
-      lastUpdated: weather.apiTimestamp || weather.timestamp,
-      location: locName,
-      apiStatus: 'SUCCESS',
-      calculationTime: weather.timestamp,
-      dataType: 'LIVE_WEATHER',
-    });
-  }, [weather, currentLocation?.displayName]);
 
   // Compute full HTSS audit when needed
   const auditData = useMemo(() => {
@@ -295,9 +274,6 @@ export const CitizenDashboard: React.FC = () => {
           <p className="text-xs text-gray-500 font-mono mt-2">
             Mock and synthetic weather data fallbacks are strictly disabled.
           </p>
-          <div className="mt-4">
-            <DataProvenancePanel provenance={provenance} compact={false} />
-          </div>
         </div>
       </div>
     );
@@ -322,17 +298,6 @@ export const CitizenDashboard: React.FC = () => {
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">
               {currentLocation.displayName}
             </h1>
-            <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-cyan-400 mt-1">
-              <span className="font-bold tracking-wide">
-                GPS: {currentLocation.latitude.toFixed(4)}°N, {currentLocation.longitude.toFixed(4)}°E (±{Math.round(currentLocation.accuracy)}m)
-              </span>
-              <span className="text-gray-500">•</span>
-              <span className="text-gray-300">
-                Updated: {new Date(currentLocation.timestamp).toLocaleTimeString()}
-              </span>
-              <span className="text-gray-500">•</span>
-              <span className="text-emerald-400 font-semibold">LIVE DEVICE GEOLOCATION</span>
-            </div>
           </div>
         </div>
 
@@ -347,8 +312,7 @@ export const CitizenDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* DATA PROVENANCE PANEL */}
-      <DataProvenancePanel provenance={provenance} compact={true} />
+      {/* DATA PROVENANCE PANEL — hidden for production */}
 
       {/* PERSONALIZED VULNERABILITY PROFILE SELECTOR */}
       <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-800/80 border border-white/10 shadow-lg">

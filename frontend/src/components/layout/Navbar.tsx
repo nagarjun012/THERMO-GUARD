@@ -9,8 +9,6 @@ import {
   Info,
   BookOpen,
   ShieldAlert,
-  User,
-  Shield,
   LogOut,
   ArrowRightLeft,
   HeartPulse,
@@ -110,42 +108,8 @@ export const Navbar: React.FC = () => {
               </div>
             </div>
 
-            {/* ROLE BADGE & AUTH SWITCH CONTROLS */}
+            {/* ROLE BADGE & AUTH SWITCH CONTROLS — hidden for production */}
             <div className="hidden sm:flex items-center gap-2.5">
-              {userRole === 'gov' ? (
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-medium rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300">
-                    <Shield className="w-3.5 h-3.5 text-amber-400" />
-                    <span>GOV PORTAL</span>
-                  </span>
-                  <button
-                    onClick={handleSwitchRole}
-                    type="button"
-                    className="px-2.5 py-1 text-xs font-mono font-medium rounded-lg text-slate-300 border border-slate-700 bg-slate-800 hover:bg-slate-700 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
-                    title="Switch to User Login"
-                  >
-                    <ArrowRightLeft className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Switch to Citizen</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-mono font-medium rounded-lg bg-blue-500/10 border border-blue-500/30 text-blue-300">
-                    <User className="w-3.5 h-3.5 text-blue-400" />
-                    <span>CITIZEN</span>
-                  </span>
-                  <button
-                    onClick={handleSwitchRole}
-                    type="button"
-                    className="px-2.5 py-1 text-xs font-mono font-medium rounded-lg text-slate-300 border border-slate-700 bg-slate-800 hover:bg-slate-700 hover:text-white transition-colors flex items-center gap-1.5 cursor-pointer"
-                    title="Switch to Government Login"
-                  >
-                    <ArrowRightLeft className="w-3.5 h-3.5 text-slate-400" />
-                    <span>Switch to Gov</span>
-                  </button>
-                </div>
-              )}
-
               <button
                 onClick={handleLogout}
                 type="button"
