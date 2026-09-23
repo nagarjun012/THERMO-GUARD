@@ -23,6 +23,9 @@ export const Header: React.FC = () => {
 
   const fetchRealtimeLocation = () => {
     setGpsNotice(null);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('thermo:refresh-location'));
+    }
     detectRealtimeLocation(true, setIsLocating, (msg) => {
       setGpsNotice(msg);
       setTimeout(() => setGpsNotice(null), 8000);

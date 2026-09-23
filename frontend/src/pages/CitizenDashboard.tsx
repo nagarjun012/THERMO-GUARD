@@ -1,5 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { useWeather, useThermalStress, useRisk, useAlerts } from '../hooks/useApi';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { apiService } from '../services/api';
+import { resolveLocationFromCoords } from '../services/locationService';
 import { ThermalStressGauge } from '../components/dashboard/ThermalStressGauge';
 import { WeatherCard } from '../components/dashboard/WeatherCard';
 import { ThermalIndexCard } from '../components/dashboard/ThermalIndexCard';
@@ -14,16 +16,143 @@ import { OfficialThresholdReconciliation } from '../components/common/OfficialTh
 import { useAppStore } from '../stores/appStore';
 import { buildWeatherProvenance } from '../lib/dataProvenance';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
-import { MapPin, RefreshCw, AlertTriangle, Activity, Users } from 'lucide-react';
+import { MapPin, RefreshCw, AlertTriangle, Activity, Users, Crosshair } from 'lucide-react';
+
+export interface CurrentDashboardLocation {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  timestamp: number;
+  displayName: string;
+}
 
 export const CitizenDashboard: React.FC = () => {
-  const { selectedLocation, vulnerabilityProfile, setVulnerabilityProfile, locationPermissionDenied, isManualSelection } = useAppStore();
-  const { data: weather, isLoading: wLoading, isError: wError } = useWeather();
-  const { data: thermal, isLoading: tLoading, isError: tError } = useThermalStress();
-  const { data: risk, isLoading: rLoading, isError: rError } = useRisk();
-  const { data: alerts, isLoading: aLoading } = useAlerts();
+  const { vulnerabilityProfile, setVulnerabilityProfile, userRole } = useAppStore();
+  const [currentLocation, setCurrentLocation] = useState<CurrentDashboardLocation | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'locating' | 'ready' | 'unavailable'>('locating');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
-  const { userRole } = useAppStore();
+
+  const [isLocatingFresh, setIsLocatingFresh] = useState(false);
+
+  // Authoritative real-time browser Geolocation request
+  const requestFreshLocation = useCallback(() => {
+    setIsLocatingFresh(true);
+    setLocationStatus((prev) => (prev === 'ready' ? 'ready' : 'locating'));
+    setErrorMessage(null);
+
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setIsLocatingFresh(false);
+      setLocationStatus('unavailable');
+      setErrorMessage('Geolocation API is not supported by your browser.');
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        setIsLocatingFresh(false);
+        const { latitude, longitude, accuracy } = pos.coords;
+        try {
+          const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
+          const freshLocation: CurrentDashboardLocation = {
+            latitude,
+            longitude,
+            accuracy,
+            timestamp: pos.timestamp || Date.now(),
+            displayName: resolved.displayName || `${resolved.district}, ${resolved.state}`,
+          };
+          setCurrentLocation(freshLocation);
+          setLocationStatus('ready');
+
+          // Keep Map and appStore synchronized with the user's real verified browser position
+          useAppStore.getState().setIndiaLocation(
+            resolved.state,
+            resolved.district,
+            latitude,
+            longitude,
+            true,
+            'LIVE',
+            resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
+            true,
+            false
+          );
+        } catch (err) {
+          const freshLocation: CurrentDashboardLocation = {
+            latitude,
+            longitude,
+            accuracy,
+            timestamp: pos.timestamp || Date.now(),
+            displayName: `${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E`,
+          };
+          setCurrentLocation(freshLocation);
+          setLocationStatus('ready');
+        }
+      },
+      (err) => {
+        setIsLocatingFresh(false);
+        console.warn('Dashboard browser geolocation error:', err);
+        setCurrentLocation(null);
+        setLocationStatus('unavailable');
+        if (err.code === 1) {
+          setErrorMessage('Location permission denied — enable browser location access in your address bar.');
+        } else if (err.code === 2) {
+          setErrorMessage('Position unavailable from device GPS sensor.');
+        } else if (err.code === 3) {
+          setErrorMessage('Location request timed out. Please click "Use My Location" to retry.');
+        } else {
+          setErrorMessage('Current location unavailable — enable browser location access.');
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0, // Always request fresh coordinates, never cached
+      }
+    );
+  }, []);
+
+  // Request fresh location on component mount
+  useEffect(() => {
+    requestFreshLocation();
+  }, [requestFreshLocation]);
+
+  // Listen for "Use My Location" trigger from Header or other controls
+  useEffect(() => {
+    const handler = () => {
+      requestFreshLocation();
+    };
+    window.addEventListener('thermo:refresh-location', handler);
+    return () => window.removeEventListener('thermo:refresh-location', handler);
+  }, [requestFreshLocation]);
+
+  // Weather query strictly using fresh real-time coordinates (never hardcoded or default)
+  const { data: weather, isLoading: wLoading, isError: wError } = useQuery({
+    queryKey: ['dashboard-weather', currentLocation?.latitude, currentLocation?.longitude],
+    queryFn: () => apiService.getWeather(currentLocation!.latitude, currentLocation!.longitude),
+    enabled: !!currentLocation,
+    staleTime: 30000,
+  });
+
+  const { data: thermal, isLoading: tLoading, isError: tError } = useQuery({
+    queryKey: ['dashboard-thermal', currentLocation?.latitude, currentLocation?.longitude],
+    queryFn: () => apiService.getThermalStress(currentLocation!.latitude, currentLocation!.longitude),
+    enabled: !!currentLocation,
+    staleTime: 30000,
+  });
+
+  const { data: risk, isLoading: rLoading, isError: rError } = useQuery({
+    queryKey: ['dashboard-risk', currentLocation?.latitude, currentLocation?.longitude],
+    queryFn: () => apiService.getRisk(currentLocation!.latitude, currentLocation!.longitude),
+    enabled: !!currentLocation,
+    staleTime: 30000,
+  });
+
+  const { data: alerts, isLoading: aLoading } = useQuery({
+    queryKey: ['dashboard-alerts', currentLocation?.latitude, currentLocation?.longitude],
+    queryFn: () => apiService.getAlerts(currentLocation!.latitude, currentLocation!.longitude),
+    enabled: !!currentLocation,
+    staleTime: 30000,
+  });
 
   // Compute personalized thermal risk dynamically based on selected demographic vulnerability profile
   const activeThermal = useMemo(() => {
@@ -39,9 +168,10 @@ export const CitizenDashboard: React.FC = () => {
 
   // Compute provenance from weather data
   const provenance = useMemo(() => {
+    const locName = currentLocation?.displayName || 'Real-time GPS Location';
     if (!weather || !weather.isLive) {
       return buildWeatherProvenance({
-        location: selectedLocation.name,
+        location: locName,
         apiStatus: 'FAILED',
         dataType: 'LIVE_WEATHER',
       });
@@ -49,12 +179,12 @@ export const CitizenDashboard: React.FC = () => {
     return buildWeatherProvenance({
       source: weather.source || 'Open-Meteo',
       lastUpdated: weather.apiTimestamp || weather.timestamp,
-      location: selectedLocation.name,
+      location: locName,
       apiStatus: 'SUCCESS',
       calculationTime: weather.timestamp,
       dataType: 'LIVE_WEATHER',
     });
-  }, [weather, selectedLocation.name]);
+  }, [weather, currentLocation?.displayName]);
 
   // Compute full HTSS audit when needed
   const auditData = useMemo(() => {
@@ -68,11 +198,47 @@ export const CitizenDashboard: React.FC = () => {
     );
   }, [weather, thermal]);
 
+  // If locating or location is unavailable, DO NOT show fake or previously stored location
+  if (locationStatus === 'locating' || !currentLocation) {
+    if (locationStatus === 'unavailable') {
+      return (
+        <div className="max-w-7xl mx-auto px-4 py-24 flex flex-col items-center justify-center text-center space-y-4">
+          <div className="p-8 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 max-w-lg shadow-[0_0_30px_rgba(245,158,11,0.15)] space-y-3">
+            <MapPin className="w-12 h-12 mx-auto text-amber-400 animate-bounce" />
+            <h2 className="text-xl font-black font-mono tracking-wider text-white">CURRENT LOCATION UNAVAILABLE</h2>
+            <p className="text-sm text-gray-300 font-mono">
+              {errorMessage || 'Current location unavailable — enable browser location access.'}
+            </p>
+            <p className="text-xs text-gray-500 font-mono">
+              THERMOS strictly requires real-time device geolocation. Mock, cached, and assumed coordinates are prohibited.
+            </p>
+            <div className="pt-2">
+              <button
+                onClick={requestFreshLocation}
+                className="skeuo-btn skeuo-btn-emerald px-5 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 mx-auto cursor-pointer"
+              >
+                <Crosshair className="w-4 h-4" />
+                <span>Enable / Retry Location Access</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="max-w-7xl mx-auto px-4 py-24 flex flex-col items-center justify-center text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-orange-400 animate-spin" />
+        <p className="font-mono text-sm text-gray-300">Acquiring current browser GPS coordinates...</p>
+      </div>
+    );
+  }
+
   if (wLoading || tLoading || rLoading || aLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-24 flex flex-col items-center justify-center text-center space-y-4">
         <RefreshCw className="w-8 h-8 text-orange-400 animate-spin" />
-        <p className="font-mono text-sm text-gray-300">Fetching live weather telemetry from Open-Meteo...</p>
+        <p className="font-mono text-sm text-gray-300">Fetching live weather telemetry for {currentLocation.displayName}...</p>
       </div>
     );
   }
@@ -85,7 +251,7 @@ export const CitizenDashboard: React.FC = () => {
           <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-red-400" />
           <h2 className="text-2xl font-black font-mono tracking-wider text-red-400">DATA UNAVAILABLE</h2>
           <p className="text-sm text-gray-300 font-mono mt-3">
-            Unable to retrieve verified live telemetry from Open-Meteo API for {selectedLocation.name}.
+            Unable to retrieve verified live telemetry from Open-Meteo API for {currentLocation.displayName}.
           </p>
           <p className="text-xs text-gray-500 font-mono mt-2">
             Mock and synthetic weather data fallbacks are strictly disabled.
@@ -115,36 +281,42 @@ export const CitizenDashboard: React.FC = () => {
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">
-              {selectedLocation.name}
+              {currentLocation.displayName}
             </h1>
             <div className="flex flex-wrap items-center gap-2 text-xs font-mono text-cyan-400 mt-1">
-              <span className="font-bold tracking-wide">LIVE WEATHER — Open-Meteo</span>
+              <span className="font-bold tracking-wide">
+                GPS: {currentLocation.latitude.toFixed(4)}°N, {currentLocation.longitude.toFixed(4)}°E (±{Math.round(currentLocation.accuracy)}m)
+              </span>
               <span className="text-gray-500">•</span>
               <span className="text-gray-300">
-                Updated: {weather.apiTimestamp || weather.timestamp}
+                Updated: {new Date(currentLocation.timestamp).toLocaleTimeString()}
               </span>
+              <span className="text-gray-500">•</span>
+              <span className="text-emerald-400 font-semibold">LIVE DEVICE GEOLOCATION</span>
             </div>
           </div>
         </div>
 
-        {/* ONLY DISPLAY REAL-TIME BADGE UPON VERIFIED SUCCESSFUL API RESPONSE */}
-        {weather.isLive && (
-          <span className="skeuo-pill px-3.5 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2 text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-            <span>LIVE TELEMETRY</span>
-          </span>
-        )}
-      </div>
+        {/* USE MY LOCATION / REFRESH TACTILE BUTTON & REAL-TIME BADGE */}
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={requestFreshLocation}
+            disabled={isLocatingFresh}
+            className="skeuo-btn skeuo-btn-emerald px-3.5 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+            title="Request fresh browser GPS reading"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isLocatingFresh ? 'animate-spin' : ''}`} />
+            <span>Use My Location</span>
+          </button>
 
-      {/* LOCATION PERMISSION NOTICE IF DENIED */}
-      {locationPermissionDenied && !isManualSelection && (
-        <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center gap-3 text-amber-300 text-xs font-mono">
-          <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
-          <span>
-            Location access is blocked in your browser. Showing last verified coordinates. Enable location access in your address bar for live GPS precision.
-          </span>
+          {weather.isLive && (
+            <span className="skeuo-pill px-3.5 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2 text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+              <span>LIVE TELEMETRY</span>
+            </span>
+          )}
         </div>
-      )}
+      </div>
 
       {/* DATA PROVENANCE PANEL */}
       <DataProvenancePanel provenance={provenance} compact={true} />
