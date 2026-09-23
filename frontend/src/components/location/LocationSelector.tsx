@@ -12,7 +12,7 @@ export const LocationSelector: React.FC = () => {
     selectedLocation.stateName || 'Tamil Nadu'
   );
   const [selectedDistrict, setSelectedDistrict] = useState<string>(
-    selectedLocation.districtName || 'Karur'
+    selectedLocation.districtName || selectedLocation.name.split(',')[0] || ''
   );
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
@@ -94,7 +94,7 @@ export const LocationSelector: React.FC = () => {
   // Select Search Item
   const handleSelectSearchResult = (res: any) => {
     const stName = res.stateName || res.state || selectedLocation.stateName || 'Tamil Nadu';
-    const distName = res.districtName || res.district || selectedLocation.districtName || 'Karur';
+    const distName = res.districtName || res.district || selectedLocation.districtName || res.name || '';
     const locName = res.localityName || undefined;
 
     setSelectedState(stName);

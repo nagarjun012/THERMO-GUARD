@@ -178,22 +178,15 @@ export function detectRealtimeLocation(
 ): void {
   if (onLocatingChange) onLocatingChange(true);
 
-  const curLoc = useAppStore.getState().selectedLocation;
-  const isDefaultFallback =
-    !curLoc.isGpsLive &&
-    (curLoc.districtName === 'Karur' ||
-      curLoc.name.includes('Karur') ||
-      curLoc.name.includes('Aravakkurichchi'));
-
   if (forcePrompt) {
     useAppStore.getState().setIsManualSelection(false);
-  } else if (useAppStore.getState().isManualSelection && !isDefaultFallback) {
+  } else if (useAppStore.getState().isManualSelection) {
     if (onLocatingChange) onLocatingChange(false);
     return;
   }
 
   // Fast Client IP Geolocation (<200ms quick-fill before browser GPS resolves)
-  if (!useAppStore.getState().isManualSelection || isDefaultFallback) {
+  if (!useAppStore.getState().isManualSelection) {
     fetch('https://api.bigdatacloud.net/data/reverse-geocode-client', { signal: AbortSignal.timeout(2500) })
       .then(async (res) => {
         if (!res.ok) return;
@@ -203,7 +196,7 @@ export function detectRealtimeLocation(
           typeof data.longitude === 'number' &&
           !useAppStore.getState().selectedLocation.isGpsLive
         ) {
-          const resolved = await resolveLocationFromCoords(data.latitude, data.longitude, true);
+          const resolved = await resolveLocationFromCoords(data.latitude, data.longitude, false);
           if (!useAppStore.getState().selectedLocation.isGpsLive && !useAppStore.getState().isManualSelection) {
             useAppStore.getState().setIndiaLocation(
               resolved.state,
@@ -213,7 +206,7 @@ export function detectRealtimeLocation(
               true,
               'LIVE',
               resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
-              true,
+              false,
               false
             );
           }

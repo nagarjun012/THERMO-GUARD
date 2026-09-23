@@ -100,8 +100,7 @@ const getInitialLocation = (): Location => {
         typeof parsed.lat === 'number' &&
         typeof parsed.lon === 'number' &&
         parsed.name &&
-        !parsed.name.includes('Detecting live') &&
-        !parsed.name.includes('Aravakkurichchi')
+        !parsed.name.includes('Detecting live')
       ) {
         return parsed;
       }
@@ -110,7 +109,7 @@ const getInitialLocation = (): Location => {
     console.warn('Error reading stored location:', e);
   }
 
-  // Baseline fallback (isGpsLive false until verified by live GPS or user selection)
+  // Baseline initial location
   return {
     lat: 10.9601,
     lon: 78.0766,
@@ -128,10 +127,6 @@ const getInitialIsManual = (): boolean => {
     const saved = localStorage.getItem('thermosafe_user_location');
     if (saved) {
       const parsed = JSON.parse(saved);
-      // Stale fallbacks or previous corrupted taluk names should not block real-time GPS
-      if (parsed?.name?.includes('Aravakkurichchi') || parsed?.name === 'Karur, Tamil Nadu') {
-        return false;
-      }
       return parsed?.isManual === true;
     }
   } catch {}
