@@ -159,7 +159,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                 placeholder="e.g. Citizen, Farmer, Field Worker..."
                 value={userName}
                 onChange={(e) => setUserName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-dark-950/80 border border-white/10 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-dark-900 border border-white/20 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-500 transition-colors shadow-inner"
+                style={{ backgroundColor: '#090d16', color: '#ffffff' }}
               />
             </div>
 
@@ -209,9 +210,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     onChange={(e) => { setGovId(e.target.value); setGovError(''); }}
                     required
                     placeholder="e.g. NDMA-HQ-882"
-                    className={`w-full px-4 py-3 rounded-xl bg-dark-950/80 border text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-500 transition-colors ${
-                      govError ? 'border-red-500/50' : 'border-white/10'
+                    className={`w-full px-4 py-3 rounded-xl bg-dark-900 border text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-500 transition-colors shadow-inner ${
+                      govError ? 'border-red-500/50' : 'border-white/20'
                     }`}
+                    style={{ backgroundColor: '#090d16', color: '#fcd34d' }}
                   />
                   <Shield className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
                 </div>
@@ -228,9 +230,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                     onChange={(e) => { setPasscode(e.target.value); setGovError(''); }}
                     required
                     placeholder="Enter official passcode..."
-                    className={`w-full px-4 py-3 rounded-xl bg-dark-950/80 border text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-500 transition-colors ${
-                      govError ? 'border-red-500/50' : 'border-white/10'
+                    className={`w-full px-4 py-3 rounded-xl bg-dark-900 border text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-500 transition-colors shadow-inner ${
+                      govError ? 'border-red-500/50' : 'border-white/20'
                     }`}
+                    style={{ backgroundColor: '#090d16', color: '#fcd34d' }}
                   />
                   <Lock className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
                 </div>

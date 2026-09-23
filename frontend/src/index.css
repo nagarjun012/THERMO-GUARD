@@ -290,3 +290,14 @@ code, pre, .font-mono {
 .dark-popup .leaflet-popup-close-button:hover {
   color: #ffffff !important;
 }
+
+/* Browser autofill reset for dark theme */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #090d16 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
