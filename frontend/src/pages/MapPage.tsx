@@ -78,9 +78,9 @@ export const MapPage: React.FC = () => {
                 onChange={(e) => setGisResolution(e.target.value)}
                 className="bg-dark-800 text-white font-semibold rounded-lg px-2 py-1 border border-dark-600 text-xs focus:outline-none focus:border-accent cursor-pointer"
               >
-                <option value="District / City Level Risk">🌆 District / City Level</option>
-                <option value="All-India District Overview">🌐 All-India Districts</option>
-                <option value="State / Regional Level Risk">🗺️ State / Regional Level</option>
+                <option value="District / City Level Risk">District / City Level</option>
+                <option value="All-India District Overview">All-India Districts</option>
+                <option value="State / Regional Level Risk">State / Regional Level</option>
               </select>
             </div>
 

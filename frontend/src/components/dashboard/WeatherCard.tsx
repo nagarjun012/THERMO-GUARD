@@ -25,8 +25,8 @@ export const WeatherCard: React.FC<Props> = ({ title, value, unit, icon, color =
         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">
           {title}
         </h3>
-        <div className="neu-well p-2 rounded-xl text-center flex items-center justify-center">
-          <Icon className="w-4 h-4" style={{ color, filter: `drop-shadow(0 0 6px ${color}80)` }} />
+        <div className="neu-well p-2 rounded-lg text-center flex items-center justify-center">
+          <Icon className="w-4 h-4" style={{ color }} />
         </div>
       </div>
 

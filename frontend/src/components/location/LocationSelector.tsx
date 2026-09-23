@@ -146,7 +146,7 @@ export const LocationSelector: React.FC = () => {
           <Search className="w-4 h-4 text-gray-400 absolute left-3 pointer-events-none" />
           <input
             type="text"
-            placeholder="🔍 Search State, UT or District (e.g. Chennai, Coimbatore, Delhi)..."
+            placeholder="Search State, UT or District (e.g. Chennai, Coimbatore, Delhi)..."
             value={searchQuery}
             onChange={handleSearchChange}
             onFocus={() => setIsSearchFocused(true)}
@@ -245,13 +245,14 @@ export const LocationSelector: React.FC = () => {
 
           {/* DATA STATUS BADGE */}
           <span
-            className={`px-2.5 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider ${
+            className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider inline-flex items-center gap-1.5 ${
               dataStatus === 'LIVE'
-                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                : 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/40'
+                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
             }`}
           >
-            {dataStatus === 'LIVE' ? '🔴 LIVE DATA' : '⚡ DEMO / SIMULATED DATA'}
+            {dataStatus === 'LIVE' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_6px_#34d399]" />}
+            {dataStatus === 'LIVE' ? 'LIVE TELEMETRY' : 'SIMULATED DATA'}
           </span>
         </div>
 

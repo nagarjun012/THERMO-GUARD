@@ -11,8 +11,8 @@ export const AlertPanel: React.FC<Props> = ({ alerts }) => {
   if (!alerts || alerts.length === 0) {
     return (
       <div className="neu-card p-6 flex flex-col items-center justify-center text-center h-full min-h-[200px]">
-        <div className="w-12 h-12 rounded-2xl neu-well flex items-center justify-center mb-3">
-          <Info className="w-6 h-6 text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.7)]" />
+        <div className="w-10 h-10 rounded-xl neu-well flex items-center justify-center mb-3">
+          <Info className="w-5 h-5 text-emerald-400" />
         </div>
         <h3 className="text-sm font-bold text-gray-200 uppercase font-mono">No Active Warnings</h3>
         <p className="text-xs text-gray-400 mt-1">Thermal indices are within safe physiological limits.</p>
@@ -25,34 +25,30 @@ export const AlertPanel: React.FC<Props> = ({ alerts }) => {
       case 'red':
         return {
           bg: 'bg-red-500/10',
-          border: 'border-red-500/50',
+          border: 'border-red-500/40',
           icon: Skull,
           color: 'text-red-400',
-          glow: 'shadow-[0_0_15px_rgba(239,68,68,0.2)]',
         };
       case 'orange':
         return {
           bg: 'bg-orange-500/10',
-          border: 'border-orange-500/50',
+          border: 'border-orange-500/40',
           icon: Flame,
           color: 'text-orange-400',
-          glow: 'shadow-[0_0_15px_rgba(249,115,22,0.2)]',
         };
       case 'yellow':
         return {
           bg: 'bg-yellow-500/10',
-          border: 'border-yellow-500/50',
+          border: 'border-yellow-500/40',
           icon: AlertTriangle,
           color: 'text-yellow-400',
-          glow: 'shadow-[0_0_15px_rgba(234,179,8,0.2)]',
         };
       default:
         return {
           bg: 'bg-blue-500/10',
-          border: 'border-blue-500/50',
+          border: 'border-blue-500/40',
           icon: AlertCircle,
           color: 'text-blue-400',
-          glow: 'shadow-[0_0_15px_rgba(59,130,246,0.2)]',
         };
     }
   };
@@ -61,7 +57,7 @@ export const AlertPanel: React.FC<Props> = ({ alerts }) => {
     <div className="neu-card p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
         <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-          <AlertTriangle className="w-4 h-4 text-yellow-400 drop-shadow-[0_0_6px_rgba(250,204,21,0.6)]" />
+          <AlertTriangle className="w-4 h-4 text-yellow-400" />
           Active Heat Alerts ({alerts.length})
         </h3>
         <span className="skeuo-pill px-2 py-0.5 text-[10px] font-mono text-yellow-400 border border-yellow-500/30">
@@ -79,7 +75,7 @@ export const AlertPanel: React.FC<Props> = ({ alerts }) => {
                 key={alert.id}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`p-4 rounded-xl border ${styles.bg} ${styles.border} ${styles.glow} transition-all`}
+                className={`p-4 rounded-xl border ${styles.bg} ${styles.border} transition-colors`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex items-center gap-2">

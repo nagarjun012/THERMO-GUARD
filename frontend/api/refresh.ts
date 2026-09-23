@@ -44,7 +44,7 @@ function verifySessionToken(token: string): UserSession | null {
   const providedBuf = Buffer.from(providedSignature);
   const expectedBuf = Buffer.from(expectedSignature);
   if (providedBuf.length !== expectedBuf.length) return null;
-  if (!crypto.timingSafeEqual(providedBuf, expectedBuf)) return null;
+  if (!crypto.timingSafeEqual(new Uint8Array(providedBuf), new Uint8Array(expectedBuf))) return null;
 
   try {
     const raw = base64UrlDecode(encodedPayload);

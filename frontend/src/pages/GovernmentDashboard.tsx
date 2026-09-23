@@ -87,19 +87,19 @@ export const GovernmentDashboard: React.FC = () => {
           {auditData && (
             <button
               onClick={() => setIsAuditOpen(true)}
-              className="skeuo-btn px-4 py-2.5 text-xs font-mono font-bold text-gray-300 rounded-xl flex items-center gap-2 hover:text-white transition-colors"
+              className="skeuo-btn px-3.5 py-2 text-xs font-mono font-medium text-slate-300 rounded-lg flex items-center gap-2 hover:text-white transition-colors"
               title="Inspect authoritative HTSS calculation formula breakdown"
             >
-              <Calculator className="w-4 h-4 text-emerald-400" />
+              <Calculator className="w-3.5 h-3.5 text-emerald-400" />
               <span>HTSS Audit View</span>
             </button>
           )}
 
           <button
             onClick={() => alert('Emergency Heatwave Protocol Broadcast Triggered to State Authorities.')}
-            className="skeuo-btn skeuo-btn-danger btn-shimmer px-5 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl shadow-[0_4px_16px_rgba(220,38,38,0.55)] flex items-center gap-2"
+            className="skeuo-btn skeuo-btn-danger px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2"
           >
-            <Siren className="w-4 h-4 animate-bounce" />
+            <Siren className="w-3.5 h-3.5 text-white" />
             <span>Broadcast Emergency Alert</span>
           </button>
         </div>

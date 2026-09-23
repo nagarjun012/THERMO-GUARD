@@ -72,13 +72,10 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
               />
 
               {/* SUNKEN ILLUMINATED WELL */}
-              <div className="neu-well p-3.5 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+              <div className="neu-well p-3 rounded-xl flex items-center justify-center shrink-0">
                 <Icon
-                  className="w-6 h-6"
-                  style={{
-                    color: card.color,
-                    filter: `drop-shadow(0 0 6px ${card.color}80)`,
-                  }}
+                  className="w-5 h-5"
+                  style={{ color: card.color }}
                 />
               </div>
 

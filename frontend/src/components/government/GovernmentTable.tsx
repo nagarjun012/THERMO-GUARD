@@ -80,8 +80,8 @@ export const GovernmentTable: React.FC<Props> = () => {
       <div className="glass-specular p-4 sm:p-5 border-b border-white/10 bg-dark-950/40 space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl neu-well text-emerald-400">
-              <Radio className="w-5 h-5 animate-pulse drop-shadow-[0_0_8px_rgba(16,185,129,0.8)]" />
+            <div className="p-2.5 rounded-xl neu-well text-emerald-400">
+              <Radio className="w-5 h-5" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2.5">
@@ -269,7 +269,7 @@ export const GovernmentTable: React.FC<Props> = () => {
                 title={`Fetch real-time Open-Meteo weather for all districts in ${selectedStateFilter}`}
               >
                 <Zap className={`w-3.5 h-3.5 ${isSyncingState === selectedStateFilter ? 'animate-spin' : 'text-emerald-200'}`} />
-                <span>{isSyncingState === selectedStateFilter ? 'Syncing...' : `⚡ Sync ${selectedStateFilter} Live`}</span>
+                <span>{isSyncingState === selectedStateFilter ? 'Syncing...' : `Sync ${selectedStateFilter} Live`}</span>
               </button>
             )}
           </div>
@@ -469,7 +469,7 @@ export const GovernmentTable: React.FC<Props> = () => {
                           }}
                           className="skeuo-btn skeuo-btn-dark px-2.5 py-1 rounded-lg text-[11px] font-mono transition flex items-center gap-1 mx-auto hover:border-orange-500/50"
                         >
-                          <Cpu className="w-3 h-3 text-orange-400" /> Inspect 🔍
+                          <Cpu className="w-3 h-3 text-orange-400" /> Inspect
                         </button>
                       </td>
                     </tr>

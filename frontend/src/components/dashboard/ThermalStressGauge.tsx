@@ -83,21 +83,20 @@ export const ThermalStressGauge: React.FC<Props> = ({ score, level }) => {
           {/* SKEUOMORPHIC CENTER DIAL HUB */}
           <div className="absolute flex flex-col items-center justify-center text-center pointer-events-none">
             <span
-              className="text-5xl font-black font-mono tracking-tight drop-shadow-[0_2px_10px_rgba(0,0,0,0.9)]"
+              className="text-5xl font-black font-mono tracking-tight"
               style={{ color }}
             >
               {score}
             </span>
-            <span className="text-[10px] font-mono text-gray-500 uppercase -mt-1 font-bold">
+            <span className="text-[10px] font-mono text-gray-400 uppercase tracking-widest mt-0.5 font-bold">
               Score / 100
             </span>
             <div
-              className="skeuo-pill mt-2 px-3 py-0.5 text-xs font-black uppercase tracking-widest border shadow-lg"
+              className="skeuo-pill mt-2.5 px-3 py-0.5 text-xs font-black uppercase tracking-wider border shadow-md"
               style={{
                 color,
-                borderColor: `${color}60`,
-                backgroundColor: `${color}18`,
-                textShadow: `0 0 12px ${color}80`,
+                borderColor: `${color}40`,
+                backgroundColor: `${color}14`,
               }}
             >
               {level}

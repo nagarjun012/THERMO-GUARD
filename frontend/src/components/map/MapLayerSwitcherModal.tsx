@@ -1,5 +1,20 @@
 import React from 'react';
-import { X, Layers, Check } from 'lucide-react';
+import {
+  X,
+  Layers,
+  Check,
+  Flame,
+  MapPin,
+  Map,
+  Activity,
+  Sun,
+  Thermometer,
+  Droplets,
+  ThermometerSun,
+  CloudRain,
+  Wind,
+  Zap,
+} from 'lucide-react';
 
 export interface ActiveMapLayers {
   thermalRisk: boolean;
@@ -32,20 +47,20 @@ export const MapLayerSwitcherModal: React.FC<Props> = ({
 }) => {
   if (!isOpen) return null;
 
-  const layerItems: { key: keyof ActiveMapLayers; label: string; icon: string; group: string }[] = [
-    { key: 'thermalRisk', label: 'Thermal Risk Score Layer', icon: '🔥', group: 'Core GIS' },
-    { key: 'districtBoundaries', label: 'District Boundaries', icon: '📍', group: 'Core GIS' },
-    { key: 'stateBoundaries', label: 'State Boundaries', icon: '🇮🇳', group: 'Core GIS' },
-    { key: 'heatPulseGradient', label: 'Animated Heat Pulse Gradient', icon: '🌀', group: 'Visual Effects' },
+  const layerItems: { key: keyof ActiveMapLayers; label: string; icon: React.ComponentType<{ className?: string }>; group: string }[] = [
+    { key: 'thermalRisk', label: 'Thermal Risk Score Layer', icon: Flame, group: 'Core GIS' },
+    { key: 'districtBoundaries', label: 'District Boundaries', icon: MapPin, group: 'Core GIS' },
+    { key: 'stateBoundaries', label: 'State Boundaries', icon: Map, group: 'Core GIS' },
+    { key: 'heatPulseGradient', label: 'Animated Heat Pulse Gradient', icon: Activity, group: 'Visual Effects' },
 
-    { key: 'wbgt', label: 'WBGT Layer (Occupational)', icon: '☀️', group: 'Thermal Indices' },
-    { key: 'heatIndex', label: 'Heat Index Layer (Apparent Temp)', icon: '🌡️', group: 'Thermal Indices' },
-    { key: 'humidex', label: 'Humidex Layer (Discomfort)', icon: '💧', group: 'Thermal Indices' },
+    { key: 'wbgt', label: 'WBGT Layer (Occupational)', icon: Sun, group: 'Thermal Indices' },
+    { key: 'heatIndex', label: 'Heat Index Layer (Apparent Temp)', icon: Thermometer, group: 'Thermal Indices' },
+    { key: 'humidex', label: 'Humidex Layer (Discomfort)', icon: Droplets, group: 'Thermal Indices' },
 
-    { key: 'temperature', label: 'Air Temperature (°C)', icon: '🔴', group: 'Weather Telemetry' },
-    { key: 'humidity', label: 'Relative Humidity (%)', icon: '🔵', group: 'Weather Telemetry' },
-    { key: 'wind', label: 'Wind Speed (km/h)', icon: '💨', group: 'Weather Telemetry' },
-    { key: 'solarRadiation', label: 'Solar Radiation (W/m²)', icon: '⚡', group: 'Weather Telemetry' },
+    { key: 'temperature', label: 'Air Temperature (°C)', icon: ThermometerSun, group: 'Weather Telemetry' },
+    { key: 'humidity', label: 'Relative Humidity (%)', icon: CloudRain, group: 'Weather Telemetry' },
+    { key: 'wind', label: 'Wind Speed (km/h)', icon: Wind, group: 'Weather Telemetry' },
+    { key: 'solarRadiation', label: 'Solar Radiation (W/m²)', icon: Zap, group: 'Weather Telemetry' },
   ];
 
   const groups = Array.from(new Set(layerItems.map((item) => item.group)));
@@ -75,6 +90,7 @@ export const MapLayerSwitcherModal: React.FC<Props> = ({
                 .filter((item) => item.group === grp)
                 .map((item) => {
                   const isActive = layers[item.key];
+                  const Icon = item.icon;
                   return (
                     <button
                       key={item.key}
@@ -86,7 +102,7 @@ export const MapLayerSwitcherModal: React.FC<Props> = ({
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <span className="text-sm">{item.icon}</span>
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-orange-400' : 'text-gray-400'}`} />
                         <span>{item.label}</span>
                       </div>
                       <div

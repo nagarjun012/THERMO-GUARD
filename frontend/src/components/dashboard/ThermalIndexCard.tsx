@@ -30,12 +30,11 @@ export const ThermalIndexCard: React.FC<Props> = ({ title, value, max, unit, cat
           </div>
         </div>
         <span
-          className="skeuo-pill px-2.5 py-0.5 text-[10px] font-black uppercase tracking-wider border shadow-md"
+          className="skeuo-pill px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider border"
           style={{
             backgroundColor: `${color}15`,
-            borderColor: `${color}40`,
+            borderColor: `${color}35`,
             color,
-            textShadow: `0 0 8px ${color}60`,
           }}
         >
           {category}
@@ -43,17 +42,14 @@ export const ThermalIndexCard: React.FC<Props> = ({ title, value, max, unit, cat
       </div>
 
       {/* SUNKEN RECESSED INDICATOR CHANNEL */}
-      <div className="neu-well h-3 rounded-full overflow-hidden p-[2px] mt-2">
+      <div className="neu-well h-2.5 rounded-full overflow-hidden p-[1px] mt-2">
         <div
-          className="h-full rounded-full transition-all duration-1000 shadow-sm relative overflow-hidden"
+          className="h-full rounded-full transition-all duration-700 relative overflow-hidden"
           style={{
             width: `${percentage}%`,
             backgroundColor: color,
-            boxShadow: `0 0 10px ${color}90`,
           }}
-        >
-          <div className="absolute inset-0 bg-gradient-to-b from-white/30 to-transparent pointer-events-none" />
-        </div>
+        />
       </div>
     </div>
   );

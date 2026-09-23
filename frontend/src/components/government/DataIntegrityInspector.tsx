@@ -43,8 +43,8 @@ export const DataIntegrityInspector: React.FC<Props> = ({ district, isOpen, onCl
         {/* HEADER */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl neu-well text-orange-400">
-              <Cpu className="w-6 h-6 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]" />
+            <div className="p-2.5 rounded-xl neu-well text-orange-400">
+              <Cpu className="w-5 h-5" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">

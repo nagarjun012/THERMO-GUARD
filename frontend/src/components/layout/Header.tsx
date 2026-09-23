@@ -64,7 +64,7 @@ export const Header: React.FC = () => {
         {/* NEUMORPHIC SUNKEN SEARCH WELL */}
         <div className="relative flex-1 max-w-md">
           <form onSubmit={handleSearchSubmit} className="neu-well flex items-center px-3 py-1.5 transition-all focus-within:ring-2 focus-within:ring-accent/50">
-            <Search className="w-4 h-4 text-orange-400 shrink-0 mr-2.5 drop-shadow-[0_0_4px_rgba(249,115,22,0.6)]" />
+            <Search className="w-4 h-4 text-orange-400 shrink-0 mr-2.5" />
             <input
               type="text"
               value={search}
@@ -123,7 +123,7 @@ export const Header: React.FC = () => {
               </>
             ) : (
               <>
-                <Crosshair className="w-3.5 h-3.5 drop-shadow-[0_0_4px_rgba(255,255,255,0.8)]" />
+                <Crosshair className="w-3.5 h-3.5" />
                 <span>Use My Location</span>
               </>
             )}

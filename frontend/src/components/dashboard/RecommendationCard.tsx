@@ -11,7 +11,7 @@ export const RecommendationCard: React.FC<Props> = ({ risk }) => {
     <div className="neu-card p-6 h-full flex flex-col">
       <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
         <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-          <Icons.ShieldCheck className="w-4 h-4 text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.6)]" />
+          <Icons.ShieldCheck className="w-4 h-4 text-emerald-400" />
           Clinical Advisory
         </h3>
         <span className="skeuo-pill px-2 py-0.5 text-[10px] font-mono text-gray-400">

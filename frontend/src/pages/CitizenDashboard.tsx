@@ -110,8 +110,8 @@ export const CitizenDashboard: React.FC = () => {
       {/* HEADER ROW */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
         <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-2xl neu-well text-orange-400">
-            <MapPin className="w-5 h-5 drop-shadow-[0_0_6px_rgba(249,115,22,0.8)]" />
+          <div className="p-2.5 rounded-xl neu-well text-orange-400">
+            <MapPin className="w-5 h-5" />
           </div>
           <div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">
@@ -129,9 +129,9 @@ export const CitizenDashboard: React.FC = () => {
 
         {/* ONLY DISPLAY REAL-TIME BADGE UPON VERIFIED SUCCESSFUL API RESPONSE */}
         {weather.isLive && (
-          <span className="skeuo-pill px-3.5 py-1.5 text-xs font-black tracking-wider flex items-center gap-2 text-emerald-400 border-emerald-500/40 bg-emerald-500/10 shadow-[0_0_15px_rgba(16,185,129,0.25)]">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            🟢 LIVE
+          <span className="skeuo-pill px-3.5 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2 text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+            <span>LIVE TELEMETRY</span>
           </span>
         )}
       </div>
@@ -353,7 +353,8 @@ export const CitizenDashboard: React.FC = () => {
             className="text-[10px] font-mono text-gray-500 hover:text-orange-400 transition-colors px-3 py-1.5 rounded-lg border border-white/5 hover:border-orange-500/20 cursor-pointer"
             type="button"
           >
-            🔍 Open HTSS Audit View
+            <Activity className="w-3 h-3 inline-block mr-1 text-orange-400/80" />
+            Open HTSS Audit View
           </button>
         </div>
       )}
