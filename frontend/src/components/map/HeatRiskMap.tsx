@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { CityData } from '../../types';
 import { useAppStore } from '../../stores/appStore';
 import { useWeather, useThermalStress, useRisk } from '../../hooks/useApi';
 import { getRiskColorByCategory } from '../../utils/helpers';
+import { computeRealThermalRisk } from '../../utils/thermalEngine';
 import { MapControls } from './MapControls';
 import { MapLayerSwitcherModal, ActiveMapLayers } from './MapLayerSwitcherModal';
 import { MapLoadingOverlay } from './MapLoadingOverlay';
@@ -73,6 +74,63 @@ export const HeatRiskMap: React.FC<Props> = ({
   const { data: thermal } = useThermalStress();
   const { data: risk } = useRisk();
   const { districts: liveDistricts } = useAllIndiaLiveTelemetry();
+
+  // Resolve current active location's real-time HTSS score, category and color (matching Map Legend)
+  const currentLocationHtss = useMemo(() => {
+    // 1. Check if selected location matches a live district in liveDistricts
+    const matchedDistrict = liveDistricts.find((d) => {
+      if (selectedLocation.districtName && d.name.toLowerCase() === selectedLocation.districtName.toLowerCase()) {
+        return true;
+      }
+      const distLat = Math.abs(d.lat - selectedLocation.lat);
+      const distLon = Math.abs(d.lon - selectedLocation.lon);
+      return distLat < 0.15 && distLon < 0.15;
+    });
+
+    let score = matchedDistrict?.htss ?? thermal?.htss ?? risk?.score;
+
+    // 2. If no score yet, compute using thermal engine if weather is available
+    if ((score === undefined || score === null) && weather && typeof weather.temperature === 'number' && typeof weather.humidity === 'number') {
+      const computed = computeRealThermalRisk(
+        weather.temperature,
+        weather.humidity,
+        weather.windSpeed || 1,
+        weather.solarRadiation || 0
+      );
+      score = computed.htss;
+    }
+
+    const finalScore = score !== undefined && score !== null ? Math.round(score) : null;
+
+    // Derive category according to Risk Level Legend (0-24: LOW, 25-49: MODERATE, 50-74: HIGH, 75-100: EXTREME)
+    let category: 'LOW' | 'MODERATE' | 'HIGH' | 'EXTREME' = 'LOW';
+    if (finalScore !== null) {
+      if (finalScore >= 75) category = 'EXTREME';
+      else if (finalScore >= 50) category = 'HIGH';
+      else if (finalScore >= 25) category = 'MODERATE';
+      else category = 'LOW';
+    } else if (thermal?.htssCategory) {
+      const upper = thermal.htssCategory.toUpperCase();
+      if (upper.includes('EXTREME')) category = 'EXTREME';
+      else if (upper.includes('HIGH')) category = 'HIGH';
+      else if (upper.includes('MODERATE')) category = 'MODERATE';
+      else category = 'LOW';
+    } else if (risk?.level) {
+      const upper = risk.level.toUpperCase();
+      if (upper.includes('EXTREME')) category = 'EXTREME';
+      else if (upper.includes('HIGH')) category = 'HIGH';
+      else if (upper.includes('MODERATE')) category = 'MODERATE';
+      else category = 'LOW';
+    }
+
+    const color = getRiskColorByCategory(category);
+
+    return {
+      score: finalScore,
+      category,
+      color,
+    };
+  }, [liveDistricts, selectedLocation, thermal, risk, weather]);
 
   const currentCenter: [number, number] = center || [selectedLocation.lat, selectedLocation.lon];
 
@@ -338,16 +396,16 @@ export const HeatRiskMap: React.FC<Props> = ({
         })}
 
         {/* ========================================================================= */}
-        {/* LIVE REAL-TIME LOCATION BEACON & HIGH-PRECISION GPS PULSE MARKER          */}
+        {/* LIVE REAL-TIME LOCATION BEACON & HTSS RISK LEVEL PULSE MARKER             */}
         {/* ========================================================================= */}
         <CircleMarker
           center={[selectedLocation.lat, selectedLocation.lon]}
           radius={30}
           pathOptions={{
-            fillColor: '#3b82f6',
-            fillOpacity: 0.2,
-            color: '#2563eb',
-            weight: 2,
+            fillColor: currentLocationHtss.color,
+            fillOpacity: 0.22,
+            color: currentLocationHtss.color,
+            weight: 2.5,
             dashArray: '4 4',
           }}
         />
@@ -355,7 +413,7 @@ export const HeatRiskMap: React.FC<Props> = ({
           center={[selectedLocation.lat, selectedLocation.lon]}
           radius={11}
           pathOptions={{
-            fillColor: '#2563eb',
+            fillColor: currentLocationHtss.color,
             fillOpacity: 1,
             color: '#ffffff',
             weight: 3.5,
@@ -363,16 +421,37 @@ export const HeatRiskMap: React.FC<Props> = ({
         >
           <Popup className="dark-popup font-sans" autoPan={true}>
             <div className="p-2 min-w-[240px]">
-              <div className="flex items-center gap-1.5 text-blue-400 font-black text-[11px] mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
-                📍 REAL-TIME LOCATION (GOOGLE SATELLITE)
+              <div className="flex items-center justify-between gap-2 border-b border-dark-600 pb-1.5 mb-1.5">
+                <div className="flex items-center gap-1.5 font-black text-[11px]" style={{ color: currentLocationHtss.color }}>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full animate-ping"
+                    style={{ backgroundColor: currentLocationHtss.color }}
+                  />
+                  📍 ACTIVE LOCATION
+                </div>
+                <span
+                  className="text-[10px] font-black uppercase px-2 py-0.5 rounded"
+                  style={{
+                    color: currentLocationHtss.color,
+                    backgroundColor: `${currentLocationHtss.color}20`,
+                    border: `1px solid ${currentLocationHtss.color}40`,
+                  }}
+                >
+                  {currentLocationHtss.category}
+                </span>
               </div>
               <div className="font-extrabold text-sm text-white font-sans leading-tight">
                 {selectedLocation.name}
               </div>
-              <div className="text-[11px] text-gray-300 font-mono mt-1.5 bg-dark-800/80 p-1.5 rounded border border-dark-600">
+              <div className="text-[11px] text-gray-300 font-mono mt-1.5 bg-dark-800/80 p-1.5 rounded border border-dark-600 space-y-0.5">
                 <div>Latitude: <strong>{selectedLocation.lat.toFixed(5)}°N</strong></div>
                 <div>Longitude: <strong>{selectedLocation.lon.toFixed(5)}°E</strong></div>
+                {currentLocationHtss.score !== null && (
+                  <div className="pt-1 mt-1 border-t border-dark-700/60 flex items-center justify-between">
+                    <span>HTSS Risk Score:</span>
+                    <strong style={{ color: currentLocationHtss.color }}>{currentLocationHtss.score} / 100</strong>
+                  </div>
+                )}
               </div>
               {weather && (
                 <div className="mt-2 text-xs text-gray-200 border-t border-dark-600 pt-1.5 space-y-0.5">
@@ -390,8 +469,15 @@ export const HeatRiskMap: React.FC<Props> = ({
                   </div>
                 </div>
               )}
-              <div className="mt-2.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 rounded text-center">
-                ✅ 100% GENUINE GOOGLE SATELLITE POSITION
+              <div
+                className="mt-2.5 text-[10px] font-bold px-2 py-1 rounded text-center border"
+                style={{
+                  color: currentLocationHtss.color,
+                  backgroundColor: `${currentLocationHtss.color}15`,
+                  borderColor: `${currentLocationHtss.color}40`,
+                }}
+              >
+                ● {currentLocationHtss.category} RISK LEVEL ({currentLocationHtss.score !== null ? `HTSS ${currentLocationHtss.score}` : 'ACTIVE'})
               </div>
             </div>
           </Popup>
