@@ -33,16 +33,12 @@ export const CitizenDashboard: React.FC = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
 
-  const [isLocatingFresh, setIsLocatingFresh] = useState(false);
-
   // Authoritative real-time browser Geolocation request
   const requestFreshLocation = useCallback(() => {
-    setIsLocatingFresh(true);
     setLocationStatus((prev) => (prev === 'ready' ? 'ready' : 'locating'));
     setErrorMessage(null);
 
     if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      setIsLocatingFresh(false);
       setLocationStatus('unavailable');
       setErrorMessage('Geolocation API is not supported by your browser.');
       return;
@@ -50,7 +46,6 @@ export const CitizenDashboard: React.FC = () => {
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
-        setIsLocatingFresh(false);
         const { latitude, longitude, accuracy } = pos.coords;
         try {
           const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
@@ -89,7 +84,6 @@ export const CitizenDashboard: React.FC = () => {
         }
       },
       (err) => {
-        setIsLocatingFresh(false);
         console.warn('Dashboard browser geolocation error:', err);
         setCurrentLocation(null);
         setLocationStatus('unavailable');
@@ -297,18 +291,8 @@ export const CitizenDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* USE MY LOCATION / REFRESH TACTILE BUTTON & REAL-TIME BADGE */}
+        {/* REAL-TIME BADGE */}
         <div className="flex items-center gap-2.5">
-          <button
-            onClick={requestFreshLocation}
-            disabled={isLocatingFresh}
-            className="skeuo-btn skeuo-btn-emerald px-3.5 py-1.5 text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-            title="Request fresh browser GPS reading"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${isLocatingFresh ? 'animate-spin' : ''}`} />
-            <span>Use My Location</span>
-          </button>
-
           {weather.isLive && (
             <span className="skeuo-pill px-3.5 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2 text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />

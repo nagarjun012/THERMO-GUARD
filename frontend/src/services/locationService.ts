@@ -44,41 +44,34 @@ export async function resolveLocationFromCoords(
       const data = await res.json();
       const adminList: any[] = data.localityInfo?.administrative || [];
 
-      const talukObj = adminList.find(
-        (a) =>
-          a.description?.toLowerCase().includes('taluk') ||
-          a.description?.toLowerCase().includes('town') ||
-          a.name?.toLowerCase().includes('taluk')
-      );
-
       const distObj = adminList.find(
         (a) =>
           a.description?.toLowerCase().includes('district') ||
           a.name?.toLowerCase().includes('district')
       );
 
-      const rawLocality =
-        data.city ||
-        data.locality ||
-        talukObj?.name ||
-        '';
-
+      const rawCity = data.city || '';
       const rawDist = distObj?.name?.replace(/\s+district/i, '').trim() || data.city || '';
       const district = (rawDist || nearest.district).replace(/\s+district/i, '').trim();
       const state = data.principalSubdivision || nearest.state;
 
-      const cleanLocality = rawLocality
-        ? rawLocality.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
+      // Clean city name (do NOT use taluk or village names as locality)
+      const cleanCity = rawCity && rawCity.toLowerCase() !== district.toLowerCase()
+        ? rawCity.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
         : '';
-      const hasLocality = cleanLocality.length > 0 && cleanLocality.toLowerCase() !== district.toLowerCase();
-      const displayName = hasLocality
-        ? `${cleanLocality}, ${district}, ${state}`
+
+      const hasCity = cleanCity.length > 0 &&
+        !cleanCity.toLowerCase().includes('taluk') &&
+        !cleanCity.toLowerCase().includes('aravakkurichchi');
+
+      const displayName = hasCity
+        ? `${cleanCity}, ${district}, ${state}`
         : `${district}, ${state}`;
 
       const resolved: ResolvedLocation = {
         lat,
         lon,
-        locality: hasLocality ? cleanLocality : district,
+        locality: hasCity ? cleanCity : district,
         district,
         state,
         displayName,
@@ -105,15 +98,7 @@ export async function resolveLocationFromCoords(
       const data = await res.json();
       const addr = data.address || {};
 
-      const rawLocality =
-        addr.suburb ||
-        addr.town ||
-        addr.village ||
-        addr.neighbourhood ||
-        addr.residential ||
-        addr.city_district ||
-        addr.city ||
-        '';
+      const rawCity = addr.city || addr.town || '';
 
       let rawDist =
         addr.state_district?.replace(/\s+district/i, '').trim() ||
@@ -124,18 +109,22 @@ export async function resolveLocationFromCoords(
       const district = (rawDist || nearest.district).replace(/\s+district/i, '').trim();
       const state = addr.state || nearest.state;
 
-      const cleanLocality = rawLocality
-        ? rawLocality.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
+      const cleanCity = rawCity && rawCity.toLowerCase() !== district.toLowerCase()
+        ? rawCity.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
         : '';
-      const hasLocality = cleanLocality.length > 0 && cleanLocality.toLowerCase() !== district.toLowerCase();
-      const displayName = hasLocality
-        ? `${cleanLocality}, ${district}, ${state}`
+
+      const hasCity = cleanCity.length > 0 &&
+        !cleanCity.toLowerCase().includes('taluk') &&
+        !cleanCity.toLowerCase().includes('aravakkurichchi');
+
+      const displayName = hasCity
+        ? `${cleanCity}, ${district}, ${state}`
         : `${district}, ${state}`;
 
       const resolved: ResolvedLocation = {
         lat,
         lon,
-        locality: hasLocality ? cleanLocality : district,
+        locality: hasCity ? cleanCity : district,
         district,
         state,
         displayName: displayName || `${district}, ${state}`,
