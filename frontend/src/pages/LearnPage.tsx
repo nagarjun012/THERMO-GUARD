@@ -21,6 +21,14 @@ import {
   Sliders,
   Info,
   Shield,
+  TrendingUp,
+  Bell,
+  Heart,
+  ShieldCheck,
+  Zap,
+  CheckCircle2,
+  Calendar,
+  Layers,
 } from 'lucide-react';
 
 
@@ -74,18 +82,19 @@ export const LearnPage: React.FC = () => {
         const el = document.getElementById(sec.id);
         if (el) {
           const rect = el.getBoundingClientRect();
-          if (rect.top <= 180 && rect.bottom >= 180) {
+          if (rect.top <= 200 && rect.bottom >= 100) {
             setActiveSection(sec.id);
             break;
           }
         }
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const scrollTo = (id: string) => {
+    setActiveSection(id);
     const el = document.getElementById(id);
     if (el) {
       const offset = 140;
@@ -1205,9 +1214,249 @@ export const LearnPage: React.FC = () => {
               Individual risk depends on personal factors like age, physical activity, exposure time, hydration, access to shade, and pre-existing medical conditions. The district score represents <strong>area-level environmental heat risk</strong>, not an individual medical diagnosis.
             </p>
           </div>
+        </section>
 
-          {/* INTERACTIVE CALCULATOR SIMULATOR */}
-          <div id="simulator" className="glass-card p-6 md:p-8 space-y-6 border-accent/40">
+        {/* 72-HOUR MULTI-HORIZON FORECASTS */}
+        <section id="forecast" className="space-y-8">
+          <div className="border-l-4 border-cyan-500 pl-4">
+            <h2 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
+              <TrendingUp className="w-8 h-8 text-cyan-400" /> 72-Hour Multi-Horizon Predictive Modeling
+            </h2>
+            <p className="text-gray-300 text-sm md:text-base mt-1 max-w-3xl">
+              Anticipating dangerous thermal stress hours and days in advance allows schools, hospitals, power utilities, and district disaster authorities to deploy life-saving countermeasures before the heat strikes.
+            </p>
+          </div>
+
+          <div className="glass-card p-6 md:p-8 space-y-6 border-cyan-500/30">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-5 rounded-2xl bg-cyan-950/20 border border-cyan-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold rounded-lg">+24 Hours Horizon</span>
+                  <Zap className="w-4 h-4 text-cyan-400" />
+                </div>
+                <h4 className="text-lg font-bold text-white">Immediate Tactical Prep</h4>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  High-confidence hourly thermal prediction. Triggers mandatory shift adjustments for outdoor laborers and municipal water tanker dispatch.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-blue-950/20 border border-blue-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 bg-blue-500/20 text-blue-300 font-mono text-xs font-bold rounded-lg">+48 Hours Horizon</span>
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                </div>
+                <h4 className="text-lg font-bold text-white">Institutional Action</h4>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  Hospital emergency rooms pre-stock IV saline fluids, ice packs, and set up rapid-cooling beds for expected heatwave cases.
+                </p>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-purple-950/20 border border-purple-500/30 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-1 bg-purple-500/20 text-purple-300 font-mono text-xs font-bold rounded-lg">+72 Hours Horizon</span>
+                  <Layers className="w-4 h-4 text-purple-400" />
+                </div>
+                <h4 className="text-lg font-bold text-white">Macro Strategic Warning</h4>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  State and district disaster managers issue early public notices, coordinate power grids for peak AC usage, and mobilize NGO shade shelters.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-5 bg-dark-800 rounded-xl border border-dark-600 space-y-2">
+              <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Ensemble Weather Science
+              </h4>
+              <p className="text-xs text-gray-300 leading-relaxed">
+                THERMOS blends high-resolution global numerical weather prediction models (including ECMWF, NOAA GFS, and IMD NCMRWF) with local biometeorological physics engines to calculate true Human Thermal Stress (HTSS), not just dry ambient air temperature.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* MULTI-TIER HEAT ALERT SYSTEM */}
+        <section id="alerts" className="space-y-8">
+          <div className="border-l-4 border-red-500 pl-4">
+            <h2 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
+              <Bell className="w-8 h-8 text-red-400" /> Multi-Tier Early Warning & Alert System
+            </h2>
+            <p className="text-gray-300 text-sm md:text-base mt-1 max-w-3xl">
+              Standardized color-coded heat alert levels aligned with National Disaster Management Authority (NDMA) guidelines and IMD protocols for immediate public action.
+            </p>
+          </div>
+
+          <div className="glass-card p-6 md:p-8 space-y-6 border-red-500/30">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div className="p-4 rounded-xl border border-emerald-500/40 bg-emerald-950/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 bg-emerald-500 text-dark-900 font-black text-xs rounded">GREEN</span>
+                  <span className="text-xs font-mono text-emerald-400 font-bold">0-30</span>
+                </div>
+                <h4 className="font-bold text-emerald-300 text-sm">Normal Conditions</h4>
+                <p className="text-[11px] text-gray-300">No special alert. Regular hydration and daily outdoor activities are completely safe.</p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-yellow-500/40 bg-yellow-950/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 bg-yellow-500 text-dark-900 font-black text-xs rounded">YELLOW</span>
+                  <span className="text-xs font-mono text-yellow-400 font-bold">31-60</span>
+                </div>
+                <h4 className="font-bold text-yellow-300 text-sm">Heat Watch</h4>
+                <p className="text-[11px] text-gray-300">Moderate thermal discomfort. Sensitive individuals and elders should avoid extended sun exposure.</p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-orange-500/40 bg-orange-950/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 bg-orange-500 text-dark-900 font-black text-xs rounded">ORANGE</span>
+                  <span className="text-xs font-mono text-orange-400 font-bold">61-75</span>
+                </div>
+                <h4 className="font-bold text-orange-300 text-sm">Heat Alert</h4>
+                <p className="text-[11px] text-gray-300">Severe discomfort. High risk for outdoor laborers. Mandatory shaded rest breaks every hour.</p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-red-500/40 bg-red-950/20 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 bg-red-500 text-white font-black text-xs rounded">RED</span>
+                  <span className="text-xs font-mono text-red-400 font-bold">76-85</span>
+                </div>
+                <h4 className="font-bold text-red-300 text-sm">Severe Warning</h4>
+                <p className="text-[11px] text-gray-300">High probability of heat stroke. No outdoor labor between 11:00 AM and 4:00 PM.</p>
+              </div>
+
+              <div className="p-4 rounded-xl border border-purple-500/50 bg-purple-950/30 space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 bg-purple-600 text-white font-black text-xs rounded">PURPLE</span>
+                  <span className="text-xs font-mono text-purple-300 font-bold">86-100</span>
+                </div>
+                <h4 className="font-bold text-purple-300 text-sm">Emergency Alert</h4>
+                <p className="text-[11px] text-gray-300">Critical disaster emergency. Complete shutdown of outdoor work, emergency cooling centers opened.</p>
+              </div>
+            </div>
+
+            <div className="p-5 bg-dark-800 rounded-xl border border-dark-600 flex flex-col md:flex-row items-center justify-between gap-4 text-xs">
+              <div className="space-y-1">
+                <span className="font-bold text-white text-sm">🚨 Instant Communication Channels</span>
+                <p className="text-gray-300">THERMOS alerts reach citizens via localized web telemetry, emergency banner notices, and SMS broadcasts.</p>
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className="px-3 py-1.5 bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg font-bold">Real-time Push</span>
+                <span className="px-3 py-1.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-lg font-bold">GPS-Targeted</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* DEMOGRAPHIC & OCCUPATIONAL VULNERABILITY */}
+        <section id="vulnerability" className="space-y-8">
+          <div className="border-l-4 border-purple-500 pl-4">
+            <h2 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
+              <Users className="w-8 h-8 text-purple-400" /> Demographic Vulnerability Profiles
+            </h2>
+            <p className="text-gray-300 text-sm md:text-base mt-1 max-w-3xl">
+              Heat affects people differently. THERMOS customizes risk calculations and safety advisories based on physiological vulnerability and occupational exposure.
+            </p>
+          </div>
+
+          <div className="glass-card p-6 md:p-8 space-y-6 border-purple-500/30">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-5 rounded-2xl bg-orange-950/20 border border-orange-500/30 space-y-3">
+                <div className="text-2xl">👷</div>
+                <h4 className="text-base font-bold text-white">Outdoor Laborers</h4>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  Construction, farm, and delivery workers generate internal metabolic heat while absorbing direct solar radiation. High risk of rapid heat exhaustion.
+                </p>
+                <div className="pt-2 border-t border-orange-500/20 text-[11px] font-bold text-orange-400">
+                  Priority: 15-min hourly shaded rest & electrolyte replenishment
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-blue-950/20 border border-blue-500/30 space-y-3">
+                <div className="text-2xl">👵</div>
+                <h4 className="text-base font-bold text-white">Elderly Citizens (65+)</h4>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  Age reduces natural sweat gland response and thirst sensitivity. Chronic hypertension, diabetes, and cardiovascular medications amplify risk.
+                </p>
+                <div className="pt-2 border-t border-blue-500/20 text-[11px] font-bold text-blue-400">
+                  Priority: Keep indoor temperatures cool; drink water regularly
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-pink-950/20 border border-pink-500/30 space-y-3">
+                <div className="text-2xl">🤰</div>
+                <h4 className="text-base font-bold text-white">Mothers & Children</h4>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  Infants and pregnant women have higher metabolic rates and dehydrate much faster. Children produce more heat relative to body surface area.
+                </p>
+                <div className="pt-2 border-t border-pink-500/20 text-[11px] font-bold text-pink-400">
+                  Priority: Strict indoor stay during peak daylight hours
+                </div>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 space-y-3">
+                <div className="text-2xl">🚶</div>
+                <h4 className="text-base font-bold text-white">General Public</h4>
+                <p className="text-xs text-gray-300 leading-relaxed">
+                  Office workers, students, and commuters exposed to urban heat island effects during transit or outdoor errands.
+                </p>
+                <div className="pt-2 border-t border-emerald-500/20 text-[11px] font-bold text-emerald-400">
+                  Priority: Carry water bottles and wear breathable cottons
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SAFETY & ACTIONS */}
+        <section id="safety" className="space-y-8">
+          <div className="border-l-4 border-emerald-500 pl-4">
+            <h2 className="text-2xl md:text-4xl font-extrabold text-white tracking-tight flex items-center gap-3">
+              <ShieldCheck className="w-8 h-8 text-emerald-400" /> Heatwave Safety Guidelines & First Aid
+            </h2>
+            <p className="text-gray-300 text-sm md:text-base mt-1 max-w-3xl">
+              Proven clinical practices, hydration protocols, and emergency steps to safeguard yourself, your family, and your coworkers during high-heat periods.
+            </p>
+          </div>
+
+          <div className="glass-card p-6 md:p-8 space-y-6 border-emerald-500/30">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="p-5 rounded-2xl bg-dark-800 border border-dark-600 space-y-3">
+                <div className="flex items-center gap-2 text-emerald-400 font-bold text-base">
+                  <Droplets className="w-5 h-5" /> 1. Hydration Protocols
+                </div>
+                <ul className="text-xs text-gray-300 space-y-2 list-disc pl-4">
+                  <li>Drink 250ml of water every 20 minutes even if not feeling thirsty.</li>
+                  <li>Include ORS packets, coconut water, lemon juice, or buttermilk.</li>
+                  <li>Avoid caffeinated beverages, alcohol, and high-sugar sodas that promote dehydration.</li>
+                </ul>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-dark-800 border border-dark-600 space-y-3">
+                <div className="flex items-center gap-2 text-yellow-400 font-bold text-base">
+                  <Sun className="w-5 h-5" /> 2. Sun & Clothing Habits
+                </div>
+                <ul className="text-xs text-gray-300 space-y-2 list-disc pl-4">
+                  <li>Avoid direct exposure during peak solar hours (11:00 AM – 4:00 PM).</li>
+                  <li>Wear loose-fitting, light-colored, lightweight breathable cotton clothing.</li>
+                  <li>Use wide-brim hats, sunglasses, and umbrellas when commuting outdoors.</li>
+                </ul>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-dark-800 border border-dark-600 space-y-3">
+                <div className="flex items-center gap-2 text-red-400 font-bold text-base">
+                  <Heart className="w-5 h-5" /> 3. Emergency First Aid (108/112)
+                </div>
+                <ul className="text-xs text-gray-300 space-y-2 list-disc pl-4">
+                  <li><strong>Heat Exhaustion:</strong> Move to shade, apply wet cloths to neck & armpits, sip cool water.</li>
+                  <li><strong>Heat Stroke (Emergency):</strong> Hot red skin, confusion, fainting. Call 108 immediately and cool body with ice packs/fans.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* INTERACTIVE CALCULATOR SIMULATOR */}
+        <section id="simulator" className="space-y-6">
+          <div className="glass-card p-6 md:p-8 space-y-6 border-accent/40">
             <div className="flex items-center gap-3">
               <Sliders className="w-7 h-7 text-accent" />
               <div>
@@ -1306,9 +1555,11 @@ export const LearnPage: React.FC = () => {
               </div>
             </div>
           </div>
+        </section>
 
-          {/* FREQUENTLY ASKED QUESTIONS (FAQ) */}
-          <div id="faq" className="glass-card p-6 md:p-8 space-y-6">
+        {/* FREQUENTLY ASKED QUESTIONS (FAQ) */}
+        <section id="faq" className="space-y-6">
+          <div className="glass-card p-6 md:p-8 space-y-6">
             <div className="flex items-center gap-3">
               <HelpCircle className="w-7 h-7 text-accent" />
               <div>
@@ -1336,9 +1587,11 @@ export const LearnPage: React.FC = () => {
               ))}
             </div>
           </div>
+        </section>
 
-          {/* GLOSSARY SECTION */}
-          <div id="glossary" className="glass-card p-6 md:p-8 space-y-6">
+        {/* GLOSSARY SECTION */}
+        <section id="glossary" className="space-y-6">
+          <div className="glass-card p-6 md:p-8 space-y-6">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <BookOpen className="w-7 h-7 text-accent" />
@@ -1369,39 +1622,39 @@ export const LearnPage: React.FC = () => {
               ))}
             </div>
           </div>
-
-          {/* BACK TO TOP BUTTON */}
-          {showBackToTop && (
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="fixed bottom-6 right-6 p-3 bg-accent text-white rounded-full shadow-2xl hover:bg-orange-600 transition-all z-50 transform hover:scale-110"
-              title="Back to top"
-            >
-              <ArrowUp className="w-5 h-5" />
-            </button>
-          )}
-
-          {/* 13. FINAL SIMPLE EXPLANATION & CTA */}
-          <div className="glass-card p-6 md:p-8 border-accent/40 bg-gradient-to-r from-dark-800 via-dark-700 to-dark-800 text-center space-y-6">
-            <div className="max-w-2xl mx-auto space-y-3">
-              <span className="text-3xl">💡</span>
-              <h4 className="text-xl font-bold text-white">Think of it this way:</h4>
-              <p className="text-sm text-gray-200 leading-relaxed">
-                India is vast with diverse microclimates. Heat conditions differ drastically across regions. THERMOS evaluates heat-related risk at the local district and city level, showing where the danger is highest. That makes heat warnings and resource planning targeted, actionable, and life-saving.
-              </p>
-            </div>
-
-            <div className="pt-2">
-              <button
-                onClick={() => navigate('/map')}
-                className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-extrabold rounded-full text-base shadow-xl shadow-orange-500/30 transition-all transform hover:scale-105"
-              >
-                Explore the Live Risk Map <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
         </section>
+
+        {/* FINAL SIMPLE EXPLANATION & CTA */}
+        <div className="glass-card p-6 md:p-8 border-accent/40 bg-gradient-to-r from-dark-800 via-dark-700 to-dark-800 text-center space-y-6">
+          <div className="max-w-2xl mx-auto space-y-3">
+            <span className="text-3xl">💡</span>
+            <h4 className="text-xl font-bold text-white">Think of it this way:</h4>
+            <p className="text-sm text-gray-200 leading-relaxed">
+              India is vast with diverse microclimates. Heat conditions differ drastically across regions. THERMOS evaluates heat-related risk at the local district and city level, showing where the danger is highest. That makes heat warnings and resource planning targeted, actionable, and life-saving.
+            </p>
+          </div>
+
+          <div className="pt-2">
+            <button
+              onClick={() => navigate('/map')}
+              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-extrabold rounded-full text-base shadow-xl shadow-orange-500/30 transition-all transform hover:scale-105"
+            >
+              Explore the Live Risk Map <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* BACK TO TOP BUTTON */}
+      {showBackToTop && (
+        <button
+          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          className="fixed bottom-6 right-6 p-3 bg-accent text-white rounded-full shadow-2xl hover:bg-orange-600 transition-all z-50 transform hover:scale-110"
+          title="Back to top"
+        >
+          <ArrowUp className="w-5 h-5" />
+        </button>
+      )}
     </div>
   );
 };
