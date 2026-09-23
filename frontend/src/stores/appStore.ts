@@ -109,14 +109,14 @@ const getInitialLocation = (): Location => {
     console.warn('Error reading stored location:', e);
   }
 
-  // Baseline initial location
+  // Baseline initial location (auto-updated by real-time GPS / IP pipeline on load)
   return {
-    lat: 10.9601,
-    lon: 78.0766,
-    name: 'Karur, Tamil Nadu',
+    lat: 13.0827,
+    lon: 80.2707,
+    name: 'Chennai, Tamil Nadu',
     stateName: 'Tamil Nadu',
-    districtName: 'Karur',
-    localityName: 'Karur',
+    districtName: 'Chennai',
+    localityName: 'Chennai',
     dataStatus: 'LIVE',
     isGpsLive: false,
   };
