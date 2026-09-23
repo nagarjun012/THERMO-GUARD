@@ -8,16 +8,14 @@ import { HeatRiskMap } from '../components/map/HeatRiskMap';
 import { MapLegend } from '../components/map/MapLegend';
 import { StateRiskBar } from '../components/charts/StateRiskBar';
 import { VulnerabilityRadar } from '../components/charts/VulnerabilityRadar';
-import { DataProvenancePanel } from '../components/dashboard/DataProvenancePanel';
 import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
-import { buildWeatherProvenance } from '../lib/dataProvenance';
 import { computeFullAudit } from '../lib/htssEngine';
 import { Siren, Calculator } from 'lucide-react';
 
 export const GovernmentDashboard: React.FC = () => {
   const { selectedLocation } = useAppStore();
   const { data: apiData } = useGovernmentDashboard();
-  const { districts, counters, isLoading, progress, lastFetchedIso } = useGovPortalData();
+  const { districts, counters, isLoading, progress } = useGovPortalData();
   const [isAuditOpen, setIsAuditOpen] = useState(false);
 
   // Socioeconomic vulnerability baseline reference data (Census / NITI Aayog Index)
@@ -40,19 +38,6 @@ export const GovernmentDashboard: React.FC = () => {
       level: d.riskCategory,
     }))
     .slice(0, 5);
-
-  // Provenance for government command center
-  const provenance = useMemo(() => {
-    const isSuccess = counters.successfulCount > 0;
-    return buildWeatherProvenance({
-      source: 'Open-Meteo Batch Telemetry',
-      lastUpdated: lastFetchedIso,
-      location: 'National / 788 Administrative Districts',
-      apiStatus: isSuccess ? 'SUCCESS' : isLoading ? 'PARTIAL' : 'FAILED',
-      calculationTime: lastFetchedIso || new Date().toISOString(),
-      dataType: 'LIVE_WEATHER',
-    });
-  }, [lastFetchedIso, counters.successfulCount, isLoading]);
 
   // Compute HTSS audit data for highest-risk district or first verified district
   const auditTarget = useMemo(() => {
@@ -103,11 +88,6 @@ export const GovernmentDashboard: React.FC = () => {
             <span>Broadcast Emergency Alert</span>
           </button>
         </div>
-      </div>
-
-      {/* DATA PROVENANCE ACCORDION */}
-      <div className="mb-4">
-        <DataProvenancePanel provenance={provenance} compact={true} />
       </div>
 
       {/* DYNAMIC LIVE OVERVIEW CARDS */}
