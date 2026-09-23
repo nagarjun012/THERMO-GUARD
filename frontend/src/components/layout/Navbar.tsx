@@ -10,17 +10,13 @@ import {
   BookOpen,
   ShieldAlert,
   LogOut,
-  ArrowRightLeft,
   HeartPulse,
 } from 'lucide-react';
 import { useAppStore } from '../../stores/appStore';
 import { TRANSLATIONS } from '../../i18n/translations';
-import { LoginModal } from '../auth/LoginModal';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [switchTargetRole, setSwitchTargetRole] = useState<'user' | 'gov'>('user');
   const navigate = useNavigate();
   const { userRole, logout, language } = useAppStore();
   const t = TRANSLATIONS[language];
@@ -43,13 +39,6 @@ export const Navbar: React.FC = () => {
           { to: '/learn', label: t.nav.learn, icon: BookOpen },
           { to: '/about', label: t.nav.about, icon: Info },
         ];
-
-  // Role switch requires re-authentication via LoginModal
-  const handleSwitchRole = () => {
-    const targetRole = userRole === 'gov' ? 'user' : 'gov';
-    setSwitchTargetRole(targetRole);
-    setIsModalOpen(true);
-  };
 
   const handleLogout = () => {
     logout();
@@ -136,20 +125,6 @@ export const Navbar: React.FC = () => {
         {/* MOBILE MENU DROPDOWN */}
         {isOpen && (
           <div className="md:hidden glass-modal border-t border-white/10 px-4 pt-3 pb-5 space-y-3 animate-fadeIn">
-            {/* MOBILE ROLE BADGE */}
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <span className="text-xs font-mono font-bold text-gray-400">CURRENT SESSION:</span>
-              <span
-                className={`px-2.5 py-1 text-xs font-mono font-bold rounded-lg border ${
-                  userRole === 'gov'
-                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-                    : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
-                }`}
-              >
-                {userRole === 'gov' ? 'GOV LOGIN' : 'USER LOGIN'}
-              </span>
-            </div>
-
             {links.map((item) => (
               <NavLink
                 key={item.to}
@@ -168,38 +143,22 @@ export const Navbar: React.FC = () => {
               </NavLink>
             ))}
 
-            <div className="pt-2 border-t border-white/10 flex gap-2">
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  handleSwitchRole();
-                }}
-                className="flex-1 py-2 px-3 text-xs font-mono font-bold rounded-xl border border-white/10 bg-white/5 text-gray-200 flex items-center justify-center gap-2"
-              >
-                <ArrowRightLeft className="w-3.5 h-3.5" />
-                <span>Switch to {userRole === 'gov' ? 'User Login' : 'Gov Login'}</span>
-              </button>
+            <div className="pt-2 border-t border-white/10">
               <button
                 onClick={() => {
                   setIsOpen(false);
                   handleLogout();
                 }}
-                className="p-2 text-xs font-mono font-bold rounded-xl border border-red-500/20 bg-red-500/10 text-red-300"
+                className="w-full py-2.5 px-3 text-xs font-mono font-bold rounded-xl border border-red-500/20 bg-red-500/10 text-red-300 flex items-center justify-center gap-2"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />
+                <span>Logout</span>
               </button>
             </div>
           </div>
         )}
       </nav>
-
-      {/* LOGIN MODAL */}
-      <LoginModal
-        isOpen={isModalOpen}
-        initialRole={switchTargetRole}
-        onClose={() => setIsModalOpen(false)}
-      />
     </>
   );
 };

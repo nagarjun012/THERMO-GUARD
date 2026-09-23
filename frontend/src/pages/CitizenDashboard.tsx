@@ -14,7 +14,7 @@ import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
 import { OfficialThresholdReconciliation } from '../components/common/OfficialThresholdReconciliation';
 import { useAppStore } from '../stores/appStore';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
-import { MapPin, RefreshCw, AlertTriangle, Activity, Users, Crosshair } from 'lucide-react';
+import { MapPin, AlertTriangle, Users } from 'lucide-react';
 
 export interface CurrentDashboardLocation {
   latitude: number;
@@ -25,7 +25,7 @@ export interface CurrentDashboardLocation {
 }
 
 export const CitizenDashboard: React.FC = () => {
-  const { selectedLocation, vulnerabilityProfile, setVulnerabilityProfile, userRole } = useAppStore();
+  const { selectedLocation, vulnerabilityProfile, setVulnerabilityProfile } = useAppStore();
   const [currentLocation, setCurrentLocation] = useState<CurrentDashboardLocation | null>(() => {
     const s = useAppStore.getState().selectedLocation;
     if (s && s.lat && s.lon && s.name && !s.name.includes('Detecting live')) {
