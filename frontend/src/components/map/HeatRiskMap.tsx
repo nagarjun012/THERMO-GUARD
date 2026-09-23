@@ -265,11 +265,12 @@ export const HeatRiskMap: React.FC<Props> = ({
         style={{ height: '100%', width: '100%', background: '#030712' }}
         zoomControl={false}
       >
-        {/* Genuine OpenStreetMap Standard Tile Layer */}
+        {/* Google Satellite Hybrid Theme (High-Resolution Satellite Imagery + Labels) */}
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maxZoom={19}
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
+          url="https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+          subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+          maxZoom={20}
+          attribution='&copy; <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer">Google Maps Satellite</a>'
         />
 
         <MapCameraController center={targetCenter} zoom={targetZoom} />
@@ -364,7 +365,7 @@ export const HeatRiskMap: React.FC<Props> = ({
             <div className="p-2 min-w-[240px]">
               <div className="flex items-center gap-1.5 text-blue-400 font-black text-[11px] mb-1">
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
-                📍 REAL-TIME LOCATION (OPENSTREETMAP)
+                📍 REAL-TIME LOCATION (GOOGLE SATELLITE)
               </div>
               <div className="font-extrabold text-sm text-white font-sans leading-tight">
                 {selectedLocation.name}
@@ -390,7 +391,7 @@ export const HeatRiskMap: React.FC<Props> = ({
                 </div>
               )}
               <div className="mt-2.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 rounded text-center">
-                ✅ 100% GENUINE OPENSTREETMAP POSITION
+                ✅ 100% GENUINE GOOGLE SATELLITE POSITION
               </div>
             </div>
           </Popup>
