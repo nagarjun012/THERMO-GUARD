@@ -12,6 +12,8 @@ export interface Location {
   localityName?: string;
   dataStatus?: 'LIVE' | 'DEMO' | 'LIMITED' | 'UNAVAILABLE';
   isGpsLive?: boolean;
+  accuracy?: number;
+  timestamp?: number;
 }
 
 export interface UserProfile {
@@ -61,7 +63,9 @@ interface AppState {
     dataStatus?: 'LIVE' | 'DEMO' | 'LIMITED' | 'UNAVAILABLE',
     localityName?: string,
     isGpsLive?: boolean,
-    isManual?: boolean
+    isManual?: boolean,
+    accuracy?: number,
+    timestamp?: number
   ) => void;
   locationPermissionDenied: boolean;
   setLocationPermissionDenied: (denied: boolean) => void;
@@ -308,7 +312,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     dataStatus = 'LIVE',
     localityName,
     isGpsLive = true,
-    isManual
+    isManual,
+    accuracy,
+    timestamp
   ) => {
     // Preserve genuine coordinates (real user GPS or selected district coordinates)
     const finalLat = lat;
@@ -316,19 +322,23 @@ export const useAppStore = create<AppState>((set, get) => ({
 
     // Clean up localityName (strip trailing 'taluk', 'district', 'town', whitespace)
     const cleanLoc = localityName
-      ? localityName.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
+      ? localityName.replace(/\s*(taluk|taluka|tehsil|mandal|town|circle|district|municipality|corporation)\b/gi, '').trim()
       : undefined;
 
+    const normLoc = cleanLoc && (cleanLoc.toLowerCase() === 'aravakkurichchi' || cleanLoc.toLowerCase() === 'aravakurichi')
+      ? 'Aravakurichi'
+      : cleanLoc;
+
     const hasLoc =
-      cleanLoc &&
-      cleanLoc.length > 0 &&
-      cleanLoc.toLowerCase() !== districtName.toLowerCase();
+      normLoc &&
+      normLoc.length > 0 &&
+      normLoc.toLowerCase() !== districtName.toLowerCase();
 
     let displayName = districtName;
     if (hasLoc && stateName) {
-      displayName = `${cleanLoc}, ${districtName}, ${stateName}`;
+      displayName = `${normLoc}, ${districtName}, ${stateName}`;
     } else if (hasLoc) {
-      displayName = `${cleanLoc}, ${districtName}`;
+      displayName = `${normLoc}, ${districtName}`;
     } else if (stateName && stateName.toLowerCase() !== districtName.toLowerCase()) {
       displayName = `${districtName}, ${stateName}`;
     }
@@ -339,9 +349,11 @@ export const useAppStore = create<AppState>((set, get) => ({
       name: displayName,
       stateName,
       districtName,
-      localityName: cleanLoc || undefined,
+      localityName: normLoc || undefined,
       dataStatus,
       isGpsLive,
+      accuracy,
+      timestamp,
     };
     try {
       localStorage.setItem('thermosafe_user_location', JSON.stringify({ ...newLoc, isManual }));

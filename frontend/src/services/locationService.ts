@@ -16,8 +16,22 @@ function getCacheKey(lat: number, lon: number): string {
   return `${lat.toFixed(3)},${lon.toFixed(3)}`;
 }
 
+function cleanAreaName(rawName?: string, districtName?: string): string {
+  if (!rawName) return '';
+  const cleaned = rawName
+    .replace(/\s*(taluk|taluka|tehsil|mandal|sub-district|circle|corporation|municipality|district)\b/gi, '')
+    .trim();
+  if (cleaned.toLowerCase() === 'aravakkurichchi' || cleaned.toLowerCase() === 'aravakurichi') {
+    return 'Aravakurichi';
+  }
+  if (districtName && cleaned.toLowerCase() === districtName.toLowerCase()) {
+    return '';
+  }
+  return cleaned;
+}
+
 /**
- * Reverse geocodes coordinates to exact Locality / Taluk, District, and State.
+ * Reverse geocodes coordinates to exact Locality / Area, District, and State.
  * Always preserves the exact coordinates (real user GPS or physical position).
  * Uses in-memory caching and fast CDNs to resolve in milliseconds.
  */
@@ -55,23 +69,25 @@ export async function resolveLocationFromCoords(
       const district = (rawDist || nearest.district).replace(/\s+district/i, '').trim();
       const state = data.principalSubdivision || nearest.state;
 
-      // Clean city name (do NOT use taluk or village names as locality)
-      const cleanCity = rawCity && rawCity.toLowerCase() !== district.toLowerCase()
-        ? rawCity.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
-        : '';
+      const subAdminObj = adminList.find(
+        (a) =>
+          a.adminLevel >= 6 &&
+          !a.name?.toLowerCase().includes('district') &&
+          !a.description?.toLowerCase().includes('district')
+      );
 
-      const hasCity = cleanCity.length > 0 &&
-        !cleanCity.toLowerCase().includes('taluk') &&
-        !cleanCity.toLowerCase().includes('aravakkurichchi');
+      const rawArea = data.locality || rawCity || subAdminObj?.name || '';
+      const cleanArea = cleanAreaName(rawArea, district);
+      const hasArea = cleanArea.length > 0 && cleanArea.toLowerCase() !== district.toLowerCase();
 
-      const displayName = hasCity
-        ? `${cleanCity}, ${district}, ${state}`
+      const displayName = hasArea
+        ? `${cleanArea}, ${district}, ${state}`
         : `${district}, ${state}`;
 
       const resolved: ResolvedLocation = {
         lat,
         lon,
-        locality: hasCity ? cleanCity : district,
+        locality: hasArea ? cleanArea : district,
         district,
         state,
         displayName,
@@ -98,8 +114,6 @@ export async function resolveLocationFromCoords(
       const data = await res.json();
       const addr = data.address || {};
 
-      const rawCity = addr.city || addr.town || '';
-
       let rawDist =
         addr.state_district?.replace(/\s+district/i, '').trim() ||
         addr.county?.replace(/\s+district/i, '').trim() ||
@@ -109,22 +123,30 @@ export async function resolveLocationFromCoords(
       const district = (rawDist || nearest.district).replace(/\s+district/i, '').trim();
       const state = addr.state || nearest.state;
 
-      const cleanCity = rawCity && rawCity.toLowerCase() !== district.toLowerCase()
-        ? rawCity.replace(/\s+taluk/i, '').replace(/\s+district/i, '').replace(/\s+town/i, '').trim()
-        : '';
+      const rawArea =
+        addr.town ||
+        addr.suburb ||
+        addr.neighbourhood ||
+        addr.village ||
+        addr.hamlet ||
+        addr.municipality ||
+        addr.city_district ||
+        addr.residential ||
+        addr.locality ||
+        addr.city ||
+        '';
 
-      const hasCity = cleanCity.length > 0 &&
-        !cleanCity.toLowerCase().includes('taluk') &&
-        !cleanCity.toLowerCase().includes('aravakkurichchi');
+      const cleanArea = cleanAreaName(rawArea, district);
+      const hasArea = cleanArea.length > 0 && cleanArea.toLowerCase() !== district.toLowerCase();
 
-      const displayName = hasCity
-        ? `${cleanCity}, ${district}, ${state}`
+      const displayName = hasArea
+        ? `${cleanArea}, ${district}, ${state}`
         : `${district}, ${state}`;
 
       const resolved: ResolvedLocation = {
         lat,
         lon,
-        locality: hasCity ? cleanCity : district,
+        locality: hasArea ? cleanArea : district,
         district,
         state,
         displayName: displayName || `${district}, ${state}`,
@@ -250,7 +272,9 @@ export function detectRealtimeLocation(
         'LIVE',
         resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
         true,
-        false
+        false,
+        accuracy,
+        pos.timestamp || Date.now()
       );
       if (onLocatingChange) onLocatingChange(false);
     };
@@ -340,7 +364,9 @@ export function detectRealtimeLocation(
           'LIVE',
           resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
           true,
-          false
+          false,
+          accuracy,
+          pos.timestamp || Date.now()
         );
       },
       () => {},

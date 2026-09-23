@@ -27,11 +27,50 @@ export interface CurrentDashboardLocation {
 }
 
 export const CitizenDashboard: React.FC = () => {
-  const { vulnerabilityProfile, setVulnerabilityProfile, userRole } = useAppStore();
-  const [currentLocation, setCurrentLocation] = useState<CurrentDashboardLocation | null>(null);
-  const [locationStatus, setLocationStatus] = useState<'locating' | 'ready' | 'unavailable'>('locating');
+  const { selectedLocation, vulnerabilityProfile, setVulnerabilityProfile, userRole } = useAppStore();
+  const [currentLocation, setCurrentLocation] = useState<CurrentDashboardLocation | null>(() => {
+    const s = useAppStore.getState().selectedLocation;
+    if (s && s.lat && s.lon && s.name && !s.name.includes('Detecting live')) {
+      return {
+        latitude: s.lat,
+        longitude: s.lon,
+        accuracy: s.accuracy || 50,
+        timestamp: s.timestamp || Date.now(),
+        displayName: s.name,
+      };
+    }
+    return null;
+  });
+  const [locationStatus, setLocationStatus] = useState<'locating' | 'ready' | 'unavailable'>(() => {
+    const s = useAppStore.getState().selectedLocation;
+    return (s && s.lat && s.lon && s.name && !s.name.includes('Detecting live')) ? 'ready' : 'locating';
+  });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
+
+  // Synchronize dashboard location with the Live Map / appStore selected location
+  useEffect(() => {
+    if (selectedLocation && selectedLocation.lat && selectedLocation.lon && selectedLocation.name) {
+      setCurrentLocation((prev) => {
+        if (
+          prev &&
+          prev.displayName === selectedLocation.name &&
+          Math.abs(prev.latitude - selectedLocation.lat) < 0.0001 &&
+          Math.abs(prev.longitude - selectedLocation.lon) < 0.0001
+        ) {
+          return prev;
+        }
+        return {
+          latitude: selectedLocation.lat,
+          longitude: selectedLocation.lon,
+          accuracy: selectedLocation.accuracy || prev?.accuracy || 50,
+          timestamp: selectedLocation.timestamp || prev?.timestamp || Date.now(),
+          displayName: selectedLocation.name,
+        };
+      });
+      setLocationStatus('ready');
+    }
+  }, [selectedLocation]);
 
   // Authoritative real-time browser Geolocation request
   const requestFreshLocation = useCallback(() => {
@@ -69,7 +108,9 @@ export const CitizenDashboard: React.FC = () => {
             'LIVE',
             resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
             true,
-            false
+            false,
+            accuracy,
+            pos.timestamp || Date.now()
           );
         } catch (err) {
           const freshLocation: CurrentDashboardLocation = {
@@ -85,8 +126,12 @@ export const CitizenDashboard: React.FC = () => {
       },
       (err) => {
         console.warn('Dashboard browser geolocation error:', err);
-        setCurrentLocation(null);
-        setLocationStatus('unavailable');
+        // If we already have selectedLocation from map, keep it rather than blanking out
+        const existing = useAppStore.getState().selectedLocation;
+        if (!existing || !existing.lat || !existing.lon) {
+          setCurrentLocation(null);
+          setLocationStatus('unavailable');
+        }
         if (err.code === 1) {
           setErrorMessage('Location permission denied — enable browser location access in your address bar.');
         } else if (err.code === 2) {
