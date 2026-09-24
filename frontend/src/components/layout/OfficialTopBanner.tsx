@@ -35,7 +35,7 @@ export const OfficialTopBanner: React.FC = () => {
               <a
                 key={h.number}
                 href={`tel:${h.number}`}
-                className="px-2 py-0.5 rounded-md bg-red-500/10 border border-red-500/20 text-red-200 hover:bg-red-500/20 transition-colors font-mono font-bold"
+                className="px-2 py-0.5 rounded-md bg-red-500/10 border border-red-500/20 text-red-200 hover:bg-red-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all font-mono font-bold shadow-sm"
                 title={`${h.label}: ${h.description}`}
                 aria-label={`Call ${h.label} at ${h.number}. ${h.description}`}
               >

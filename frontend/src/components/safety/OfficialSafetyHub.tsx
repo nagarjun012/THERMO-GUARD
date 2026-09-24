@@ -106,10 +106,10 @@ export const OfficialSafetyHub: React.FC = () => {
               <button
                 key={tierKey}
                 onClick={() => setSelectedTier(tierKey)}
-                className={`p-3.5 rounded-2xl border text-left transition-all cursor-pointer ${
+                className={`p-3.5 rounded-2xl border text-left transition-all duration-200 cursor-pointer ${
                   isSelected
-                    ? `${cfg.bg} ${cfg.border} ring-2 ring-amber-400/40 shadow-lg`
-                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700 text-slate-400'
+                    ? `${cfg.bg} ${cfg.border} ring-2 ring-amber-400/40 shadow-xl -translate-y-0.5`
+                    : 'bg-slate-900/60 border-slate-800 hover:border-slate-700/80 hover:bg-slate-800/40 text-slate-400 hover:-translate-y-0.5 active:translate-y-0'
                 }`}
               >
                 <div className="flex items-center justify-between mb-1">

@@ -13,7 +13,7 @@ export const WeatherCard: React.FC<Props> = ({ title, value, unit, icon, color =
   const Icon = (LucideIcons[icon] as React.ElementType) || LucideIcons.Activity;
 
   return (
-    <div className="neu-card neu-card-hover p-5 flex flex-col justify-between overflow-hidden relative group">
+    <div className="neu-card neu-card-hover card-3d-subtle p-5 flex flex-col justify-between overflow-hidden relative group">
       {/* AMBIENT CORNER GLOW */}
       <div
         className="absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl opacity-15 pointer-events-none transition-opacity duration-500 group-hover:opacity-30"

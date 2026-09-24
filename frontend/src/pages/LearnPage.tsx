@@ -218,16 +218,16 @@ export const LearnPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-dark-900 text-gray-200 pb-20 relative">
       {/* STICKY SUB-NAVIGATION BAR */}
-      <div className="sticky top-16 z-40 bg-dark-800/90 backdrop-blur-md border-b border-dark-600 shadow-lg">
+      <div className="sticky top-16 z-40 bg-[#090e18]/92 backdrop-blur-xl border-b border-slate-700/60 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
         <div className="max-w-7xl mx-auto px-4 overflow-x-auto py-2.5 flex items-center gap-2 no-scrollbar">
           {navSections.map((sec) => (
             <button
               key={sec.id}
               onClick={() => scrollTo(sec.id)}
-              className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
                 activeSection === sec.id
-                  ? 'bg-gradient-to-r from-orange-500 to-red-600 text-white shadow-[0_0_12px_rgba(249,115,22,0.4)]'
-                  : 'bg-dark-700 text-gray-300 hover:bg-dark-600 hover:text-white'
+                  ? 'bg-gradient-to-b from-orange-500 via-amber-600 to-orange-600 text-white font-bold border border-orange-400/50 shadow-[0_2px_12px_rgba(249,115,22,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] -translate-y-0.5'
+                  : 'bg-slate-900/80 text-slate-300 border border-slate-700/60 hover:border-slate-600 hover:bg-slate-800/80 hover:text-white hover:-translate-y-0.5 active:translate-y-0'
               }`}
             >
               {sec.label}

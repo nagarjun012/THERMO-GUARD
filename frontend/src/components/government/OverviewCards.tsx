@@ -63,7 +63,7 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
           return (
             <div
               key={i}
-              className="neu-card neu-card-hover p-5 flex items-center gap-4 relative overflow-hidden group"
+              className="neu-card neu-card-hover card-3d-subtle p-5 flex items-center gap-4 relative overflow-hidden group"
             >
               {/* AMBIENT CORNER GLOW */}
               <div

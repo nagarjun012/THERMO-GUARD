@@ -365,15 +365,15 @@ export const CitizenDashboard: React.FC = () => {
               <button
                 key={profKey}
                 onClick={() => setVulnerabilityProfile(profKey)}
-                className={`px-3 py-2 rounded-xl text-xs font-mono font-bold transition-all text-left flex flex-col gap-0.5 cursor-pointer border ${
+                className={`px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold transition-all duration-200 text-left flex flex-col gap-0.5 cursor-pointer border ${
                   isActive
-                    ? 'bg-orange-500/20 border-orange-500 text-orange-400 shadow-[0_0_12px_rgba(249,115,22,0.3)]'
-                    : 'bg-white/5 border-white/5 text-slate-400 hover:text-white hover:bg-white/10'
+                    ? 'bg-gradient-to-b from-orange-500/25 via-orange-600/15 to-orange-700/20 border-orange-400/60 text-orange-300 shadow-[0_4px_16px_rgba(249,115,22,0.25),inset_0_1px_0_rgba(255,255,255,0.2)] -translate-y-0.5'
+                    : 'bg-slate-900/60 border-slate-700/60 text-slate-400 hover:text-slate-200 hover:border-slate-600/80 hover:bg-slate-800/60 hover:-translate-y-0.5 active:translate-y-0'
                 }`}
                 type="button"
               >
                 <span>{prof.label}</span>
-                <span className="text-[10px] font-normal text-slate-400">
+                <span className={`text-[10px] font-normal transition-colors ${isActive ? 'text-orange-200/80' : 'text-slate-400'}`}>
                   {prof.metabolicOffset > 0 ? `+${prof.metabolicOffset} HTSS Strain` : 'Standard 150 W/m²'}
                 </span>
               </button>

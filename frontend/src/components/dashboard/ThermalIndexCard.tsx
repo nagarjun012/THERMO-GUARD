@@ -14,7 +14,7 @@ export const ThermalIndexCard: React.FC<Props> = ({ title, value, max, unit, cat
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
   return (
-    <div className="neu-card neu-card-hover p-5 flex flex-col justify-between">
+    <div className="neu-card neu-card-hover card-3d-subtle p-5 flex flex-col justify-between">
       <div className="flex justify-between items-start mb-3">
         <div>
           <h3 className="text-xs font-bold text-gray-400 mb-1.5 uppercase tracking-wider font-mono">

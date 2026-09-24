@@ -69,24 +69,24 @@ export const Navbar: React.FC = () => {
 
             {/* DESKTOP NAV TABS (DYNAMICALLY FILTERED BY LOGIN ROLE) */}
             <div className="hidden md:block">
-              <div className="flex items-center gap-1 p-1 bg-slate-900/80 rounded-xl border border-slate-800/90">
+              <div className="flex items-center gap-1.5 p-1 bg-[#090e18]/90 rounded-xl border border-slate-700/60 shadow-[inset_0_2px_5px_rgba(0,0,0,0.65),0_1px_1px_rgba(255,255,255,0.06)] backdrop-blur-md">
                 {links.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     className={({ isActive }) =>
-                      `flex items-center gap-2 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                      `flex items-center gap-2 px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all duration-200 cursor-pointer ${
                         isActive
-                          ? 'bg-slate-800 text-white border border-slate-700/90 shadow-sm'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
+                          ? 'bg-gradient-to-b from-slate-800/95 via-[#1c263c] to-[#131b2c] text-white border border-slate-600/50 shadow-[0_2px_10px_-2px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.22)] -translate-y-[0.5px]'
+                          : 'text-slate-400 hover:text-slate-100 hover:bg-slate-800/40 hover:-translate-y-[0.5px] border border-transparent'
                       }`
                     }
                   >
                     {({ isActive }) => (
                       <>
                         <item.icon
-                          className={`w-3.5 h-3.5 transition-colors ${
-                            isActive ? 'text-blue-400' : 'text-slate-400'
+                          className={`w-3.5 h-3.5 transition-colors duration-200 ${
+                            isActive ? 'text-cyan-400 drop-shadow-[0_0_6px_rgba(34,211,238,0.45)]' : 'text-slate-400'
                           }`}
                         />
                         <span>{item.label}</span>
@@ -102,7 +102,7 @@ export const Navbar: React.FC = () => {
               <button
                 onClick={handleLogout}
                 type="button"
-                className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 active:scale-95 transition-all cursor-pointer"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />
@@ -124,21 +124,21 @@ export const Navbar: React.FC = () => {
 
         {/* MOBILE MENU DROPDOWN */}
         {isOpen && (
-          <div className="md:hidden glass-modal border-t border-white/10 px-4 pt-3 pb-5 space-y-3 animate-fadeIn">
+          <div className="md:hidden glass-modal border-t border-white/10 px-4 pt-3 pb-5 space-y-2.5 animate-fadeIn">
             {links.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
-                  `skeuo-btn btn-shimmer w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${
+                  `w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${
                     isActive
-                      ? 'skeuo-btn-dark text-white border-l-4 border-accent shadow-md'
+                      ? 'bg-gradient-to-r from-slate-800/90 to-slate-900/90 text-white border border-slate-600/50 shadow-md'
                       : 'text-gray-300 hover:text-white hover:bg-white/5'
                   }`
                 }
               >
-                <item.icon className="w-4 h-4 text-accent" />
+                <item.icon className="w-4 h-4 text-cyan-400" />
                 <span>{item.label}</span>
               </NavLink>
             ))}
@@ -149,7 +149,7 @@ export const Navbar: React.FC = () => {
                   setIsOpen(false);
                   handleLogout();
                 }}
-                className="w-full py-2.5 px-3 text-xs font-mono font-bold rounded-xl border border-red-500/20 bg-red-500/10 text-red-300 flex items-center justify-center gap-2"
+                className="w-full py-2.5 px-3 text-xs font-mono font-bold rounded-xl border border-red-500/20 bg-red-500/10 text-red-300 hover:bg-red-500/20 flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />

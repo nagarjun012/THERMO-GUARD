@@ -44,43 +44,79 @@ code, pre, .font-mono {
    Rich depth, crisp hairline borders, elegant specular highlights
    ========================================================================= */
 
-/* Primary operational card base */
+/* 3D Perspective Context */
+.perspective-container {
+  perspective: 1200px;
+  transform-style: preserve-3d;
+}
+
+/* Primary operational card base with tactile 3D depth */
 .neu-card {
-  background: linear-gradient(165deg, rgba(20, 27, 44, 0.9) 0%, rgba(11, 16, 26, 0.96) 100%);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: linear-gradient(165deg, rgba(20, 27, 44, 0.92) 0%, rgba(11, 16, 26, 0.98) 100%);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 14px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35), 0 4px 14px -3px rgba(0, 0, 0, 0.45);
   position: relative;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
+}
+
+.neu-card-hover {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, box-shadow;
 }
 
 .neu-card-hover:hover {
-  border-color: rgba(255, 255, 255, 0.16);
-  box-shadow: 0 4px 16px -2px rgba(0, 0, 0, 0.5);
+  transform: translateY(-2.5px) translateZ(6px);
+  border-color: rgba(255, 255, 255, 0.18);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.neu-card-hover:active {
+  transform: translateY(-0.5px) translateZ(2px);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.5);
+}
+
+/* Subtle 3D Interactive Card */
+.card-3d-subtle {
+  transform: translateZ(0);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  will-change: transform, box-shadow;
+}
+
+.card-3d-subtle:hover {
+  transform: translateY(-3px) translateZ(10px);
+  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14);
 }
 
 /* Recessed instrument cavity for readouts, inputs, and metric panels */
 .neu-well {
-  background: rgba(7, 11, 18, 0.85);
+  background: rgba(7, 11, 18, 0.88);
   border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.55);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.11);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.65), 0 1px 2px rgba(255, 255, 255, 0.04);
   border-radius: 12px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .neu-well-deep {
-  background: radial-gradient(circle at 50% 50%, #080c14 0%, #04060a 100%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: inset 0 3px 8px rgba(0, 0, 0, 0.8);
+  background: radial-gradient(circle at 50% 50%, #090e18 0%, #04060b 100%);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.85);
   border-radius: 9999px;
 }
 
 /* Status Plate / Mini-Chassis */
 .neu-plate {
-  background: rgba(26, 35, 54, 0.7);
+  background: rgba(26, 35, 54, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.09);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
 }
 
 /* =========================================================================
@@ -89,38 +125,42 @@ code, pre, .font-mono {
 
 /* Floating Navigation Bar */
 .glass-nav {
-  background: rgba(11, 15, 25, 0.82);
-  backdrop-filter: blur(20px) saturate(180%);
-  -webkit-backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+  background: rgba(11, 15, 25, 0.86);
+  backdrop-filter: blur(22px) saturate(180%);
+  -webkit-backdrop-filter: blur(22px) saturate(180%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.5);
 }
 
 /* Operational Modal / Flyout */
 .glass-modal {
-  background: rgba(13, 18, 30, 0.95);
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  background: rgba(13, 18, 30, 0.96);
+  backdrop-filter: blur(30px) saturate(190%);
+  -webkit-backdrop-filter: blur(30px) saturate(190%);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 18px;
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8);
+  border-top: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 20px;
+  box-shadow: 0 28px 70px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
 /* Standard Secondary Card */
 .glass-card {
-  background: rgba(18, 25, 41, 0.7);
+  background: rgba(18, 25, 41, 0.72);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-panel {
-  background: rgba(16, 23, 38, 0.75);
+  background: rgba(16, 23, 38, 0.78);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-top: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 14px;
 }
 
@@ -135,13 +175,18 @@ code, pre, .font-mono {
   left: 0;
   right: 0;
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 30%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0.18) 70%, transparent 100%);
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.18) 30%, rgba(255, 255, 255, 0.38) 50%, rgba(255, 255, 255, 0.18) 70%, transparent 100%);
   pointer-events: none;
 }
 
 /* =========================================================================
    3. TACTILE PREMIUM BUTTONS & CONTROLS
    Smooth gradients, refined 1px highlight, subtle tactile feedback
+   ========================================================================= */
+
+/* =========================================================================
+   3. TACTILE PREMIUM BUTTONS & CONTROLS
+   Smooth gradients, refined 1px highlight, subtle 3D tactile feedback
    ========================================================================= */
 
 .skeuo-btn {
@@ -154,13 +199,19 @@ code, pre, .font-mono {
   border-radius: 10px;
   cursor: pointer;
   user-select: none;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.18s cubic-bezier(0.16, 1, 0.3, 1), background 0.2s ease, border-color 0.2s ease;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 6px rgba(0, 0, 0, 0.35);
+  will-change: transform;
+}
+
+.skeuo-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 5px 14px -2px rgba(0, 0, 0, 0.45);
 }
 
 .skeuo-btn:active:not(:disabled) {
   transform: translateY(1px);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.45), 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* Neutralized shimmer */
@@ -173,11 +224,11 @@ code, pre, .font-mono {
   background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
   color: #ffffff;
   border: 1px solid #60a5fa;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 6px rgba(30, 64, 175, 0.35);
 }
 .skeuo-btn-primary:hover:not(:disabled) {
   background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 6px 16px -2px rgba(37, 99, 235, 0.45);
 }
 .skeuo-btn-primary:active:not(:disabled) {
   background: linear-gradient(180deg, #1e40af 0%, #1d4ed8 100%);
@@ -188,11 +239,11 @@ code, pre, .font-mono {
   background: linear-gradient(180deg, #10b981 0%, #047857 100%);
   color: #ffffff;
   border: 1px solid #34d399;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 6px rgba(4, 120, 87, 0.35);
 }
 .skeuo-btn-emerald:hover:not(:disabled) {
   background: linear-gradient(180deg, #34d399 0%, #059669 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 6px 16px -2px rgba(5, 150, 105, 0.45);
 }
 .skeuo-btn-emerald:active:not(:disabled) {
   background: linear-gradient(180deg, #065f46 0%, #047857 100%);
@@ -203,11 +254,11 @@ code, pre, .font-mono {
   background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
   color: #ffffff;
   border: 1px solid #f87171;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 6px rgba(185, 28, 28, 0.35);
 }
 .skeuo-btn-danger:hover:not(:disabled) {
   background: linear-gradient(180deg, #f87171 0%, #dc2626 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 2px 4px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 6px 16px -2px rgba(220, 38, 38, 0.45);
 }
 .skeuo-btn-danger:active:not(:disabled) {
   background: linear-gradient(180deg, #991b1b 0%, #b91c1c 100%);
@@ -218,10 +269,11 @@ code, pre, .font-mono {
   background: linear-gradient(180deg, #f59e0b 0%, #b45309 100%);
   color: #ffffff;
   border: 1px solid #fbbf24;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 1px 3px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28), 0 2px 6px rgba(180, 83, 9, 0.35);
 }
 .skeuo-btn-amber:hover:not(:disabled) {
   background: linear-gradient(180deg, #fbbf24 0%, #d97706 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.38), 0 6px 16px -2px rgba(217, 119, 6, 0.45);
 }
 .skeuo-btn-amber:active:not(:disabled) {
   background: linear-gradient(180deg, #92400e 0%, #b45309 100%);
@@ -232,12 +284,14 @@ code, pre, .font-mono {
   background: linear-gradient(180deg, #242c3f 0%, #151b29 100%);
   color: #e2e8f0;
   border: 1px solid rgba(255, 255, 255, 0.12);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 .skeuo-btn-dark:hover:not(:disabled) {
-  background: linear-gradient(180deg, #2c364e 0%, #1d2537 100%);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: linear-gradient(180deg, #2e3a54 0%, #1c2539 100%);
+  border-color: rgba(255, 255, 255, 0.24);
   color: #ffffff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 5px 14px -2px rgba(0, 0, 0, 0.5);
 }
 .skeuo-btn-dark:active:not(:disabled) {
   background: linear-gradient(180deg, #121a2a 0%, #151b29 100%);
@@ -249,25 +303,29 @@ code, pre, .font-mono {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s ease;
 }
 
 /* --- Precision Instrument Gauge Bezel --- */
 .metallic-bezel {
-  background: linear-gradient(145deg, #283247 0%, #121824 100%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(145deg, #2a354c 0%, #101622 100%);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-top: 1px solid rgba(255, 255, 255, 0.28);
   box-shadow: 
-    inset 0 1px 1px rgba(255, 255, 255, 0.25),
-    0 8px 24px rgba(0, 0, 0, 0.6);
+    inset 0 1px 2px rgba(255, 255, 255, 0.28),
+    0 12px 32px rgba(0, 0, 0, 0.75);
   border-radius: 9999px;
   padding: 6px;
+  transition: box-shadow 0.3s ease;
 }
 
-/* Status Accents */
+/* Status Accents (Maintains exact HTSS risk meaning) */
 .glow-safe { border-color: rgba(16, 185, 129, 0.4); }
 .glow-low { border-color: rgba(234, 179, 8, 0.4); }
 .glow-moderate { border-color: rgba(249, 115, 22, 0.4); }
 .glow-high { border-color: rgba(239, 68, 68, 0.45); }
-.glow-extreme { border-color: rgba(239, 68, 68, 0.6); }
+.glow-extreme { border-color: rgba(168, 85, 247, 0.55); }
 
 /* Leaflet Dark Popup styling */
 .dark-popup .leaflet-popup-content-wrapper {
@@ -300,4 +358,59 @@ input:-webkit-autofill:active {
   -webkit-text-fill-color: #ffffff !important;
   caret-color: #ffffff !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+/* =========================================================================
+   4. POLISHED HUMAN-CRAFTED KEYFRAME ANIMATIONS
+   Gentle ambient float, smooth entrance, subtle breathing
+   ========================================================================= */
+
+@keyframes ambientFloatSlow {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(12px, -14px) scale(1.04);
+  }
+}
+
+@keyframes ambientFloatReverse {
+  0%, 100% {
+    transform: translate(0px, 0px) scale(1);
+  }
+  50% {
+    transform: translate(-10px, 12px) scale(0.97);
+  }
+}
+
+.animate-ambient-slow {
+  animation: ambientFloatSlow 14s ease-in-out infinite;
+}
+
+.animate-ambient-reverse {
+  animation: ambientFloatReverse 16s ease-in-out infinite;
+}
+
+@keyframes subtlePulse {
+  0%, 100% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.animate-subtle-pulse {
+  animation: subtlePulse 4s ease-in-out infinite;
+}
+
+/* Smooth input focus style */
+.input-human {
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+.input-human:focus {
+  border-color: rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }

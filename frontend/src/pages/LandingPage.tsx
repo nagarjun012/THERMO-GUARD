@@ -149,13 +149,13 @@ export const LandingPage: React.FC = () => {
               {/* GATEWAY 1: USER LOGIN */}
               <div
                 onClick={() => handleQuickLogin('user')}
-                className="neu-card p-6 text-left rounded-2xl border border-slate-700/80 hover:border-blue-500/50 transition-colors cursor-pointer group"
+                className="neu-card neu-card-hover card-3d-subtle p-6 text-left rounded-2xl border border-slate-700/80 hover:border-blue-500/50 hover:shadow-[0_14px_34px_-6px_rgba(59,130,246,0.22)] transition-all cursor-pointer group"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
+                  <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:scale-105 transition-transform">
                     <User className="w-5 h-5" />
                   </div>
-                  <span className="text-[11px] font-mono font-medium text-blue-400 border border-blue-500/30 px-2 py-0.5 rounded-md bg-blue-500/10">
+                  <span className="text-[11px] font-mono font-medium text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-md bg-blue-500/10 shadow-sm">
                     PUBLIC / CITIZEN
                   </span>
                 </div>
@@ -165,7 +165,7 @@ export const LandingPage: React.FC = () => {
                 <p className="text-xs text-slate-400 mb-4 leading-relaxed">
                   Personalized strain profiles, live GIS heat risk maps, 72-hour forecast, and clinical advisories.
                 </p>
-                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-blue-400 group-hover:translate-x-1 transition-transform">
+                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-blue-400 group-hover:translate-x-1.5 transition-transform">
                   <span>Open Citizen Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
@@ -174,13 +174,13 @@ export const LandingPage: React.FC = () => {
               {/* GATEWAY 2: GOV LOGIN */}
               <div
                 onClick={() => handleQuickLogin('gov')}
-                className="neu-card p-6 text-left rounded-2xl border border-slate-700/80 hover:border-amber-500/50 transition-colors cursor-pointer group"
+                className="neu-card neu-card-hover card-3d-subtle p-6 text-left rounded-2xl border border-slate-700/80 hover:border-amber-500/50 hover:shadow-[0_14px_34px_-6px_rgba(245,158,11,0.22)] transition-all cursor-pointer group"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 group-hover:scale-105 transition-transform">
                     <Shield className="w-5 h-5" />
                   </div>
-                  <span className="text-[11px] font-mono font-medium text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md bg-amber-500/10">
+                  <span className="text-[11px] font-mono font-medium text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md bg-amber-500/10 shadow-sm">
                     OFFICIAL AUTHORITIES
                   </span>
                 </div>
@@ -190,7 +190,7 @@ export const LandingPage: React.FC = () => {
                 <p className="text-xs text-slate-400 mb-4 leading-relaxed">
                   National heat risk intelligence across all 788 districts, Section 144 triggers, and hospital capacity.
                 </p>
-                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-amber-400 group-hover:translate-x-1 transition-transform">
+                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-amber-400 group-hover:translate-x-1.5 transition-transform">
                   <span>Access Government Portal</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
@@ -208,9 +208,9 @@ export const LandingPage: React.FC = () => {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + i * 0.05 }}
-                  className="neu-card p-6 border border-slate-800/90 hover:border-slate-700 transition-colors group"
+                  className="neu-card neu-card-hover card-3d-subtle p-6 border border-slate-800/90 hover:border-slate-700/90 transition-all group"
                 >
-                  <div className="w-10 h-10 bg-slate-800 border border-slate-700/80 rounded-lg flex items-center justify-center mb-4 text-slate-300 group-hover:text-orange-400 transition-colors">
+                  <div className="w-10 h-10 bg-slate-800/80 border border-slate-700/80 rounded-xl flex items-center justify-center mb-4 text-slate-300 group-hover:text-orange-400 group-hover:scale-105 transition-all shadow-inner">
                     <Icon className="w-5 h-5" />
                   </div>
                   <h3 className="text-base font-bold text-white mb-2">{f.title}</h3>
