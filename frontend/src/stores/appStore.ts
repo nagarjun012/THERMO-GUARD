@@ -325,20 +325,16 @@ export const useAppStore = create<AppState>((set, get) => ({
       ? localityName.replace(/\s*(taluk|taluka|tehsil|mandal|town|circle|district|municipality|corporation)\b/gi, '').trim()
       : undefined;
 
-    const normLoc = cleanLoc && (cleanLoc.toLowerCase() === 'aravakkurichchi' || cleanLoc.toLowerCase() === 'aravakurichi')
-      ? 'Aravakurichi'
-      : cleanLoc;
-
     const hasLoc =
-      normLoc &&
-      normLoc.length > 0 &&
-      normLoc.toLowerCase() !== districtName.toLowerCase();
+      cleanLoc &&
+      cleanLoc.length > 0 &&
+      cleanLoc.toLowerCase() !== districtName.toLowerCase();
 
     let displayName = districtName;
     if (hasLoc && stateName) {
-      displayName = `${normLoc}, ${districtName}, ${stateName}`;
+      displayName = `${cleanLoc}, ${districtName}, ${stateName}`;
     } else if (hasLoc) {
-      displayName = `${normLoc}, ${districtName}`;
+      displayName = `${cleanLoc}, ${districtName}`;
     } else if (stateName && stateName.toLowerCase() !== districtName.toLowerCase()) {
       displayName = `${districtName}, ${stateName}`;
     }
@@ -349,7 +345,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       name: displayName,
       stateName,
       districtName,
-      localityName: normLoc || undefined,
+      localityName: cleanLoc || undefined,
       dataStatus,
       isGpsLive,
       accuracy,

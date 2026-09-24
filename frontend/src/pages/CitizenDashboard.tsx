@@ -26,29 +26,125 @@ export interface CurrentDashboardLocation {
 
 export const CitizenDashboard: React.FC = () => {
   const { selectedLocation, vulnerabilityProfile, setVulnerabilityProfile, userRole } = useAppStore();
-  const [currentLocation, setCurrentLocation] = useState<CurrentDashboardLocation | null>(() => {
-    const s = useAppStore.getState().selectedLocation;
-    if (s && s.lat && s.lon && s.name && !s.name.includes('Detecting live')) {
-      return {
-        latitude: s.lat,
-        longitude: s.lon,
-        accuracy: s.accuracy || 50,
-        timestamp: s.timestamp || Date.now(),
-        displayName: s.name,
-      };
-    }
-    return null;
-  });
-  const [locationStatus, setLocationStatus] = useState<'locating' | 'ready' | 'unavailable'>(() => {
-    const s = useAppStore.getState().selectedLocation;
-    return (s && s.lat && s.lon && s.name && !s.name.includes('Detecting live')) ? 'ready' : 'locating';
-  });
+
+  // Authoritative real-time current-location state for the Dashboard
+  // Never initialized with hardcoded, mock, or cached coordinates
+  const [currentLocation, setCurrentLocation] = useState<CurrentDashboardLocation | null>(null);
+  const [locationStatus, setLocationStatus] = useState<'locating' | 'ready' | 'unavailable'>('locating');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isLocating, setIsLocating] = useState<boolean>(false);
+  const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
 
-  // Synchronize dashboard location with the Live Map / appStore selected location
+  // Authoritative real-time browser Geolocation request
+  const requestFreshLocation = useCallback(() => {
+    setIsLocating(true);
+    setLocationStatus((prev) => (prev === 'ready' ? 'ready' : 'locating'));
+    setErrorMessage(null);
+
+    if (typeof navigator === 'undefined' || !navigator.geolocation) {
+      setCurrentLocation(null);
+      setLocationStatus('unavailable');
+      setErrorMessage('Geolocation API is not supported by your browser.');
+      setIsLocating(false);
+      return;
+    }
+
+    const onGpsSuccess = async (pos: GeolocationPosition) => {
+      const { latitude, longitude, accuracy } = pos.coords;
+      try {
+        const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
+        const freshLocation: CurrentDashboardLocation = {
+          latitude,
+          longitude,
+          accuracy,
+          timestamp: pos.timestamp || Date.now(),
+          displayName: resolved.displayName || `${resolved.district}, ${resolved.state}`,
+        };
+        setCurrentLocation(freshLocation);
+        setLocationStatus('ready');
+        setLastUpdated(Date.now());
+        setIsLocating(false);
+
+        // Keep Map and appStore synchronized with the user's real verified browser position
+        useAppStore.getState().setIndiaLocation(
+          resolved.state,
+          resolved.district,
+          latitude,
+          longitude,
+          true,
+          'LIVE',
+          resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
+          true, // isGpsLive = true
+          false,
+          accuracy,
+          pos.timestamp || Date.now()
+        );
+      } catch (err) {
+        console.warn('Reverse geocode fallback for coordinates:', err);
+        const freshLocation: CurrentDashboardLocation = {
+          latitude,
+          longitude,
+          accuracy,
+          timestamp: pos.timestamp || Date.now(),
+          displayName: `${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E`,
+        };
+        setCurrentLocation(freshLocation);
+        setLocationStatus('ready');
+        setLastUpdated(Date.now());
+        setIsLocating(false);
+      }
+    };
+
+    const onGpsError = (err: GeolocationPositionError) => {
+      console.warn('Dashboard browser geolocation error:', err);
+      setIsLocating(false);
+      // Strictly enforce: never fall back to fake, stored or IP location!
+      // Only mark unavailable if no verified GPS position has been established in this session
+      setCurrentLocation((prev) => {
+        if (!prev) {
+          setLocationStatus('unavailable');
+        }
+        return prev;
+      });
+      if (err.code === 1) {
+        setErrorMessage('Location permission denied — enable browser location access in your address bar.');
+      } else if (err.code === 2) {
+        setErrorMessage('Position unavailable from device GPS sensor.');
+      } else if (err.code === 3) {
+        setErrorMessage('Location request timed out. Please click "Use My Location" to retry.');
+      } else {
+        setErrorMessage('Current location unavailable — enable browser location access.');
+      }
+    };
+
+    // Eagerly request High-Accuracy GPS (maximumAge: 0 enforces strictly fresh coordinates)
+    navigator.geolocation.getCurrentPosition(
+      onGpsSuccess,
+      () => {
+        // Fallback to standard accuracy if high-accuracy satellite lock takes too long
+        navigator.geolocation.getCurrentPosition(
+          onGpsSuccess,
+          onGpsError,
+          { enableHighAccuracy: false, timeout: 6000, maximumAge: 0 }
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 9000,
+        maximumAge: 0,
+      }
+    );
+  }, []);
+
+  // Request fresh location on component mount
   useEffect(() => {
-    if (selectedLocation && selectedLocation.lat && selectedLocation.lon && selectedLocation.name) {
+    requestFreshLocation();
+  }, [requestFreshLocation]);
+
+  // Synchronize dashboard location only if appStore has genuine verified GPS (e.g. from Map's "Locate Me")
+  useEffect(() => {
+    if (selectedLocation?.isGpsLive && selectedLocation.lat && selectedLocation.lon && selectedLocation.name) {
       setCurrentLocation((prev) => {
         if (
           prev &&
@@ -61,97 +157,15 @@ export const CitizenDashboard: React.FC = () => {
         return {
           latitude: selectedLocation.lat,
           longitude: selectedLocation.lon,
-          accuracy: selectedLocation.accuracy || prev?.accuracy || 50,
-          timestamp: selectedLocation.timestamp || prev?.timestamp || Date.now(),
+          accuracy: selectedLocation.accuracy || 50,
+          timestamp: selectedLocation.timestamp || Date.now(),
           displayName: selectedLocation.name,
         };
       });
       setLocationStatus('ready');
+      setLastUpdated(selectedLocation.timestamp || Date.now());
     }
   }, [selectedLocation]);
-
-  // Authoritative real-time browser Geolocation request
-  const requestFreshLocation = useCallback(() => {
-    setLocationStatus((prev) => (prev === 'ready' ? 'ready' : 'locating'));
-    setErrorMessage(null);
-
-    if (typeof navigator === 'undefined' || !navigator.geolocation) {
-      setLocationStatus('unavailable');
-      setErrorMessage('Geolocation API is not supported by your browser.');
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const { latitude, longitude, accuracy } = pos.coords;
-        try {
-          const resolved = await resolveLocationFromCoords(latitude, longitude, true, accuracy);
-          const freshLocation: CurrentDashboardLocation = {
-            latitude,
-            longitude,
-            accuracy,
-            timestamp: pos.timestamp || Date.now(),
-            displayName: resolved.displayName || `${resolved.district}, ${resolved.state}`,
-          };
-          setCurrentLocation(freshLocation);
-          setLocationStatus('ready');
-
-          // Keep Map and appStore synchronized with the user's real verified browser position
-          useAppStore.getState().setIndiaLocation(
-            resolved.state,
-            resolved.district,
-            latitude,
-            longitude,
-            true,
-            'LIVE',
-            resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
-            true,
-            false,
-            accuracy,
-            pos.timestamp || Date.now()
-          );
-        } catch (err) {
-          const freshLocation: CurrentDashboardLocation = {
-            latitude,
-            longitude,
-            accuracy,
-            timestamp: pos.timestamp || Date.now(),
-            displayName: `${latitude.toFixed(4)}°N, ${longitude.toFixed(4)}°E`,
-          };
-          setCurrentLocation(freshLocation);
-          setLocationStatus('ready');
-        }
-      },
-      (err) => {
-        console.warn('Dashboard browser geolocation error:', err);
-        // If we already have selectedLocation from map, keep it rather than blanking out
-        const existing = useAppStore.getState().selectedLocation;
-        if (!existing || !existing.lat || !existing.lon) {
-          setCurrentLocation(null);
-          setLocationStatus('unavailable');
-        }
-        if (err.code === 1) {
-          setErrorMessage('Location permission denied — enable browser location access in your address bar.');
-        } else if (err.code === 2) {
-          setErrorMessage('Position unavailable from device GPS sensor.');
-        } else if (err.code === 3) {
-          setErrorMessage('Location request timed out. Please click "Use My Location" to retry.');
-        } else {
-          setErrorMessage('Current location unavailable — enable browser location access.');
-        }
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0, // Always request fresh coordinates, never cached
-      }
-    );
-  }, []);
-
-  // Request fresh location on component mount
-  useEffect(() => {
-    requestFreshLocation();
-  }, [requestFreshLocation]);
 
   // Listen for "Use My Location" trigger from Header or other controls
   useEffect(() => {
@@ -301,8 +315,24 @@ export const CitizenDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* REAL-TIME BADGE */}
+        {/* CONTROLS & REAL-TIME BADGE */}
         <div className="flex items-center gap-2.5">
+          <button
+            onClick={requestFreshLocation}
+            disabled={isLocating}
+            className="skeuo-btn px-3 py-1.5 text-xs font-bold font-mono rounded-xl flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors cursor-pointer border border-white/10 hover:border-orange-500/30"
+            title="Request fresh real-time browser location"
+          >
+            <Crosshair className={`w-3.5 h-3.5 text-orange-400 ${isLocating ? 'animate-spin' : ''}`} />
+            <span>{isLocating ? 'Locating...' : 'Use My Location'}</span>
+          </button>
+
+          {lastUpdated && (
+            <span className="text-[10px] font-mono text-gray-400 hidden sm:inline">
+              Updated {new Date(lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+            </span>
+          )}
+
           {weather.isLive && (
             <span className="skeuo-pill px-3.5 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2 text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />

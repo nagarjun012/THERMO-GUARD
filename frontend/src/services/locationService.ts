@@ -21,9 +21,6 @@ function cleanAreaName(rawName?: string, districtName?: string): string {
   const cleaned = rawName
     .replace(/\s*(taluk|taluka|tehsil|mandal|sub-district|circle|corporation|municipality|district)\b/gi, '')
     .trim();
-  if (cleaned.toLowerCase() === 'aravakkurichchi' || cleaned.toLowerCase() === 'aravakurichi') {
-    return 'Aravakurichi';
-  }
   if (districtName && cleaned.toLowerCase() === districtName.toLowerCase()) {
     return '';
   }
