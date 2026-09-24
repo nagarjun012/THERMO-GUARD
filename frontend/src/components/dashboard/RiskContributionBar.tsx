@@ -7,32 +7,31 @@ interface Props {
 }
 
 export const RiskContributionBar: React.FC<Props> = ({ factors }) => {
-  const colors = ['#ef4444', '#f97316', '#eab308', '#3b82f6', '#8b5cf6'];
+  const colors = ['#ef4444', '#f97316', '#eab308', '#2563eb', '#8b5cf6'];
 
   return (
-    <div className="neu-card p-6">
-      <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
-        <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-orange-400" />
+    <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 sm:p-7 border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.07)]">
+      <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+        <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+          <BarChart3 className="w-4 h-4 text-blue-600" />
           Heat Stress Factor Decomposition
         </h3>
-        <span className="skeuo-pill px-2.5 py-0.5 text-[10px] font-mono text-gray-400">
+        <span className="px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-[#EDF5FD] rounded-full border border-blue-100/60">
           Relative Weighting
         </span>
       </div>
 
-      {/* SUNKEN RECESSED BAR WELL */}
-      <div className="neu-well p-1.5 h-10 rounded-xl overflow-hidden flex mb-4">
+      {/* RECESSED MULTI-BAR */}
+      <div className="p-1 h-10 rounded-2xl overflow-hidden flex mb-4 bg-[#EDF5FD] border border-blue-100/60">
         {factors.map((f, i) => (
           <motion.div
             key={f.factor}
             initial={{ width: 0 }}
             animate={{ width: `${f.contribution}%` }}
             transition={{ duration: 1, delay: i * 0.1 }}
-            className="h-full flex items-center justify-center text-[11px] font-black font-mono text-white overflow-hidden whitespace-nowrap relative shadow-inner first:rounded-l-lg last:rounded-r-lg"
+            className="h-full flex items-center justify-center text-[11px] font-extrabold text-white overflow-hidden whitespace-nowrap relative shadow-inner first:rounded-l-xl last:rounded-r-xl"
             style={{
               backgroundColor: colors[i % colors.length],
-              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.4), inset 0 -1px 0 rgba(0,0,0,0.3)`,
             }}
           >
             <div className="absolute inset-0 bg-gradient-to-b from-white/20 to-transparent pointer-events-none" />
@@ -41,22 +40,21 @@ export const RiskContributionBar: React.FC<Props> = ({ factors }) => {
         ))}
       </div>
 
-      {/* TACTILE LEGEND CHIPS */}
+      {/* LEGEND CHIPS */}
       <div className="flex flex-wrap gap-2.5 mt-4">
         {factors.map((f, i) => (
           <div
             key={f.factor}
-            className="neu-plate px-3 py-1.5 rounded-xl flex items-center gap-2 text-xs"
+            className="px-3.5 py-1.5 rounded-xl flex items-center gap-2 text-xs bg-[#EDF5FD] border border-blue-100/80 shadow-xs"
           >
             <div
-              className="w-2.5 h-2.5 rounded-full shadow-sm"
+              className="w-2.5 h-2.5 rounded-full shadow-xs"
               style={{
                 backgroundColor: colors[i % colors.length],
-                boxShadow: `0 0 6px ${colors[i % colors.length]}`,
               }}
             />
-            <span className="text-gray-400 font-mono text-[11px]">{f.factor}:</span>
-            <span className="font-bold font-mono text-white text-[11px]">{f.contribution}%</span>
+            <span className="text-slate-500 font-medium text-[11px]">{f.factor}:</span>
+            <span className="font-extrabold text-slate-800 text-[11px]">{f.contribution}%</span>
           </div>
         ))}
       </div>

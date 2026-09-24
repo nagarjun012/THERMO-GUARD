@@ -8,13 +8,13 @@ interface Props {
 
 export const RecommendationCard: React.FC<Props> = ({ risk }) => {
   return (
-    <div className="neu-card p-6 h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
-        <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono flex items-center gap-2">
-          <Icons.ShieldCheck className="w-4 h-4 text-emerald-400" />
+    <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 h-full flex flex-col border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.07)]">
+      <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+        <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
+          <Icons.ShieldCheck className="w-4 h-4 text-emerald-600" />
           Clinical Advisory
         </h3>
-        <span className="skeuo-pill px-2 py-0.5 text-[10px] font-mono text-gray-400">
+        <span className="px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-[#EDF5FD] rounded-full border border-blue-100/60">
           WHO / NDMA
         </span>
       </div>
@@ -23,30 +23,30 @@ export const RecommendationCard: React.FC<Props> = ({ risk }) => {
         {risk.recommendations.map((rec, i) => {
           const Icon =
             (Icons[rec.icon as keyof typeof Icons] as React.ElementType) || Icons.Info;
-          let color = 'text-gray-400';
-          let borderGlow = 'border-white/5';
+          let color = 'text-blue-600';
+          let borderStyle = 'border-blue-100 bg-[#EDF5FD]';
           if (rec.urgency === 'high') {
-            color = 'text-orange-400';
-            borderGlow = 'border-orange-500/30';
+            color = 'text-orange-600';
+            borderStyle = 'border-orange-200 bg-orange-50/70';
           }
           if (rec.urgency === 'extreme') {
-            color = 'text-red-400';
-            borderGlow = 'border-red-500/40';
+            color = 'text-red-600';
+            borderStyle = 'border-red-200 bg-red-50/70';
           }
 
           return (
             <div
               key={i}
-              className={`neu-well p-3.5 rounded-xl border ${borderGlow} flex gap-3 items-start transition-all hover:border-white/20`}
+              className={`p-3.5 rounded-2xl border ${borderStyle} flex gap-3 items-start transition-all shadow-xs`}
             >
-              <div className={`mt-0.5 p-1.5 rounded-lg bg-dark-900 border border-white/5 shrink-0 ${color}`}>
+              <div className={`mt-0.5 p-2 rounded-xl bg-white shadow-xs shrink-0 ${color}`}>
                 <Icon className="w-4 h-4" />
               </div>
               <div className="flex-1 min-w-0">
-                <span className="skeuo-pill inline-block text-[9px] font-bold text-gray-400 uppercase tracking-widest px-2 py-0.5 mb-1">
+                <span className="inline-block text-[10px] font-bold text-slate-600 uppercase tracking-wider px-2 py-0.5 mb-1 bg-white rounded-md border border-slate-200/50">
                   {rec.audience}
                 </span>
-                <p className="text-xs text-gray-300 leading-relaxed">{rec.text}</p>
+                <p className="text-xs text-slate-700 leading-relaxed font-medium">{rec.text}</p>
               </div>
             </div>
           );

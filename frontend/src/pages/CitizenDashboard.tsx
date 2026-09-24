@@ -13,9 +13,10 @@ import { HTSSDetailPanel } from '../components/dashboard/HTSSDetailPanel';
 import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
 import { OfficialThresholdReconciliation } from '../components/common/OfficialThresholdReconciliation';
 import { HeatHealthPredictionPanel } from '../components/dashboard/HeatHealthPredictionPanel';
+import { DynamicWeatherSymbol, getClimateType } from '../components/dashboard/DynamicWeatherSymbol';
 import { useAppStore } from '../stores/appStore';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
-import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity } from 'lucide-react';
+import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun } from 'lucide-react';
 
 export interface CurrentDashboardLocation {
   latitude: number;
@@ -236,19 +237,19 @@ export const CitizenDashboard: React.FC = () => {
     if (locationStatus === 'unavailable') {
       return (
         <div className="max-w-7xl mx-auto px-4 py-24 flex flex-col items-center justify-center text-center space-y-4">
-          <div className="p-8 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 max-w-lg shadow-[0_0_30px_rgba(245,158,11,0.15)] space-y-3">
-            <MapPin className="w-12 h-12 mx-auto text-amber-400 animate-bounce" />
-            <h2 className="text-xl font-black font-mono tracking-wider text-white">CURRENT LOCATION UNAVAILABLE</h2>
-            <p className="text-sm text-gray-300 font-mono">
+          <div className="p-8 rounded-3xl bg-white/95 border border-white/90 text-amber-900 max-w-lg shadow-[0_14px_40px_rgba(20,90,190,0.1)] space-y-3">
+            <MapPin className="w-12 h-12 mx-auto text-amber-500 animate-bounce" />
+            <h2 className="text-xl font-black tracking-wider text-slate-900">CURRENT LOCATION UNAVAILABLE</h2>
+            <p className="text-sm text-slate-600">
               {errorMessage || 'Current location unavailable — enable browser location access.'}
             </p>
-            <p className="text-xs text-gray-500 font-mono">
+            <p className="text-xs text-slate-400">
               THERMOS strictly requires real-time device geolocation. Mock, cached, and assumed coordinates are prohibited.
             </p>
             <div className="pt-2">
               <button
                 onClick={requestFreshLocation}
-                className="skeuo-btn skeuo-btn-emerald px-5 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 mx-auto cursor-pointer"
+                className="px-5 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 mx-auto cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all"
               >
                 <Crosshair className="w-4 h-4" />
                 <span>Enable / Retry Location Access</span>
@@ -260,18 +261,18 @@ export const CitizenDashboard: React.FC = () => {
     }
 
     return (
-      <div className="max-w-7xl mx-auto px-4 py-24 flex flex-col items-center justify-center text-center space-y-4">
-        <RefreshCw className="w-8 h-8 text-orange-400 animate-spin" />
-        <p className="font-mono text-sm text-gray-300">Acquiring current browser GPS coordinates...</p>
+      <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] py-24 flex flex-col items-center justify-center text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+        <p className="text-sm font-bold text-slate-700">Acquiring current browser GPS coordinates...</p>
       </div>
     );
   }
 
   if (wLoading || tLoading || rLoading || aLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-24 flex flex-col items-center justify-center text-center space-y-4">
-        <RefreshCw className="w-8 h-8 text-orange-400 animate-spin" />
-        <p className="font-mono text-sm text-gray-300">Fetching live weather telemetry for {currentLocation.displayName}...</p>
+      <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] py-24 flex flex-col items-center justify-center text-center space-y-4">
+        <RefreshCw className="w-8 h-8 text-blue-600 animate-spin" />
+        <p className="text-sm font-bold text-slate-700">Fetching live weather telemetry for {currentLocation.displayName}...</p>
       </div>
     );
   }
@@ -279,14 +280,14 @@ export const CitizenDashboard: React.FC = () => {
   // Strictly enforce: If API request fails or no verified live response is received, display DATA UNAVAILABLE
   if (wError || tError || rError || !weather || !thermal || !risk || !alerts || !weather.isLive) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-24 flex flex-col items-center justify-center text-center space-y-4">
-        <div className="p-8 rounded-2xl bg-red-500/10 border border-red-500/30 text-red-400 max-w-lg shadow-[0_0_30px_rgba(239,68,68,0.15)]">
-          <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-red-400" />
-          <h2 className="text-2xl font-black font-mono tracking-wider text-red-400">DATA UNAVAILABLE</h2>
-          <p className="text-sm text-gray-300 font-mono mt-3">
+      <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] py-24 flex flex-col items-center justify-center text-center space-y-4">
+        <div className="p-8 rounded-3xl bg-white/95 border border-red-200 text-red-700 max-w-lg shadow-[0_14px_40px_rgba(239,68,68,0.15)]">
+          <AlertTriangle className="w-12 h-12 mx-auto mb-3 text-red-500" />
+          <h2 className="text-2xl font-black tracking-wider text-red-600">DATA UNAVAILABLE</h2>
+          <p className="text-sm text-slate-600 mt-3">
             Unable to retrieve verified live telemetry from Open-Meteo API for {currentLocation.displayName}.
           </p>
-          <p className="text-xs text-gray-500 font-mono mt-2">
+          <p className="text-xs text-slate-400 mt-2">
             Mock and synthetic weather data fallbacks are strictly disabled.
           </p>
         </div>
@@ -302,197 +303,369 @@ export const CitizenDashboard: React.FC = () => {
   const heatIndex = thermal.heatIndex ?? calculateHeatIndex(weather.temperature, weather.humidity);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-      {/* HEADER ROW */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl neu-well text-orange-400">
-            <MapPin className="w-5 h-5" />
+    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-800 pb-20 relative overflow-hidden -mt-2">
+      {/* SOFT ATMOSPHERIC REALISTIC SKY CLOUDS (FIGMA REFERENCE) */}
+      <div className="absolute top-0 right-0 w-[550px] h-[300px] bg-white/45 rounded-full blur-3xl pointer-events-none -mr-28 -mt-24" />
+      <div className="absolute top-72 left-0 w-[600px] h-[350px] bg-white/35 rounded-full blur-3xl pointer-events-none -ml-40" />
+      <div className="absolute top-[1200px] right-10 w-[700px] h-[400px] bg-blue-100/40 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6 relative z-10">
+        {/* LOCATION HEADER ROW */}
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-2">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-white border border-white text-blue-600 shadow-xs">
+              <MapPin className="w-5 h-5" />
+            </div>
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
+                {currentLocation.displayName}
+              </h1>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">
-              {currentLocation.displayName}
-            </h1>
+
+          {/* CONTROLS & REAL-TIME BADGE */}
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={requestFreshLocation}
+              disabled={isLocating}
+              className="px-4 py-2 text-xs font-bold rounded-full flex items-center gap-1.5 text-slate-700 bg-white/90 hover:bg-white transition-all cursor-pointer border border-white shadow-xs"
+              title="Request fresh real-time browser location"
+            >
+              <Crosshair className={`w-3.5 h-3.5 text-blue-600 ${isLocating ? 'animate-spin' : ''}`} />
+              <span>{isLocating ? 'Locating...' : 'Use My Location'}</span>
+            </button>
+
+            {lastUpdated && (
+              <span className="text-[11px] font-semibold text-slate-500 hidden sm:inline bg-white/60 px-3 py-1 rounded-full border border-white/60">
+                Updated {new Date(lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </span>
+            )}
+
+            {weather.isLive && (
+              <span className="px-3.5 py-1.5 text-xs font-extrabold tracking-wider flex items-center gap-2 text-emerald-800 border border-emerald-200 bg-emerald-50/90 rounded-full shadow-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]" />
+                <span>LIVE TELEMETRY</span>
+              </span>
+            )}
           </div>
         </div>
 
-        {/* CONTROLS & REAL-TIME BADGE */}
-        <div className="flex items-center gap-2.5">
-          <button
-            onClick={requestFreshLocation}
-            disabled={isLocating}
-            className="skeuo-btn px-3 py-1.5 text-xs font-bold font-mono rounded-xl flex items-center gap-1.5 text-slate-300 hover:text-white transition-colors cursor-pointer border border-white/10 hover:border-orange-500/30"
-            title="Request fresh real-time browser location"
-          >
-            <Crosshair className={`w-3.5 h-3.5 text-orange-400 ${isLocating ? 'animate-spin' : ''}`} />
-            <span>{isLocating ? 'Locating...' : 'Use My Location'}</span>
-          </button>
-
-          {lastUpdated && (
-            <span className="text-[10px] font-mono text-gray-400 hidden sm:inline">
-              Updated {new Date(lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-            </span>
-          )}
-
-          {weather.isLive && (
-            <span className="skeuo-pill px-3.5 py-1.5 text-xs font-bold tracking-wider flex items-center gap-2 text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
-              <span>LIVE TELEMETRY</span>
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* DATA PROVENANCE PANEL — hidden for production */}
-
-      {/* PERSONALIZED VULNERABILITY PROFILE SELECTOR */}
-      <div className="p-4 rounded-2xl bg-gradient-to-r from-slate-900/90 to-slate-800/80 border border-white/10 shadow-lg">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <div className="flex items-center gap-2">
-            <Users className="w-4 h-4 text-orange-400" />
-            <span className="text-xs font-bold font-mono tracking-wider text-slate-200 uppercase">
-              Personalized Biometeorological Strain Profile
-            </span>
-          </div>
-          <span className="text-[11px] font-mono text-cyan-400">
-            {VULNERABILITY_PROFILES[vulnerabilityProfile].description}
-          </span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {(Object.keys(VULNERABILITY_PROFILES) as VulnerabilityProfile[]).map((profKey) => {
-            const prof = VULNERABILITY_PROFILES[profKey];
-            const isActive = vulnerabilityProfile === profKey;
-            return (
-              <button
-                key={profKey}
-                onClick={() => setVulnerabilityProfile(profKey)}
-                className={`px-3.5 py-2.5 rounded-xl text-xs font-mono font-bold transition-all duration-200 text-left flex flex-col gap-0.5 cursor-pointer border ${
-                  isActive
-                    ? 'bg-gradient-to-b from-orange-500/25 via-orange-600/15 to-orange-700/20 border-orange-400/60 text-orange-300 shadow-[0_4px_16px_rgba(249,115,22,0.25),inset_0_1px_0_rgba(255,255,255,0.2)] -translate-y-0.5'
-                    : 'bg-slate-900/60 border-slate-700/60 text-slate-400 hover:text-slate-200 hover:border-slate-600/80 hover:bg-slate-800/60 hover:-translate-y-0.5 active:translate-y-0'
-                }`}
-                type="button"
-              >
-                <span>{prof.label}</span>
-                <span className={`text-[10px] font-normal transition-colors ${isActive ? 'text-orange-200/80' : 'text-slate-400'}`}>
-                  {prof.metabolicOffset > 0 ? `+${prof.metabolicOffset} HTSS Strain` : 'Standard 150 W/m²'}
+        {/* DYNAMIC CLIMATE & WEATHER HERO BANNER (EXACT FIGMA REFERENCE LAYOUT) */}
+        <div className="bg-white/95 backdrop-blur-xl rounded-[32px] p-6 sm:p-8 border border-white/90 shadow-[0_14px_40px_rgba(20,90,190,0.08)]">
+          <div className="flex flex-wrap items-center justify-between gap-6 mb-6">
+            <div className="space-y-1">
+              <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+                <span>•</span>
+                <span>{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+              <div className="flex items-baseline gap-3 pt-1">
+                <span className="text-5xl sm:text-6xl font-black text-slate-900 tracking-tight">
+                  {fmt(weather.temperature)}°C
                 </span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+                <span className="text-xs font-extrabold text-blue-700 uppercase px-3 py-1 rounded-full bg-[#EDF5FD] border border-blue-100/70 shadow-xs">
+                  {getClimateType(Number(weather.temperature), Number(weather.humidity)).replace('-', ' ')}
+                </span>
+              </div>
+              <p className="text-sm font-semibold text-slate-500 pt-1">
+                Feels like {fmt(heatIndex)}°C • {weather.windSpeed} km/h wind • {weather.humidity}% humidity
+              </p>
+            </div>
 
-      {/* PRIMARY INSTRUMENTS ROW (HTSS DIAL + 4 CORE OPEN-METEO TELEMETRY FIELDS) */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <ThermalStressGauge
-            score={fmt(activeThermal?.htss ?? thermal.htss)}
-            level={activeThermal?.level ?? (thermal.htssCategory as any) ?? risk.level}
+            <div className="flex flex-col items-center sm:items-end gap-1.5">
+              <DynamicWeatherSymbol
+                temp={Number(weather.temperature)}
+                humidity={Number(weather.humidity)}
+                size="xl"
+              />
+              <span className="text-xs font-bold text-slate-700 px-3.5 py-1 rounded-full bg-[#EDF5FD] border border-blue-100/80 shadow-xs">
+                {Number(weather.temperature) >= 38
+                  ? '🔥 High Weather / Heat Stress'
+                  : Number(weather.humidity) >= 75
+                  ? '🌧️ High Humidity & Rain Showers'
+                  : Number(weather.temperature) <= 15
+                  ? '❄️ Low Temp / Cold Wave'
+                  : '☀️ Clear Atmospheric Conditions'}
+              </span>
+            </div>
+          </div>
+
+          {/* Quick Inset Metric Tiles with Dynamic Weather Symbols */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 border-t border-slate-100">
+            {/* 1. Wind Speed Tile */}
+            {(() => {
+              const spd = Number(weather.windSpeed) || 0;
+              const cond =
+                spd < 5
+                  ? { icon: '🍃', label: 'Calm Air', badge: 'bg-emerald-50 text-emerald-800 border-emerald-200' }
+                  : spd < 15
+                  ? { icon: '💨', label: 'Gentle Breeze', badge: 'bg-sky-50 text-sky-800 border-sky-200' }
+                  : spd < 30
+                  ? { icon: '🌬️', label: 'Moderate Wind', badge: 'bg-blue-50 text-blue-800 border-blue-200' }
+                  : { icon: '🌪️', label: 'High Gale', badge: 'bg-amber-50 text-amber-800 border-amber-200' };
+
+              return (
+                <div className="p-3.5 rounded-2xl bg-[#EDF5FD] border border-blue-100/80 hover:bg-[#E4F0FC] transition-colors flex flex-col justify-between">
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-[11px] font-extrabold text-slate-700 uppercase flex items-center gap-1.5">
+                      <Wind className="w-3.5 h-3.5 text-blue-600" />
+                      Wind Speed
+                    </span>
+                    <span className="text-base leading-none" title={cond.label}>{cond.icon}</span>
+                  </div>
+                  <div className="text-xl font-black text-slate-950 my-0.5">
+                    {fmt(weather.windSpeed)} <span className="text-xs font-bold text-slate-600">km/h</span>
+                  </div>
+                  <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md border inline-block w-fit mt-1 ${cond.badge}`}>
+                    {cond.label}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 2. Dew Point Tile */}
+            {(() => {
+              const dp = Number(weather.dewPoint) || 0;
+              const cond =
+                dp < 10
+                  ? { icon: '🍂', label: 'Dry / Crisp', badge: 'bg-amber-50 text-amber-800 border-amber-200' }
+                  : dp < 18
+                  ? { icon: '💧', label: 'Comfortable', badge: 'bg-emerald-50 text-emerald-800 border-emerald-200' }
+                  : dp < 24
+                  ? { icon: '💦', label: 'Humid / Sticky', badge: 'bg-orange-50 text-orange-800 border-orange-200' }
+                  : { icon: '♨️', label: 'Oppressive', badge: 'bg-red-50 text-red-800 border-red-200' };
+
+              return (
+                <div className="p-3.5 rounded-2xl bg-[#EDF5FD] border border-blue-100/80 hover:bg-[#E4F0FC] transition-colors flex flex-col justify-between">
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-[11px] font-extrabold text-slate-700 uppercase flex items-center gap-1.5">
+                      <Droplets className="w-3.5 h-3.5 text-teal-600" />
+                      Dew Point
+                    </span>
+                    <span className="text-base leading-none" title={cond.label}>{cond.icon}</span>
+                  </div>
+                  <div className="text-xl font-black text-slate-950 my-0.5">
+                    {fmt(weather.dewPoint)} <span className="text-xs font-bold text-slate-600">°C</span>
+                  </div>
+                  <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md border inline-block w-fit mt-1 ${cond.badge}`}>
+                    {cond.label}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 3. Humidity Tile */}
+            {(() => {
+              const rh = Number(weather.humidity) || 0;
+              const cond =
+                rh < 30
+                  ? { icon: '🏜️', label: 'Dry Air', badge: 'bg-amber-50 text-amber-800 border-amber-200' }
+                  : rh < 60
+                  ? { icon: '💧', label: 'Optimal / Fair', badge: 'bg-emerald-50 text-emerald-800 border-emerald-200' }
+                  : rh < 80
+                  ? { icon: '🌧️', label: 'High Moisture', badge: 'bg-blue-50 text-blue-800 border-blue-200' }
+                  : { icon: '⛈️', label: 'Saturated', badge: 'bg-indigo-50 text-indigo-800 border-indigo-200' };
+
+              return (
+                <div className="p-3.5 rounded-2xl bg-[#EDF5FD] border border-blue-100/80 hover:bg-[#E4F0FC] transition-colors flex flex-col justify-between">
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-[11px] font-extrabold text-slate-700 uppercase flex items-center gap-1.5">
+                      <Droplet className="w-3.5 h-3.5 text-blue-600" />
+                      Humidity
+                    </span>
+                    <span className="text-base leading-none" title={cond.label}>{cond.icon}</span>
+                  </div>
+                  <div className="text-xl font-black text-slate-950 my-0.5">
+                    {fmt(weather.humidity)} <span className="text-xs font-bold text-slate-600">%</span>
+                  </div>
+                  <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md border inline-block w-fit mt-1 ${cond.badge}`}>
+                    {cond.label}
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* 4. Solar Radiation Tile */}
+            {(() => {
+              const rad = Number(weather.solarRadiation) || 0;
+              const cond =
+                rad <= 0
+                  ? { icon: '🌙', label: 'Night / Zero UV', badge: 'bg-indigo-50 text-indigo-800 border-indigo-200' }
+                  : rad < 250
+                  ? { icon: '⛅', label: 'Low Irradiance', badge: 'bg-yellow-50 text-yellow-800 border-yellow-200' }
+                  : rad < 600
+                  ? { icon: '☀️', label: 'Moderate Sunlight', badge: 'bg-amber-50 text-amber-800 border-amber-200' }
+                  : { icon: '🔥', label: 'Intense Solar UV', badge: 'bg-red-50 text-red-800 border-red-200' };
+
+              return (
+                <div className="p-3.5 rounded-2xl bg-[#EDF5FD] border border-blue-100/80 hover:bg-[#E4F0FC] transition-colors flex flex-col justify-between">
+                  <div className="flex items-center justify-between gap-1 mb-1">
+                    <span className="text-[11px] font-extrabold text-slate-700 uppercase flex items-center gap-1.5">
+                      <Sun className="w-3.5 h-3.5 text-amber-500" />
+                      Solar Radiation
+                    </span>
+                    <span className="text-base leading-none" title={cond.label}>{cond.icon}</span>
+                  </div>
+                  <div className="text-xl font-black text-slate-950 my-0.5">
+                    {fmt(weather.solarRadiation)} <span className="text-xs font-bold text-slate-600">W/m²</span>
+                  </div>
+                  <div className={`text-[10px] font-bold px-2 py-0.5 rounded-md border inline-block w-fit mt-1 ${cond.badge}`}>
+                    {cond.label}
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* PERSONALIZED VULNERABILITY PROFILE SELECTOR */}
+        <div className="p-5 rounded-[28px] bg-white/95 backdrop-blur-md border border-white/90 shadow-[0_10px_32px_rgba(30,100,200,0.07)]">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-blue-600" />
+              <span className="text-xs font-extrabold tracking-wider text-slate-800 uppercase">
+                Personalized Biometeorological Strain Profile
+              </span>
+            </div>
+            <span className="text-xs text-blue-700 font-bold">
+              {VULNERABILITY_PROFILES[vulnerabilityProfile].description}
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            {(Object.keys(VULNERABILITY_PROFILES) as VulnerabilityProfile[]).map((profKey) => {
+              const prof = VULNERABILITY_PROFILES[profKey];
+              const isActive = vulnerabilityProfile === profKey;
+              return (
+                <button
+                  key={profKey}
+                  onClick={() => setVulnerabilityProfile(profKey)}
+                  className={`px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-200 text-left flex flex-col gap-0.5 cursor-pointer border ${
+                    isActive
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-[0_4px_16px_rgba(37,99,235,0.3)] -translate-y-0.5'
+                      : 'bg-[#EDF5FD] border-blue-100/70 text-slate-700 hover:bg-[#E2F0FD] hover:text-slate-900'
+                  }`}
+                  type="button"
+                >
+                  <span>{prof.label}</span>
+                  <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>
+                    {prof.metabolicOffset > 0 ? `+${prof.metabolicOffset} HTSS Strain` : 'Standard 150 W/m²'}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* PRIMARY INSTRUMENTS ROW (HTSS DIAL + 4 CORE OPEN-METEO TELEMETRY FIELDS) */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <ThermalStressGauge
+              score={fmt(activeThermal?.htss ?? thermal.htss)}
+              level={activeThermal?.level ?? (thermal.htssCategory as any) ?? risk.level}
+            />
+          </div>
+          <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <WeatherCard title="Air Temp" value={fmt(weather.temperature)} unit="°C" icon="Thermometer" color="#f97316" />
+            <WeatherCard title="Humidity" value={fmt(weather.humidity)} unit="%" icon="Droplets" color="#3b82f6" />
+            <WeatherCard title="Wind Speed" value={fmt(weather.windSpeed)} unit="km/h" icon="Wind" color="#10b981" />
+            <WeatherCard title="Solar Rad" value={fmt(weather.solarRadiation)} unit="W/m²" icon="Sun" color="#eab308" />
+          </div>
+        </div>
+
+        {/* HTSS CALCULATION DETAILS (expandable) */}
+        <HTSSDetailPanel
+          temperature={weather.temperature}
+          humidity={weather.humidity}
+          windSpeed={weather.windSpeed}
+          solarRadiation={weather.solarRadiation}
+          htss={fmt(thermal.htss) as number}
+          riskCategory={thermal.htssCategory || risk.level}
+          wbgt={fmt(thermal.wbgt) as number}
+          utci={fmt(thermal.utci) as number}
+          heatIndex={fmt(heatIndex) as number}
+          humidex={humidex}
+          wetBulbTemp={wetBulbTemp}
+          dataTimestamp={weather.apiTimestamp || weather.timestamp}
+        />
+
+        {/* ADDITIONAL ATMOSPHERIC API TELEMETRY (REAL OPEN-METEO FIELDS) */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <WeatherCard
+            title="Pressure MSL"
+            value={fmt(weather.pressureMsl)}
+            unit="hPa"
+            icon="Gauge"
+            color="#8b5cf6"
+          />
+          <WeatherCard
+            title="Dew Point"
+            value={fmt(weather.dewPoint)}
+            unit="°C"
+            icon="CloudRain"
+            color="#06b6d4"
+          />
+          <WeatherCard
+            title="Wind Direction"
+            value={fmt(weather.windDirection)}
+            unit="°"
+            icon="Compass"
+            color="#0d9488"
+          />
+          <WeatherCard
+            title="UV Index"
+            value={weather.uvIndex !== undefined ? Math.round(weather.uvIndex * 10) / 10 : '0'}
+            unit=""
+            icon="SunMedium"
+            color="#f43f5e"
           />
         </div>
-        <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-          <WeatherCard title="Air Temp" value={fmt(weather.temperature)} unit="°C" icon="Thermometer" color="#f97316" />
-          <WeatherCard title="Humidity" value={fmt(weather.humidity)} unit="%" icon="Droplets" color="#3b82f6" />
-          <WeatherCard title="Wind Speed" value={fmt(weather.windSpeed)} unit="km/h" icon="Wind" color="#10b981" />
-          <WeatherCard title="Solar Rad" value={fmt(weather.solarRadiation)} unit="W/m²" icon="Sun" color="#eab308" />
-        </div>
-      </div>
 
-      {/* HTSS CALCULATION DETAILS (expandable) */}
-      <HTSSDetailPanel
-        temperature={weather.temperature}
-        humidity={weather.humidity}
-        windSpeed={weather.windSpeed}
-        solarRadiation={weather.solarRadiation}
-        htss={fmt(thermal.htss) as number}
-        riskCategory={thermal.htssCategory || risk.level}
-        wbgt={fmt(thermal.wbgt) as number}
-        utci={fmt(thermal.utci) as number}
-        heatIndex={fmt(heatIndex) as number}
-        humidex={humidex}
-        wetBulbTemp={wetBulbTemp}
-        dataTimestamp={weather.apiTimestamp || weather.timestamp}
-      />
+        {/* AIR QUALITY & DUAL-HAZARD COUPLING (OPEN-METEO AIR QUALITY TELEMETRY) */}
+        {weather.airQuality && (
+          <div className="p-6 rounded-[28px] bg-white/95 backdrop-blur-md border border-white/90 shadow-[0_10px_32px_rgba(30,100,200,0.07)]">
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <div className="flex items-center gap-2.5">
+                <Activity className="w-5 h-5 text-blue-600" />
+                <div>
+                  <h3 className="text-sm font-extrabold text-slate-900 tracking-tight">
+                    AIR QUALITY & DUAL-HAZARD COUPLING
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    Live atmospheric particulate & ground-level ozone telemetry (Open-Meteo Air Quality)
+                  </p>
+                </div>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-xs font-extrabold border ${
+                (weather.airQuality.aqi ?? 50) > 150
+                  ? 'bg-red-50 text-red-700 border-red-200 animate-pulse'
+                  : (weather.airQuality.aqi ?? 50) > 100
+                  ? 'bg-orange-50 text-orange-800 border-orange-200'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+              }`}>
+                AQI {weather.airQuality.aqi} — {weather.airQuality.aqiCategory}
+              </span>
+            </div>
 
-      {/* ADDITIONAL ATMOSPHERIC API TELEMETRY (REAL OPEN-METEO FIELDS) */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <WeatherCard
-          title="Pressure MSL"
-          value={fmt(weather.pressureMsl)}
-          unit="hPa"
-          icon="Gauge"
-          color="#a855f7"
-        />
-        <WeatherCard
-          title="Dew Point"
-          value={fmt(weather.dewPoint)}
-          unit="°C"
-          icon="CloudRain"
-          color="#06b6d4"
-        />
-        <WeatherCard
-          title="Wind Direction"
-          value={fmt(weather.windDirection)}
-          unit="°"
-          icon="Compass"
-          color="#14b8a6"
-        />
-        <WeatherCard
-          title="UV Index"
-          value={weather.uvIndex !== undefined ? Math.round(weather.uvIndex * 10) / 10 : '0'}
-          unit=""
-          icon="SunMedium"
-          color="#f43f5e"
-        />
-      </div>
-
-      {/* AIR QUALITY & DUAL-HAZARD COUPLING (OPEN-METEO AIR QUALITY TELEMETRY) */}
-      {weather.airQuality && (
-        <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 border border-white/10 shadow-lg">
-          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
-            <div className="flex items-center gap-2.5">
-              <Activity className="w-5 h-5 text-emerald-400" />
-              <div>
-                <h3 className="text-sm font-bold font-mono text-white tracking-wide">
-                  AIR QUALITY & DUAL-HAZARD COUPLING
-                </h3>
-                <p className="text-xs font-mono text-slate-400">
-                  Live atmospheric particulate & ground-level ozone telemetry (Open-Meteo Air Quality)
-                </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="p-3.5 rounded-2xl bg-[#EDF5FD] border border-blue-100/70">
+                <span className="text-[11px] font-bold text-slate-500 block uppercase">PM2.5 Particulate</span>
+                <span className="text-lg font-black text-slate-900">{weather.airQuality.pm25} <span className="text-xs font-normal text-slate-500">µg/m³</span></span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#EDF5FD] border border-blue-100/70">
+                <span className="text-[11px] font-bold text-slate-500 block uppercase">PM10 Coarse Dust</span>
+                <span className="text-lg font-black text-slate-900">{weather.airQuality.pm10} <span className="text-xs font-normal text-slate-500">µg/m³</span></span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#EDF5FD] border border-blue-100/70">
+                <span className="text-[11px] font-bold text-slate-500 block uppercase">Ground Ozone (O₃)</span>
+                <span className="text-lg font-black text-slate-900">{weather.airQuality.ozone} <span className="text-xs font-normal text-slate-500">µg/m³</span></span>
+              </div>
+              <div className="p-3.5 rounded-2xl bg-[#EDF5FD] border border-blue-100/70">
+                <span className="text-[11px] font-bold text-slate-500 block uppercase">Compounding CHPI</span>
+                <span className="text-lg font-black text-orange-600">{weather.chpi ?? activeThermal?.htss ?? thermal.htss} <span className="text-xs font-normal text-slate-500">/ 100</span></span>
               </div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-mono font-bold border ${
-              (weather.airQuality.aqi ?? 50) > 150
-                ? 'bg-red-500/20 border-red-500/40 text-red-400 animate-pulse'
-                : (weather.airQuality.aqi ?? 50) > 100
-                ? 'bg-orange-500/20 border-orange-500/40 text-orange-400'
-                : 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
-            }`}>
-              AQI {weather.airQuality.aqi} — {weather.airQuality.aqiCategory}
-            </span>
           </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono">
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-              <span className="text-[11px] text-slate-400 block">PM2.5 Particulate</span>
-              <span className="text-lg font-bold text-white">{weather.airQuality.pm25} <span className="text-xs font-normal text-slate-400">µg/m³</span></span>
-            </div>
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-              <span className="text-[11px] text-slate-400 block">PM10 Coarse Dust</span>
-              <span className="text-lg font-bold text-white">{weather.airQuality.pm10} <span className="text-xs font-normal text-slate-400">µg/m³</span></span>
-            </div>
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-              <span className="text-[11px] text-slate-400 block">Ground Ozone (O₃)</span>
-              <span className="text-lg font-bold text-white">{weather.airQuality.ozone} <span className="text-xs font-normal text-slate-400">µg/m³</span></span>
-            </div>
-            <div className="p-3 rounded-xl bg-white/5 border border-white/5">
-              <span className="text-[11px] text-slate-400 block">Compounding CHPI</span>
-              <span className="text-lg font-bold text-orange-400">{weather.chpi ?? activeThermal?.htss ?? thermal.htss} <span className="text-xs font-normal text-slate-400">/ 100</span></span>
-            </div>
-          </div>
-        </div>
-      )}
+        )}
 
       {/* SECONDARY THERMAL INDICES (LOCALLY CALCULATED VIA DETERMINISTIC FORMULAS) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -571,6 +744,7 @@ export const CitizenDashboard: React.FC = () => {
           onClose={() => setIsAuditOpen(false)}
         />
       )}
+      </div>
     </div>
   );
 };

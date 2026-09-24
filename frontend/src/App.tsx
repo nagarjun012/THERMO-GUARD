@@ -28,7 +28,7 @@ const queryClient = new QueryClient({
 
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen text-gray-200 selection:bg-orange-500/30 selection:text-orange-200">
+    <div className="min-h-screen text-slate-800 bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] selection:bg-blue-500/20 selection:text-blue-900">
       <OfficialTopBanner />
       <Navbar />
       <Header />

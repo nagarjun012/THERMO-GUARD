@@ -38,36 +38,36 @@ export const DataIntegrityInspector: React.FC<Props> = ({ district, isOpen, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-[700] flex items-center justify-center p-4 bg-black/75 backdrop-blur-md animate-fadeIn">
-      <div className="glass-modal relative w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-5 text-gray-200 border border-white/15">
+    <div className="fixed inset-0 z-[700] flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md animate-fadeIn">
+      <div className="relative w-full max-w-2xl rounded-3xl p-6 shadow-2xl space-y-5 bg-white text-slate-900 border border-slate-200">
         {/* HEADER */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl neu-well text-orange-400">
+            <div className="p-2.5 rounded-xl neu-well text-orange-600">
               <Cpu className="w-5 h-5" />
             </div>
             <div>
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-base sm:text-lg font-black text-white font-mono">
+                <h3 className="text-base sm:text-lg font-black text-slate-950 font-mono">
                   Data Integrity &amp; Calculation Inspector
                 </h3>
-                <span className="skeuo-pill px-2.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-emerald-500/30 flex items-center gap-1 font-bold">
+                <span className="skeuo-pill px-2.5 py-0.5 text-[10px] font-mono text-emerald-800 border border-emerald-300 bg-emerald-100 flex items-center gap-1 font-bold">
                   <ShieldCheck className="w-3 h-3" /> DETERMINISTIC
                 </span>
                 {verifiedLive && (
-                  <span className="skeuo-pill px-2.5 py-0.5 text-[10px] font-mono text-emerald-300 border border-emerald-500/50 bg-emerald-500/20 flex items-center gap-1 font-bold">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-400" /> LIVE VERIFIED
+                  <span className="skeuo-pill px-2.5 py-0.5 text-[10px] font-mono text-emerald-900 border border-emerald-300 bg-emerald-200 flex items-center gap-1 font-bold">
+                    <CheckCircle2 className="w-3 h-3 text-emerald-700" /> LIVE VERIFIED
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-400 mt-0.5 font-sans">
+              <p className="text-xs text-slate-600 mt-0.5 font-sans font-semibold">
                 Inspecting Open-Meteo telemetry and Liljegren thermodynamic pipeline
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="skeuo-btn skeuo-btn-dark p-2 rounded-xl text-gray-400 hover:text-white"
+            className="p-2 rounded-xl text-slate-500 hover:text-black hover:bg-slate-100 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -76,109 +76,109 @@ export const DataIntegrityInspector: React.FC<Props> = ({ district, isOpen, onCl
         {/* LOCATION META IN NEUMORPHIC WELL */}
         <div className="neu-well p-4 rounded-2xl grid grid-cols-2 sm:grid-cols-4 gap-3 font-mono text-xs">
           <div>
-            <span className="text-gray-500 block text-[10px] uppercase font-bold">District</span>
-            <span className="text-white font-black text-sm">{currentDistrict.district}</span>
+            <span className="text-slate-600 block text-[10px] uppercase font-bold">District</span>
+            <span className="text-slate-950 font-black text-sm">{currentDistrict.district}</span>
           </div>
           <div>
-            <span className="text-gray-500 block text-[10px] uppercase font-bold">State / UT</span>
-            <span className="text-orange-400 font-bold">{currentDistrict.state}</span>
+            <span className="text-slate-600 block text-[10px] uppercase font-bold">State / UT</span>
+            <span className="text-blue-700 font-bold">{currentDistrict.state}</span>
           </div>
           <div>
-            <span className="text-gray-500 block text-[10px] uppercase font-bold">Latitude</span>
-            <span className="text-gray-300">{currentDistrict.lat.toFixed(4)}° N</span>
+            <span className="text-slate-600 block text-[10px] uppercase font-bold">Latitude</span>
+            <span className="text-slate-800 font-bold">{currentDistrict.lat.toFixed(4)}° N</span>
           </div>
           <div>
-            <span className="text-gray-500 block text-[10px] uppercase font-bold">Longitude</span>
-            <span className="text-gray-300">{currentDistrict.lon.toFixed(4)}° E</span>
+            <span className="text-slate-600 block text-[10px] uppercase font-bold">Longitude</span>
+            <span className="text-slate-800 font-bold">{currentDistrict.lon.toFixed(4)}° E</span>
           </div>
         </div>
 
         {isFailed ? (
-          <div className="neu-well p-4 rounded-2xl border border-red-500/40 text-red-400 text-xs space-y-2">
+          <div className="p-4 rounded-2xl border border-red-300 bg-red-50 text-red-900 text-xs space-y-2">
             <div className="flex items-center gap-2 font-bold text-sm">
               <AlertTriangle className="w-5 h-5" /> API Telemetry Retrieval Failed for this District
             </div>
             <p>
               Open-Meteo query failed or returned invalid telemetry. Per safety rules, this location shows <strong>"DATA UNAVAILABLE"</strong> and is assigned 0 synthetic values.
             </p>
-            <p className="font-mono text-[11px] text-gray-400">Error: {currentDistrict.errorReason || 'Network or coordinate timeout'}</p>
+            <p className="font-mono text-[11px] text-red-700 font-bold">Error: {currentDistrict.errorReason || 'Network or coordinate timeout'}</p>
           </div>
         ) : (
           <>
             {/* STEP 1: OPEN-METEO INPUTS */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-gray-400 border-b border-white/5 pb-1 font-mono">
-                <span className="font-bold text-orange-400 flex items-center gap-1.5">
-                  <Radio className="w-3.5 h-3.5 text-emerald-400 animate-pulse" /> 1. OPEN-METEO LIVE TELEMETRY INPUTS
+              <div className="flex items-center justify-between text-xs text-slate-700 border-b border-slate-200 pb-1 font-mono">
+                <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <Radio className="w-3.5 h-3.5 text-emerald-600 animate-pulse" /> 1. OPEN-METEO LIVE TELEMETRY INPUTS
                 </span>
-                <span className="text-[11px]">Source: {currentDistrict.source}</span>
+                <span className="text-[11px] font-bold">Source: {currentDistrict.source}</span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
-                <div className="neu-card p-3 rounded-xl">
-                  <span className="text-[10px] text-gray-400 block uppercase font-bold">Air Temp (2m)</span>
-                  <span className="text-lg font-black text-white">{currentDistrict.temperature}°C</span>
+                <div className="p-3 rounded-xl bg-[#EDF5FD] border border-blue-100">
+                  <span className="text-[10px] text-slate-600 block uppercase font-bold">Air Temp (2m)</span>
+                  <span className="text-lg font-black text-slate-950">{currentDistrict.temperature}°C</span>
                 </div>
-                <div className="neu-card p-3 rounded-xl">
-                  <span className="text-[10px] text-gray-400 block uppercase font-bold">Humidity</span>
-                  <span className="text-lg font-black text-blue-400">{currentDistrict.humidity}%</span>
+                <div className="p-3 rounded-xl bg-[#EDF5FD] border border-blue-100">
+                  <span className="text-[10px] text-slate-600 block uppercase font-bold">Humidity</span>
+                  <span className="text-lg font-black text-blue-700">{currentDistrict.humidity}%</span>
                 </div>
-                <div className="neu-card p-3 rounded-xl">
-                  <span className="text-[10px] text-gray-400 block uppercase font-bold">Wind (10m)</span>
-                  <span className="text-lg font-black text-teal-400">{currentDistrict.windSpeed} km/h</span>
+                <div className="p-3 rounded-xl bg-[#EDF5FD] border border-blue-100">
+                  <span className="text-[10px] text-slate-600 block uppercase font-bold">Wind (10m)</span>
+                  <span className="text-lg font-black text-teal-700">{currentDistrict.windSpeed} km/h</span>
                 </div>
-                <div className="neu-card p-3 rounded-xl">
-                  <span className="text-[10px] text-gray-400 block uppercase font-bold">Solar Rad</span>
-                  <span className="text-lg font-black text-amber-400">{currentDistrict.solarRadiation} W/m²</span>
+                <div className="p-3 rounded-xl bg-[#EDF5FD] border border-blue-100">
+                  <span className="text-[10px] text-slate-600 block uppercase font-bold">Solar Rad</span>
+                  <span className="text-lg font-black text-amber-700">{currentDistrict.solarRadiation} W/m²</span>
                 </div>
               </div>
             </div>
 
             {/* STEP 2: THERMODYNAMIC CALCULATIONS */}
             <div className="space-y-2">
-              <div className="flex items-center justify-between text-xs text-gray-400 border-b border-white/5 pb-1 font-mono">
-                <span className="font-bold text-orange-400 flex items-center gap-1.5">
-                  <Terminal className="w-3.5 h-3.5 text-blue-400" /> 2. STULL &amp; LILJEGREN THERMODYNAMICS
+              <div className="flex items-center justify-between text-xs text-slate-700 border-b border-slate-200 pb-1 font-mono">
+                <span className="font-bold text-slate-900 flex items-center gap-1.5">
+                  <Terminal className="w-3.5 h-3.5 text-blue-600" /> 2. STULL &amp; LILJEGREN THERMODYNAMICS
                 </span>
-                <span className="text-[11px]">Calculated: {currentDistrict.calculatedAt ? new Date(currentDistrict.calculatedAt).toLocaleTimeString() : 'Live'}</span>
+                <span className="text-[11px] font-bold">Calculated: {currentDistrict.calculatedAt ? new Date(currentDistrict.calculatedAt).toLocaleTimeString() : 'Live'}</span>
               </div>
 
               <div className="grid grid-cols-3 gap-3 text-xs font-mono">
-                <div className="neu-well p-3.5 rounded-xl">
-                  <span className="text-[10px] text-gray-500 block uppercase font-bold">Wet Bulb (Twb)</span>
-                  <span className="text-base font-black text-sky-300">{currentDistrict.twb}°C</span>
-                  <span className="text-[9px] text-gray-500 block mt-1">Stull (2011) Empirical</span>
+                <div className="p-3.5 rounded-xl bg-[#EDF5FD] border border-blue-100">
+                  <span className="text-[10px] text-slate-600 block uppercase font-bold">Wet Bulb (Twb)</span>
+                  <span className="text-base font-black text-blue-800">{currentDistrict.twb}°C</span>
+                  <span className="text-[9px] text-slate-500 block mt-1">Stull (2011) Empirical</span>
                 </div>
-                <div className="neu-well p-3.5 rounded-xl">
-                  <span className="text-[10px] text-gray-500 block uppercase font-bold">Outdoor WBGT</span>
-                  <span className="text-base font-black text-purple-300">{currentDistrict.wbgt}°C</span>
-                  <span className="text-[9px] text-gray-500 block mt-1">Liljegren Outdoor Model</span>
+                <div className="p-3.5 rounded-xl bg-[#EDF5FD] border border-blue-100">
+                  <span className="text-[10px] text-slate-600 block uppercase font-bold">Outdoor WBGT</span>
+                  <span className="text-base font-black text-purple-900">{currentDistrict.wbgt}°C</span>
+                  <span className="text-[9px] text-slate-500 block mt-1">Liljegren Outdoor Model</span>
                 </div>
-                <div className="neu-well p-3.5 rounded-xl">
-                  <span className="text-[10px] text-gray-500 block uppercase font-bold">UTCI Index</span>
-                  <span className="text-base font-black text-orange-300">{currentDistrict.utci}°C</span>
-                  <span className="text-[9px] text-gray-500 block mt-1">Universal Climate</span>
+                <div className="p-3.5 rounded-xl bg-[#EDF5FD] border border-blue-100">
+                  <span className="text-[10px] text-slate-600 block uppercase font-bold">UTCI Index</span>
+                  <span className="text-base font-black text-orange-900">{currentDistrict.utci}°C</span>
+                  <span className="text-[9px] text-slate-500 block mt-1">Universal Climate</span>
                 </div>
               </div>
             </div>
 
             {/* STEP 3: FINAL HTSS RISK SCORE */}
-            <div className="neu-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 border border-orange-500/30">
+            <div className="p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 bg-white border-2 border-orange-300 shadow-sm">
               <div>
-                <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block font-mono">
+                <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block font-mono">
                   Final Deterministic HTSS Score
                 </span>
                 <div className="flex items-baseline gap-2 mt-1">
-                  <span className="text-3xl font-black font-mono text-white tracking-tight">{currentDistrict.htss}</span>
-                  <span className="text-xs text-gray-400 font-mono">/ 100</span>
-                  <span className="skeuo-pill ml-3 px-3 py-1 text-xs font-black uppercase tracking-wider text-orange-400 border border-orange-500/40 bg-orange-500/15">
+                  <span className="text-3xl font-black font-mono text-slate-950 tracking-tight">{currentDistrict.htss}</span>
+                  <span className="text-xs text-slate-600 font-mono font-bold">/ 100</span>
+                  <span className="skeuo-pill ml-3 px-3 py-1 text-xs font-black uppercase tracking-wider text-orange-950 border border-orange-400 bg-orange-100">
                     {currentDistrict.riskCategory} RISK
                   </span>
                 </div>
               </div>
-              <div className="text-right text-xs text-gray-400 font-mono">
-                <div>National Ranking: <strong className="text-white">#{currentDistrict.rank || 'N/A'}</strong></div>
-                <div className="text-[10px] text-emerald-400 mt-1">Fully Verified Telemetry</div>
+              <div className="text-right text-xs text-slate-700 font-mono font-bold">
+                <div>National Ranking: <strong className="text-slate-950 font-black">#{currentDistrict.rank || 'N/A'}</strong></div>
+                <div className="text-[10px] text-emerald-700 mt-1">Fully Verified Telemetry</div>
               </div>
             </div>
           </>

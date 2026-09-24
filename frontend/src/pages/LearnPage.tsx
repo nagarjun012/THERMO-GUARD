@@ -237,17 +237,17 @@ export const LearnPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-dark-900 text-gray-200 pb-20 relative -mt-2">
+    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 pb-20 relative -mt-2 learn-page-root">
       {/* STICKY SUB-NAVIGATION BAR WITH EFFECTS, ANIMATIONS & HIGH VISIBILITY */}
-      <div className="sticky top-16 z-40 bg-[#070d18]/95 backdrop-blur-2xl border-b border-slate-700/80 shadow-[0_8px_32px_rgba(0,0,0,0.65)] transition-all">
+      <div className="sticky top-16 z-40 bg-white/80 backdrop-blur-2xl border-b border-blue-200/60 shadow-[0_4px_20px_rgba(20,80,180,0.06)] transition-all">
         {/* Ambient Top Glow Line */}
-        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent pointer-events-none" />
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2.5 flex items-center relative gap-2">
           {/* Left Arrow Button (Desktop) */}
           <button
             onClick={() => scrollNav('left')}
-            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/90 hover:border-slate-500 shadow-md transition-all shrink-0 cursor-pointer active:scale-95 z-20"
+            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-blue-200/80 shadow-xs transition-all shrink-0 cursor-pointer active:scale-95 z-20"
             title="Scroll tabs left"
             aria-label="Scroll tabs left"
           >
@@ -255,7 +255,7 @@ export const LearnPage: React.FC = () => {
           </button>
 
           {/* Left Gradient Fade Mask */}
-          <div className="pointer-events-none absolute left-0 lg:left-10 top-0 bottom-0 w-8 bg-gradient-to-r from-[#070d18] to-transparent z-10" />
+          <div className="pointer-events-none absolute left-0 lg:left-10 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10" />
 
           {/* Tabs Scrollable Container */}
           <div
@@ -273,17 +273,17 @@ export const LearnPage: React.FC = () => {
                   onClick={() => scrollTo(sec.id)}
                   whileHover={{ scale: 1.04, y: -1 }}
                   whileTap={{ scale: 0.96 }}
-                  className={`relative group px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 cursor-pointer flex items-center gap-1.5 z-10 shrink-0 ${
+                  className={`relative group px-3.5 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors duration-200 cursor-pointer flex items-center gap-1.5 z-10 shrink-0 ${
                     isActive
-                      ? 'text-white font-bold'
-                      : 'text-slate-300 hover:text-white'
+                      ? 'text-white font-black'
+                      : 'text-slate-600 hover:text-blue-700'
                   }`}
                 >
                   {/* Sliding Active Pill Background Animation */}
                   {isActive && (
                     <motion.div
                       layoutId="activeLearnTab"
-                      className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 border border-amber-300/40 shadow-[0_2px_16px_rgba(249,115,22,0.45),inset_0_1px_1px_rgba(255,255,255,0.4)]"
+                      className="absolute inset-0 rounded-full bg-[#2563EB] shadow-[0_2px_12px_rgba(37,99,235,0.4)]"
                       transition={{ type: 'spring', stiffness: 420, damping: 32 }}
                       style={{ zIndex: -1 }}
                     />
@@ -291,15 +291,15 @@ export const LearnPage: React.FC = () => {
 
                   {/* Inactive Tab Pill Background with frosted glass and clear visibility */}
                   {!isActive && (
-                    <div className="absolute inset-0 rounded-full bg-slate-800/90 border border-slate-700/80 shadow-sm backdrop-blur-md transition-all duration-200 group-hover:bg-slate-700/90 group-hover:border-slate-500/80 group-hover:shadow-[0_0_12px_rgba(249,115,22,0.2)] -z-10" />
+                    <div className="absolute inset-0 rounded-full bg-[#EDF5FD] border border-blue-200/70 shadow-xs transition-all duration-200 group-hover:bg-white group-hover:border-blue-300 -z-10" />
                   )}
 
                   {/* Tab Icon */}
                   <Icon
                     className={`w-3.5 h-3.5 transition-transform duration-200 ${
                       isActive
-                        ? 'text-white scale-110 drop-shadow'
-                        : 'text-slate-400 group-hover:text-amber-400 group-hover:scale-110'
+                        ? 'text-white scale-110'
+                        : 'text-slate-500 group-hover:text-blue-600 group-hover:scale-110'
                     }`}
                   />
 
@@ -324,7 +324,7 @@ export const LearnPage: React.FC = () => {
           {/* Right Arrow Button (Desktop) */}
           <button
             onClick={() => scrollNav('right')}
-            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/90 hover:border-slate-500 shadow-md transition-all shrink-0 cursor-pointer active:scale-95 z-20"
+            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border border-blue-200/80 shadow-xs transition-all shrink-0 cursor-pointer active:scale-95 z-20"
             title="Scroll tabs right"
             aria-label="Scroll tabs right"
           >
@@ -335,34 +335,34 @@ export const LearnPage: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-16">
         {/* HERO SECTION */}
-        <section id="overview" className="relative glass-card p-8 md:p-12 overflow-hidden border-orange-500/20">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-orange-500/20 to-red-600/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+        <section id="overview" className="relative glass-card p-8 md:p-12 overflow-hidden border-blue-100 shadow-[0_12px_36px_rgba(30,100,200,0.07)]">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-blue-200/40 to-cyan-200/30 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
 
           <div className="relative z-10 max-w-4xl space-y-6">
-            <div className="inline-flex items-center gap-2 px-3 py-1 bg-orange-500/10 border border-orange-500/30 rounded-full text-orange-400 text-xs font-bold uppercase tracking-wider">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 border border-blue-200 rounded-full text-blue-700 text-xs font-bold uppercase tracking-wider">
               <BookOpen className="w-4 h-4" /> Educational Guide & Knowledge Hub
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-extrabold text-white tracking-tight leading-tight">
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight leading-tight">
               Understand Heat Risk.{' '}
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-red-500 to-yellow-400">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-amber-500 to-red-500">
                 Stay Ahead of the Heat.
               </span>
             </h1>
 
-            <p className="text-lg md:text-xl text-gray-300 leading-relaxed">
+            <p className="text-lg md:text-xl text-slate-600 leading-relaxed font-medium">
               Learn how THERMOS turns complex environmental data into clear, life-saving heat-health warnings for citizens, outdoor workers, healthcare staff, and disaster officials.
             </p>
 
             {/* Visual Flow Diagram */}
             <div className="pt-6 pb-4">
-              <p className="text-xs uppercase font-bold text-gray-400 tracking-wider mb-4">THERMOS System Data Flow:</p>
+              <p className="text-xs uppercase font-bold text-slate-500 tracking-wider mb-4">THERMOS System Data Flow:</p>
               <div className="grid grid-cols-2 md:grid-cols-7 gap-2 text-center text-xs font-medium">
-                <div className="glass-card p-3 rounded-lg border-blue-500/30 flex flex-col items-center justify-center">
-                  <Thermometer className="w-5 h-5 text-blue-400 mb-1" />
-                  <span>Weather Data</span>
+                <div className="p-3 rounded-2xl bg-[#EDF5FD] border border-blue-100/80 flex flex-col items-center justify-center text-slate-800">
+                  <Thermometer className="w-5 h-5 text-blue-600 mb-1" />
+                  <span className="font-bold">Weather Data</span>
                 </div>
-                <div className="hidden md:flex items-center justify-center text-gray-500">➔</div>
+                <div className="hidden md:flex items-center justify-center text-slate-400">➔</div>
                 <div className="glass-card p-3 rounded-lg border-yellow-500/30 flex flex-col items-center justify-center">
                   <Droplets className="w-5 h-5 text-yellow-400 mb-1" />
                   <span>Heat Indices</span>

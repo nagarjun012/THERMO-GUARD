@@ -20,10 +20,10 @@ export const MapPage: React.FC = () => {
 
   if (isLoading || !data) {
     return (
-      <div className="h-[calc(100vh-64px)] w-full flex items-center justify-center bg-dark-900 text-gray-400">
-        <div className="flex flex-col items-center gap-3">
-          <Activity className="w-8 h-8 text-orange-500 animate-spin" />
-          <span className="text-sm font-semibold">Loading Live Heat Risk GIS Map...</span>
+      <div className="h-[calc(100vh-64px)] w-full flex items-center justify-center bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-700">
+        <div className="flex flex-col items-center gap-3 bg-white/90 p-8 rounded-3xl border border-white/80 shadow-lg">
+          <Activity className="w-8 h-8 text-blue-600 animate-spin" />
+          <span className="text-sm font-bold text-slate-800">Loading Live Heat Risk GIS Map...</span>
         </div>
       </div>
     );
@@ -33,7 +33,7 @@ export const MapPage: React.FC = () => {
   const currentCenter: [number, number] = [selectedLocation.lat, selectedLocation.lon];
 
   return (
-    <div className="h-[calc(100vh-64px)] w-full relative overflow-hidden bg-dark-900">
+    <div className="h-[calc(100vh-64px)] w-full relative overflow-hidden bg-[#CCE5FD]">
       {/* GIS MAP CONTAINER */}
       <HeatRiskMap
         cities={data.cities}
@@ -48,35 +48,35 @@ export const MapPage: React.FC = () => {
         
         {/* LEFT: UNIFIED HORIZONTAL COMMAND STRIP */}
         <div className="pointer-events-auto flex items-center gap-2 max-w-[calc(100%-220px)]">
-          <div className="glass-card px-3.5 py-1.5 bg-dark-900/90 backdrop-blur-xl border border-dark-600/90 shadow-2xl rounded-2xl flex items-center gap-3 text-xs overflow-hidden">
+          <div className="px-3.5 py-1.5 bg-white/95 backdrop-blur-xl border border-white/80 shadow-lg rounded-2xl flex items-center gap-3 text-xs overflow-hidden">
             {/* LIVE DATA PILL */}
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono font-bold text-[10px] flex-shrink-0">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono font-bold text-[10px] flex-shrink-0">
+              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
               <span>LIVE</span>
             </div>
 
             {/* LOCATION SELECTOR TRIGGER */}
             <button
               onClick={() => setShowLocationSelector(!showLocationSelector)}
-              className="flex items-center gap-1.5 hover:text-orange-400 font-bold text-white transition-colors cursor-pointer group flex-shrink-0"
+              className="flex items-center gap-1.5 hover:text-blue-700 font-bold text-slate-800 transition-colors cursor-pointer group flex-shrink-0"
               title="Click to switch location"
             >
-              <MapPin className="w-3.5 h-3.5 text-orange-400 group-hover:scale-110 transition-transform flex-shrink-0" />
-              <span className="text-orange-400 underline underline-offset-2 font-black truncate max-w-[180px] sm:max-w-[240px]">
+              <MapPin className="w-3.5 h-3.5 text-blue-600 group-hover:scale-110 transition-transform flex-shrink-0" />
+              <span className="text-blue-700 underline underline-offset-2 font-black truncate max-w-[180px] sm:max-w-[240px]">
                 {locationName}
               </span>
             </button>
 
-            <div className="h-4 w-px bg-dark-700 hidden sm:block flex-shrink-0" />
+            <div className="h-4 w-px bg-slate-200 hidden sm:block flex-shrink-0" />
 
             {/* GIS RESOLUTION SELECTOR */}
-            <div className="flex items-center gap-1 text-[11px] text-gray-300 flex-shrink-0">
-              <Sliders className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
-              <span className="text-gray-400 font-medium hidden md:inline">GIS:</span>
+            <div className="flex items-center gap-1 text-[11px] text-slate-600 flex-shrink-0">
+              <Sliders className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+              <span className="text-slate-500 font-medium hidden md:inline">GIS:</span>
               <select
                 value={gisResolution}
                 onChange={(e) => setGisResolution(e.target.value)}
-                className="bg-dark-800 text-white font-semibold rounded-lg px-2 py-1 border border-dark-600 text-xs focus:outline-none focus:border-accent cursor-pointer"
+                className="bg-[#EDF5FD] text-slate-900 font-bold rounded-lg px-2 py-1 border border-blue-200 text-xs focus:outline-none focus:border-blue-500 cursor-pointer"
               >
                 <option value="District / City Level Risk">District / City Level</option>
                 <option value="All-India District Overview">All-India Districts</option>
@@ -84,28 +84,28 @@ export const MapPage: React.FC = () => {
               </select>
             </div>
 
-            <div className="h-4 w-px bg-dark-700 hidden sm:block flex-shrink-0" />
+            <div className="h-4 w-px bg-slate-200 hidden sm:block flex-shrink-0" />
 
             {/* MAP GUIDE TRIGGER */}
             <button
               onClick={() => setIsEduModalOpen(true)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-gradient-to-r from-orange-500/20 via-red-500/20 to-orange-500/10 hover:from-orange-500/30 hover:to-red-500/30 text-orange-300 hover:text-white border border-orange-500/30 font-bold text-xs transition-all cursor-pointer flex-shrink-0 group"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-bold text-xs transition-all cursor-pointer flex-shrink-0 group"
               title="Open Map Guide & HTSS Science Documentation"
             >
-              <Info className="w-3.5 h-3.5 text-orange-400 group-hover:rotate-12 transition-transform" />
+              <Info className="w-3.5 h-3.5 text-blue-600 group-hover:rotate-12 transition-transform" />
               <span>Map Guide</span>
-              <Sparkles className="w-3 h-3 text-yellow-300 animate-pulse" />
+              <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
             </button>
           </div>
 
           {/* MODAL OVERLAY FOR LOCATION SELECTOR */}
           {showLocationSelector && (
-            <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn pointer-events-auto">
-              <div className="relative w-full max-w-lg bg-dark-900 border border-orange-500/30 rounded-2xl p-2 shadow-2xl">
+            <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn pointer-events-auto">
+              <div className="relative w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-3 shadow-2xl">
                 <div className="flex justify-end p-2 pb-0">
                   <button
                     onClick={() => setShowLocationSelector(false)}
-                    className="px-2.5 py-1 text-xs font-bold rounded-lg bg-dark-800 text-gray-400 hover:text-white border border-dark-600 transition cursor-pointer"
+                    className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
                   >
                     Close ✕
                   </button>

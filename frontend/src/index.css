@@ -12,9 +12,9 @@
 
 body {
   font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  background: radial-gradient(circle at 50% -10%, #152037 0%, #0b0f19 50%, #06090f 100%);
+  background: linear-gradient(180deg, #A5D2FC 0%, #CCE5FD 40%, #EBF4FE 100%);
   background-attachment: fixed;
-  color: #f1f5f9;
+  color: #0f172a;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
 }
@@ -35,14 +35,14 @@ code, pre {
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #EDF5FD;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1e293b;
+  background: #93C5FD;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #60A5FA;
 }
 
 /* =========================================================================
@@ -58,16 +58,15 @@ code, pre {
 
 /* Primary operational card base with tactile 3D depth */
 .neu-card {
-  background: linear-gradient(165deg, rgba(20, 27, 44, 0.92) 0%, rgba(11, 16, 26, 0.98) 100%);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 14px;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.35), 0 4px 14px -3px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  box-shadow: 0 12px 36px rgba(30, 100, 200, 0.07);
   position: relative;
   transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: transform, box-shadow;
+  color: #0f172a;
 }
 
 .neu-card-hover {
@@ -76,15 +75,14 @@ code, pre {
 }
 
 .neu-card-hover:hover {
-  transform: translateY(-2.5px) translateZ(6px);
-  border-color: rgba(255, 255, 255, 0.18);
-  border-top-color: rgba(255, 255, 255, 0.25);
-  box-shadow: 0 12px 28px -6px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transform: translateY(-2.5px);
+  border-color: rgba(191, 219, 254, 0.9);
+  box-shadow: 0 16px 40px rgba(30, 100, 200, 0.12);
 }
 
 .neu-card-hover:active {
-  transform: translateY(-0.5px) translateZ(2px);
-  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.5);
+  transform: translateY(-0.5px);
+  box-shadow: 0 6px 16px rgba(30, 100, 200, 0.08);
 }
 
 /* Subtle 3D Interactive Card */
@@ -95,34 +93,31 @@ code, pre {
 }
 
 .card-3d-subtle:hover {
-  transform: translateY(-3px) translateZ(10px);
-  box-shadow: 0 16px 36px -8px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  transform: translateY(-3px);
+  box-shadow: 0 16px 36px rgba(30, 100, 200, 0.12);
 }
 
 /* Recessed instrument cavity for readouts, inputs, and metric panels */
 .neu-well {
-  background: rgba(7, 11, 18, 0.88);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.11);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.65), 0 1px 2px rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  background: #EDF5FD;
+  border: 1px solid rgba(191, 219, 254, 0.75);
+  border-radius: 18px;
+  box-shadow: inset 0 2px 4px rgba(30, 100, 200, 0.04);
+  color: #0f172a;
 }
 
 .neu-well-deep {
-  background: radial-gradient(circle at 50% 50%, #090e18 0%, #04060b 100%);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.85);
+  background: #EDF5FD;
+  border: 1px solid rgba(191, 219, 254, 0.8);
   border-radius: 9999px;
 }
 
 /* Status Plate / Mini-Chassis */
 .neu-plate {
-  background: rgba(26, 35, 54, 0.75);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-top: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  background: #EDF5FD;
+  border: 1px solid rgba(191, 219, 254, 0.7);
+  border-radius: 14px;
+  color: #0f172a;
 }
 
 /* =========================================================================
@@ -131,43 +126,43 @@ code, pre {
 
 /* Floating Navigation Bar */
 .glass-nav {
-  background: rgba(11, 15, 25, 0.86);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(22px) saturate(180%);
   -webkit-backdrop-filter: blur(22px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow: 0 4px 28px rgba(0, 0, 0, 0.5);
+  border-bottom: 1px solid rgba(191, 219, 254, 0.7);
+  box-shadow: 0 4px 24px rgba(30, 100, 200, 0.06);
 }
 
 /* Operational Modal / Flyout */
 .glass-modal {
-  background: rgba(13, 18, 30, 0.96);
-  backdrop-filter: blur(30px) saturate(190%);
-  -webkit-backdrop-filter: blur(30px) saturate(190%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-top: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 20px;
-  box-shadow: 0 28px 70px -10px rgba(0, 0, 0, 0.85), 0 0 0 1px rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 28px;
+  box-shadow: 0 28px 70px -10px rgba(30, 100, 200, 0.15);
+  color: #0f172a;
 }
 
 /* Standard Secondary Card */
 .glass-card {
-  background: rgba(18, 25, 41, 0.72);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 16px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: 24px;
+  box-shadow: 0 10px 32px rgba(30, 100, 200, 0.07);
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease, box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  color: #0f172a;
 }
 
 .glass-panel {
-  background: rgba(16, 23, 38, 0.78);
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  color: #0f172a;
 }
 
 /* Subdued specular divider */
@@ -425,3 +420,304 @@ input:-webkit-autofill:active {
   border-color: rgba(59, 130, 246, 0.6);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.4);
 }
+
+/* =========================================================================
+   HIGH-CONTRAST VISIBILITY FOR EDUCATIONAL & LEARN THERMOS CONTENT
+   Guarantees 100% legibility of all fonts, formulas, labels, and tables
+   ========================================================================= */
+.learn-page-root {
+  color: #0f172a !important;
+}
+
+.learn-page-root h1,
+.learn-page-root h2,
+.learn-page-root h3,
+.learn-page-root h4,
+.learn-page-root h5,
+.learn-page-root h6 {
+  color: #020617 !important;
+  font-weight: 800;
+}
+
+.learn-page-root {
+  color: #0f172a;
+}
+
+.learn-page-root h1,
+.learn-page-root h2,
+.learn-page-root h3,
+.learn-page-root h4,
+.learn-page-root h5,
+.learn-page-root h6 {
+  color: #020617 !important;
+  font-weight: 800;
+}
+
+.learn-page-root p,
+.learn-page-root li,
+.learn-page-root span,
+.learn-page-root div {
+  color: #1e293b;
+}
+
+.learn-page-root strong,
+.learn-page-root b {
+  color: #000000 !important;
+  font-weight: 800;
+}
+
+.learn-page-root .text-white {
+  color: #020617 !important;
+  font-weight: 700;
+}
+
+.learn-page-root .text-gray-100,
+.learn-page-root .text-gray-200,
+.learn-page-root .text-gray-300,
+.learn-page-root .text-slate-200,
+.learn-page-root .text-slate-300 {
+  color: #1e293b !important;
+  font-weight: 600;
+}
+
+.learn-page-root .text-gray-400,
+.learn-page-root .text-gray-500,
+.learn-page-root .text-slate-400,
+.learn-page-root .text-slate-500 {
+  color: #334155 !important;
+  font-weight: 600;
+}
+
+/* Transform all dark utility backgrounds into crisp high-contrast white cards */
+.learn-page-root [class*="bg-dark-"] {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #020617 !important;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+}
+
+.learn-page-root [class*="bg-dark-"] * {
+  color: #0f172a;
+}
+
+/* Callout alert boxes - light vibrant backgrounds with solid dark fonts */
+.learn-page-root [class*="bg-red-950"],
+.learn-page-root [class*="bg-red-900"] {
+  background-color: #FEF2F2 !important;
+  border-color: #FCA5A5 !important;
+}
+
+.learn-page-root [class*="text-red-200"],
+.learn-page-root [class*="text-red-300"],
+.learn-page-root [class*="text-red-400"] {
+  color: #991B1B !important;
+  font-weight: 700;
+}
+
+.learn-page-root [class*="bg-amber-950"],
+.learn-page-root [class*="bg-amber-900"],
+.learn-page-root [class*="bg-yellow-950"] {
+  background-color: #FFFBEB !important;
+  border-color: #FCD34D !important;
+}
+
+.learn-page-root [class*="text-amber-200"],
+.learn-page-root [class*="text-amber-300"],
+.learn-page-root [class*="text-amber-400"],
+.learn-page-root [class*="text-yellow-200"],
+.learn-page-root [class*="text-yellow-300"] {
+  color: #92400E !important;
+  font-weight: 700;
+}
+
+.learn-page-root [class*="text-orange-200"],
+.learn-page-root [class*="text-orange-300"],
+.learn-page-root [class*="text-orange-400"] {
+  color: #C2410C !important;
+  font-weight: 700;
+}
+
+.learn-page-root [class*="bg-emerald-950"],
+.learn-page-root [class*="bg-emerald-900"],
+.learn-page-root [class*="bg-green-950"] {
+  background-color: #F0FDF4 !important;
+  border-color: #86EFAC !important;
+}
+
+.learn-page-root [class*="text-emerald-200"],
+.learn-page-root [class*="text-emerald-300"],
+.learn-page-root [class*="text-emerald-400"],
+.learn-page-root [class*="text-green-200"],
+.learn-page-root [class*="text-green-300"] {
+  color: #14532D !important;
+  font-weight: 700;
+}
+
+.learn-page-root [class*="bg-purple-950"],
+.learn-page-root [class*="bg-purple-900"] {
+  background-color: #FAF5FF !important;
+  border-color: #D8B4FE !important;
+}
+
+.learn-page-root [class*="text-purple-200"],
+.learn-page-root [class*="text-purple-300"],
+.learn-page-root [class*="text-purple-400"] {
+  color: #581C87 !important;
+  font-weight: 700;
+}
+
+.learn-page-root [class*="bg-blue-950"],
+.learn-page-root [class*="bg-blue-900"] {
+  background-color: #EFF6FF !important;
+  border-color: #93C5FD !important;
+}
+
+.learn-page-root [class*="text-blue-200"],
+.learn-page-root [class*="text-blue-300"],
+.learn-page-root [class*="text-blue-400"] {
+  color: #1E40AF !important;
+  font-weight: 700;
+}
+
+/* Tables */
+.learn-page-root td,
+.learn-page-root th {
+  color: #0f172a !important;
+}
+
+.learn-page-root thead {
+  background-color: #DBEAFE !important;
+  color: #1e3a8a !important;
+}
+
+.learn-page-root thead th {
+  color: #1e3a8a !important;
+  font-weight: 800;
+}
+
+.learn-page-root tbody tr:hover {
+  background-color: #F1F5F9 !important;
+}
+
+/* Inputs & Form controls */
+.learn-page-root input[type="text"] {
+  background-color: #FFFFFF !important;
+  color: #020617 !important;
+  border: 2px solid #CBD5E1 !important;
+}
+
+.learn-page-root input[type="text"]::placeholder {
+  color: #64748B !important;
+}
+
+/* Final CTA */
+.learn-page-root .bg-gradient-to-r.from-dark-800 {
+  background: #FFFFFF !important;
+  border: 2px solid #BFDBFE !important;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.08) !important;
+}
+
+/* =========================================================================
+   GOVERNMENT COMMAND CENTER HIGH-CONTRAST VISIBILITY RULES
+   ========================================================================= */
+
+.gov-page-root {
+  color: #0f172a;
+}
+
+.gov-page-root h1,
+.gov-page-root h2,
+.gov-page-root h3,
+.gov-page-root h4,
+.gov-page-root h5,
+.gov-page-root h6 {
+  color: #020617 !important;
+  font-weight: 800;
+}
+
+.gov-page-root p,
+.gov-page-root li,
+.gov-page-root span:not(.skeuo-pill) {
+  color: #1e293b;
+}
+
+.gov-page-root strong,
+.gov-page-root b {
+  color: #000000 !important;
+  font-weight: 800;
+}
+
+.gov-page-root .text-white {
+  color: #020617 !important;
+  font-weight: 800;
+}
+
+.gov-page-root .text-gray-100,
+.gov-page-root .text-gray-200,
+.gov-page-root .text-gray-300,
+.gov-page-root .text-slate-200,
+.gov-page-root .text-slate-300 {
+  color: #1e293b !important;
+  font-weight: 700;
+}
+
+.gov-page-root .text-gray-400,
+.gov-page-root .text-gray-500,
+.gov-page-root .text-slate-400,
+.gov-page-root .text-slate-500 {
+  color: #334155 !important;
+  font-weight: 600;
+}
+
+/* Transform all dark utility backgrounds in Gov Portal into crisp white surfaces */
+.gov-page-root [class*="bg-dark-"] {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #020617 !important;
+}
+
+.gov-page-root .neu-card {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 10px 30px rgba(30, 100, 200, 0.08) !important;
+  color: #020617 !important;
+}
+
+.gov-page-root .neu-well {
+  background: #EDF5FD !important;
+  border: 1px solid rgba(191, 219, 254, 0.8) !important;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Tables inside Gov Portal */
+.gov-page-root thead tr {
+  background-color: #DBEAFE !important;
+  color: #1e3a8a !important;
+}
+
+.gov-page-root thead th {
+  color: #1e3a8a !important;
+  font-weight: 800 !important;
+}
+
+.gov-page-root tbody tr {
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.gov-page-root tbody tr:hover {
+  background-color: #F8FAFC !important;
+}
+
+.gov-page-root tbody td {
+  color: #0f172a !important;
+}
+
+.gov-page-root input[type="text"] {
+  color: #020617 !important;
+  font-weight: 600;
+}
+
+.gov-page-root input[type="text"]::placeholder {
+  color: #64748B !important;
+}
+

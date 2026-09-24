@@ -57,14 +57,14 @@ export const GovernmentDashboard: React.FC = () => {
   }, [auditTarget]);
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="gov-page-root max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* COMMAND CENTER HEADER & TACTILE CONTROLS */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight font-mono">
             Government Command Center
           </h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-1 font-mono">
+          <p className="text-xs sm:text-sm text-slate-700 mt-1 font-semibold font-mono">
             National Heat Risk Intelligence — Verified Real-Time Biometeorological Telemetry
           </p>
         </div>
@@ -73,10 +73,10 @@ export const GovernmentDashboard: React.FC = () => {
           {auditData && (
             <button
               onClick={() => setIsAuditOpen(true)}
-              className="skeuo-btn px-3.5 py-2 text-xs font-mono font-medium text-slate-300 rounded-lg flex items-center gap-2 hover:text-white transition-colors"
+              className="skeuo-btn px-3.5 py-2 text-xs font-mono font-bold text-slate-800 bg-white border border-slate-300 rounded-lg flex items-center gap-2 hover:bg-slate-50 shadow-xs transition-colors"
               title="Inspect authoritative HTSS calculation formula breakdown"
             >
-              <Calculator className="w-3.5 h-3.5 text-emerald-400" />
+              <Calculator className="w-3.5 h-3.5 text-emerald-600" />
               <span>HTSS Audit View</span>
             </button>
           )}

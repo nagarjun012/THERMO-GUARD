@@ -44,14 +44,14 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
   return (
     <div className="space-y-4 mb-6">
       {isLoading && progress && (
-        <div className="glass-panel px-4 py-3 rounded-2xl border border-orange-500/30 text-orange-400 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-lg animate-pulse">
+        <div className="bg-white px-4 py-3 rounded-2xl border border-orange-300 text-orange-950 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-md animate-pulse">
           <div className="flex items-center gap-2.5">
-            <Radio className="w-4 h-4 text-orange-400 animate-spin" />
-            <span className="font-bold">
+            <Radio className="w-4 h-4 text-orange-600 animate-spin" />
+            <span className="font-bold text-slate-900">
               Connecting Live Open-Meteo REST Pipeline across 788 Districts...
             </span>
           </div>
-          <span className="skeuo-pill px-3 py-1 font-bold text-white bg-orange-500/20 border-orange-500/40">
+          <span className="skeuo-pill px-3 py-1 font-bold text-orange-950 bg-orange-100 border border-orange-300">
             {progress.loaded} / {progress.total} Districts Processed ({progress.percent}%)
           </span>
         </div>
@@ -63,7 +63,7 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
           return (
             <div
               key={i}
-              className="neu-card neu-card-hover card-3d-subtle p-5 flex items-center gap-4 relative overflow-hidden group"
+              className="neu-card neu-card-hover card-3d-subtle p-5 flex items-center gap-4 relative overflow-hidden group bg-white/95"
             >
               {/* AMBIENT CORNER GLOW */}
               <div
@@ -82,19 +82,19 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
               {/* READOUT */}
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-1">
-                  <p className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">
+                  <p className="text-xs font-black text-slate-700 uppercase tracking-wider font-mono">
                     {card.title}
                   </p>
                   {card.badge && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded font-extrabold bg-purple-100 text-purple-900 border border-purple-300">
                       {card.badge}
                     </span>
                   )}
                 </div>
-                <h3 className="text-2xl sm:text-3xl font-black font-mono text-white mt-0.5 tracking-tight">
+                <h3 className="text-2xl sm:text-3xl font-black font-mono text-slate-950 mt-0.5 tracking-tight">
                   {card.value}
                 </h3>
-                <span className="text-[10px] text-gray-500 font-mono block mt-0.5">
+                <span className="text-[11px] text-slate-600 font-semibold font-mono block mt-0.5">
                   {card.sub}
                 </span>
               </div>

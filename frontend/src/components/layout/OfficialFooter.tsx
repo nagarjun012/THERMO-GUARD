@@ -17,8 +17,7 @@ export const OfficialFooter: React.FC = () => {
 
   return (
     <footer
-      className="w-full border-t border-white/10 mt-8"
-      style={{ background: 'linear-gradient(180deg, rgba(15,23,42,0.90) 0%, rgba(15,23,42,0.98) 100%)' }}
+      className="w-full border-t border-blue-200/60 mt-8 bg-white/75 backdrop-blur-md text-slate-600 shadow-sm"
       role="contentinfo"
       aria-label="Site footer"
     >
@@ -26,23 +25,23 @@ export const OfficialFooter: React.FC = () => {
         {/* Top row: Agency name + last updated */}
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <h2 className="text-sm font-bold text-gray-100">{GOV_CONFIG.agency.name}</h2>
-            <p className="text-xs text-gray-400 mt-0.5">{GOV_CONFIG.agency.department}</p>
+            <h2 className="text-sm font-bold text-slate-900">{GOV_CONFIG.agency.name}</h2>
+            <p className="text-xs text-slate-500 mt-0.5">{GOV_CONFIG.agency.department}</p>
           </div>
-          <div className="text-right text-xs text-gray-400">
+          <div className="text-right text-xs text-slate-500">
             <span>{tr.footer.lastUpdated}: </span>
-            <span className="font-mono text-gray-300">{GOV_CONFIG.system.lastUpdated}</span>
-            <span className="block mt-0.5">v{GOV_CONFIG.system.version}</span>
+            <span className="font-mono font-bold text-slate-800">{GOV_CONFIG.system.lastUpdated}</span>
+            <span className="block mt-0.5 font-semibold text-blue-600">v{GOV_CONFIG.system.version}</span>
           </div>
         </div>
 
         {/* Policy links */}
-        <div className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-white/5 pt-3">
+        <div className="flex flex-wrap gap-x-4 gap-y-1.5 border-t border-blue-100 pt-3">
           {policyLinks.map((link) => (
             <button
               key={link.modal}
               onClick={() => setActiveOfficialModal(link.modal)}
-              className="text-xs text-blue-300 hover:text-blue-200 underline underline-offset-2 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-sm"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 underline underline-offset-2 cursor-pointer focus:outline-none focus:ring-1 focus:ring-blue-400 rounded-sm"
               type="button"
             >
               {link.label}

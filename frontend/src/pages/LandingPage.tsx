@@ -69,21 +69,21 @@ export const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-dark-900 text-white overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 overflow-hidden">
       {/* AMBIENT GRADIENTS */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/40 rounded-full blur-[140px]" />
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-300/30 rounded-full blur-[140px]" />
       </div>
 
       <div className="relative z-10">
         {/* TOP NAVBAR */}
         <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto">
           <div className="text-2xl font-bold flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-b from-orange-500/20 to-red-600/20 border border-orange-500/30 text-orange-400">
+            <div className="p-2 rounded-xl bg-white border border-blue-200/80 text-blue-600 shadow-xs">
               <ShieldAlert className="w-6 h-6" />
             </div>
-            <span className="font-mono tracking-tight font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-400">
+            <span className="font-mono tracking-tight font-black text-slate-950">
               THERMOSAFE
             </span>
           </div>
@@ -93,39 +93,39 @@ export const LandingPage: React.FC = () => {
             <button
               onClick={() => openLogin('user')}
               type="button"
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono font-medium rounded-lg text-slate-300 border border-slate-700 bg-slate-800/90 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-blue-700 border border-blue-200 bg-white hover:bg-blue-50 shadow-xs transition-colors cursor-pointer"
             >
-              <User className="w-3.5 h-3.5 text-blue-400" />
+              <User className="w-3.5 h-3.5 text-blue-600" />
               <span>CITIZEN LOGIN</span>
             </button>
 
             <button
               onClick={() => openLogin('gov')}
               type="button"
-              className="flex items-center gap-2 px-3 py-1.5 text-xs font-mono font-medium rounded-lg text-amber-300 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 transition-colors cursor-pointer"
+              className="flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-slate-900 border border-blue-300/80 bg-[#EDF5FD] hover:bg-blue-100 shadow-xs transition-colors cursor-pointer"
             >
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
+              <Shield className="w-3.5 h-3.5 text-amber-600" />
               <span>OFFICIAL LOGIN</span>
             </button>
           </div>
         </nav>
 
         {/* HERO SECTION */}
-        <main className="max-w-7xl mx-auto px-6 pt-16 pb-32">
+        <main className="max-w-7xl mx-auto px-6 pt-12 pb-32">
           <div className="text-center max-w-4xl mx-auto mb-16">
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700 text-slate-300 text-xs font-mono mb-6"
+              className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/80 border border-blue-200 text-blue-800 text-xs font-mono font-bold mb-6 shadow-xs"
             >
-              <Activity className="w-3.5 h-3.5 text-emerald-400" />
+              <Activity className="w-3.5 h-3.5 text-blue-600" />
               <span>OPERATIONAL HEAT DEFENSE PLATFORM</span>
             </motion.div>
 
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-4xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-tight tracking-tight text-white font-mono"
+              className="text-4xl sm:text-6xl lg:text-7xl font-black mb-6 leading-tight tracking-tight text-slate-950 font-mono"
             >
               Thermal Stress Intelligence &amp; Early Warning System
             </motion.h1>
@@ -134,7 +134,7 @@ export const LandingPage: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="text-base sm:text-lg text-slate-300 mb-10 max-w-2xl mx-auto leading-relaxed"
+              className="text-base sm:text-lg text-slate-700 mb-10 max-w-2xl mx-auto leading-relaxed font-semibold"
             >
               Real-time biometeorological monitoring, physical heat index forecasting, and district-level automated mitigation protocols across all 788 Indian districts.
             </motion.p>
@@ -149,23 +149,23 @@ export const LandingPage: React.FC = () => {
               {/* GATEWAY 1: USER LOGIN */}
               <div
                 onClick={() => handleQuickLogin('user')}
-                className="neu-card neu-card-hover card-3d-subtle p-6 text-left rounded-2xl border border-slate-700/80 hover:border-blue-500/50 hover:shadow-[0_14px_34px_-6px_rgba(59,130,246,0.22)] transition-all cursor-pointer group"
+                className="p-6 text-left rounded-3xl bg-white border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.08)] hover:-translate-y-1 transition-all cursor-pointer group"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 group-hover:scale-105 transition-transform">
+                  <div className="p-2.5 rounded-2xl bg-[#EDF5FD] border border-blue-200 text-blue-600 group-hover:scale-105 transition-transform">
                     <User className="w-5 h-5" />
                   </div>
-                  <span className="text-[11px] font-mono font-medium text-blue-300 border border-blue-500/30 px-2 py-0.5 rounded-md bg-blue-500/10 shadow-sm">
+                  <span className="text-[11px] font-mono font-black text-blue-800 border border-blue-200 px-2 py-0.5 rounded-lg bg-[#EDF5FD]">
                     PUBLIC / CITIZEN
                   </span>
                 </div>
-                <h3 className="text-lg font-bold font-mono text-white mb-1 group-hover:text-blue-300 transition-colors">
+                <h3 className="text-xl font-black font-mono text-slate-950 mb-1.5 group-hover:text-blue-700 transition-colors">
                   Citizen Portal
                 </h3>
-                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                <p className="text-xs text-slate-700 mb-4 leading-relaxed font-medium">
                   Personalized strain profiles, live GIS heat risk maps, 72-hour forecast, and clinical advisories.
                 </p>
-                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-blue-400 group-hover:translate-x-1.5 transition-transform">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-blue-700 group-hover:translate-x-1.5 transition-transform">
                   <span>Open Citizen Dashboard</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
@@ -174,23 +174,23 @@ export const LandingPage: React.FC = () => {
               {/* GATEWAY 2: GOV LOGIN */}
               <div
                 onClick={() => handleQuickLogin('gov')}
-                className="neu-card neu-card-hover card-3d-subtle p-6 text-left rounded-2xl border border-slate-700/80 hover:border-amber-500/50 hover:shadow-[0_14px_34px_-6px_rgba(245,158,11,0.22)] transition-all cursor-pointer group"
+                className="p-6 text-left rounded-3xl bg-white border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.08)] hover:-translate-y-1 transition-all cursor-pointer group"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 group-hover:scale-105 transition-transform">
+                  <div className="p-2.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-700 group-hover:scale-105 transition-transform">
                     <Shield className="w-5 h-5" />
                   </div>
-                  <span className="text-[11px] font-mono font-medium text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded-md bg-amber-500/10 shadow-sm">
+                  <span className="text-[11px] font-mono font-black text-amber-900 border border-amber-300 px-2 py-0.5 rounded-lg bg-amber-50">
                     OFFICIAL AUTHORITIES
                   </span>
                 </div>
-                <h3 className="text-lg font-bold font-mono text-white mb-1 group-hover:text-amber-300 transition-colors">
+                <h3 className="text-xl font-black font-mono text-slate-950 mb-1.5 group-hover:text-amber-700 transition-colors">
                   Government Command
                 </h3>
-                <p className="text-xs text-slate-400 mb-4 leading-relaxed">
+                <p className="text-xs text-slate-700 mb-4 leading-relaxed font-medium">
                   National heat risk intelligence across all 788 districts, Section 144 triggers, and hospital capacity.
                 </p>
-                <div className="flex items-center gap-2 text-xs font-mono font-semibold text-amber-400 group-hover:translate-x-1.5 transition-transform">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-800 group-hover:translate-x-1.5 transition-transform">
                   <span>Access Government Portal</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </div>
@@ -208,13 +208,13 @@ export const LandingPage: React.FC = () => {
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 + i * 0.05 }}
-                  className="neu-card neu-card-hover card-3d-subtle p-6 border border-slate-800/90 hover:border-slate-700/90 transition-all group"
+                  className="p-6 rounded-3xl bg-white border border-white/90 shadow-[0_8px_24px_rgba(30,100,200,0.06)] hover:-translate-y-0.5 transition-all group"
                 >
-                  <div className="w-10 h-10 bg-slate-800/80 border border-slate-700/80 rounded-xl flex items-center justify-center mb-4 text-slate-300 group-hover:text-orange-400 group-hover:scale-105 transition-all shadow-inner">
+                  <div className="w-10 h-10 bg-[#EDF5FD] border border-blue-100 rounded-2xl flex items-center justify-center mb-4 text-blue-600 group-hover:scale-105 transition-all">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-base font-bold text-white mb-2">{f.title}</h3>
-                  <p className="text-slate-400 text-xs leading-relaxed">{f.desc}</p>
+                  <h3 className="text-base font-black text-slate-950 mb-2">{f.title}</h3>
+                  <p className="text-slate-700 text-xs font-medium leading-relaxed">{f.desc}</p>
                 </motion.div>
               );
             })}

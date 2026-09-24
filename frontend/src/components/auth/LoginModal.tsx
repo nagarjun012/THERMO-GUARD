@@ -83,56 +83,45 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md perspective-container">
-        {/* MODAL CARD WITH 3D DEPTH & ENTRANCE */}
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md perspective-container">
+        {/* MODAL CARD WITH CLEAN HIGH-CONTRAST WHITE SURFACE */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.94, y: 18, rotateX: 2.5 }}
-          animate={{ opacity: 1, scale: 1, y: 0, rotateX: 0 }}
-          exit={{ opacity: 0, scale: 0.96, y: 12, rotateX: -1 }}
+          initial={{ opacity: 0, scale: 0.94, y: 18 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.96, y: 12 }}
           transition={{ type: 'spring', damping: 28, stiffness: 320, mass: 0.85 }}
-          className="relative w-full max-w-lg neu-card border border-white/10 border-t-white/20 rounded-3xl p-6 sm:p-8 shadow-[0_25px_60px_-15px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.08)] overflow-hidden bg-gradient-to-b from-[#131b2e] to-[#090d16]"
+          className="relative w-full max-w-lg bg-white border border-slate-200/90 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden text-slate-900"
         >
-          {/* AMBIENT BACKGROUND GLOW WITH ORGANIC GENTLE FLOAT */}
-          <div
-            className={`absolute -top-24 -right-24 w-72 h-72 rounded-full blur-3xl opacity-20 pointer-events-none transition-colors duration-700 animate-ambient-slow ${
-              activeTab === 'gov' ? 'bg-amber-500' : 'bg-blue-500'
-            }`}
-          />
-          <div
-            className={`absolute -bottom-24 -left-24 w-60 h-60 rounded-full blur-3xl opacity-15 pointer-events-none transition-colors duration-700 animate-ambient-reverse ${
-              activeTab === 'gov' ? 'bg-orange-500' : 'bg-cyan-500'
-            }`}
-          />
-
           {/* CLOSE BUTTON */}
           <button
             onClick={onClose}
             type="button"
-            className="absolute top-5 right-5 p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 active:scale-95 transition-all cursor-pointer"
+            className="absolute top-5 right-5 p-2 rounded-xl text-slate-600 hover:text-black hover:bg-slate-100 active:scale-95 transition-all cursor-pointer"
+            aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
           </button>
 
           {/* HEADER BRAND */}
           <div className="flex items-center gap-2.5 mb-6">
-            <span className="text-2xl drop-shadow-[0_2px_8px_rgba(249,115,22,0.4)]">🌡️</span>
-            <span className="text-lg font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-400 font-mono">
+            <span className="text-2xl">🌡️</span>
+            <span className="text-lg font-black tracking-tight text-slate-950 font-mono">
               THERMOSAFE PORTAL ACCESS
             </span>
           </div>
 
-          {/* DUAL LOGIN ROLE SELECTOR TABS (REFINED INTENTIONAL COLORS) */}
-          <div className="grid grid-cols-2 gap-2 p-1.5 bg-dark-950/90 rounded-2xl border border-white/10 shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)] mb-6">
+          {/* DUAL LOGIN ROLE SELECTOR TABS */}
+          <div className="grid grid-cols-2 gap-2 p-1.5 bg-[#EDF5FD] rounded-2xl border border-blue-200/80 mb-6">
             <button
               type="button"
               onClick={() => setActiveTab('user')}
               className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-mono text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeTab === 'user'
-                  ? 'bg-gradient-to-b from-blue-500/25 via-blue-600/15 to-blue-700/20 text-blue-200 border border-blue-400/50 shadow-[0_2px_12px_rgba(59,130,246,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] -translate-y-0.5'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5 active:translate-y-0'
+                  ? 'bg-[#2563EB] text-white shadow-md'
+                  : 'text-slate-800 hover:text-blue-700 hover:bg-white/70'
               }`}
             >
-              <User className={`w-4 h-4 transition-colors ${activeTab === 'user' ? 'text-blue-400' : 'text-gray-400'}`} />
+              <User className={`w-4 h-4 transition-colors ${activeTab === 'user' ? 'text-white' : 'text-slate-700'}`} />
               <span>USER LOGIN</span>
             </button>
 
@@ -141,11 +130,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               onClick={() => setActiveTab('gov')}
               className={`flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-mono text-xs font-bold transition-all duration-200 cursor-pointer ${
                 activeTab === 'gov'
-                  ? 'bg-gradient-to-b from-amber-500/25 via-amber-600/15 to-amber-700/20 text-amber-200 border border-amber-400/50 shadow-[0_2px_12px_rgba(245,158,11,0.3),inset_0_1px_0_rgba(255,255,255,0.2)] -translate-y-0.5'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-white/5 active:translate-y-0'
+                  ? 'bg-slate-900 text-white shadow-md'
+                  : 'text-slate-800 hover:text-black hover:bg-white/70'
               }`}
             >
-              <Shield className={`w-4 h-4 transition-colors ${activeTab === 'gov' ? 'text-amber-400' : 'text-gray-400'}`} />
+              <Shield className={`w-4 h-4 transition-colors ${activeTab === 'gov' ? 'text-white' : 'text-slate-700'}`} />
               <span>GOV LOGIN</span>
             </button>
           </div>
@@ -159,18 +148,18 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               onSubmit={handleLogin}
               className="space-y-5"
             >
-              <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 text-blue-200 text-xs leading-relaxed space-y-1 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-                <div className="flex items-center gap-1.5 font-bold text-blue-400">
-                  <Sparkles className="w-4 h-4" />
+              <div className="p-4 rounded-2xl bg-[#EDF5FD] border border-blue-200 text-slate-900 text-xs leading-relaxed space-y-1">
+                <div className="flex items-center gap-1.5 font-black text-blue-900">
+                  <Sparkles className="w-4 h-4 text-blue-600" />
                   <span>Citizen & Field Worker Heat Defense</span>
                 </div>
-                <p className="text-gray-300 text-[11px]">
+                <p className="text-slate-700 text-[11px] font-semibold">
                   Access the personal Citizen Dashboard, live GIS heat risk maps, 72-hour forecasting, and actionable clinical advisories.
                 </p>
               </div>
 
               <div>
-                <label className="block text-xs font-mono font-bold text-gray-300 mb-1.5 uppercase">
+                <label className="block text-xs font-mono font-black text-slate-950 mb-1.5 uppercase tracking-wide">
                   Your Name / Organization (Optional)
                 </label>
                 <input
@@ -178,25 +167,24 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   placeholder="e.g. Citizen, Farmer, Field Worker..."
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-[#090d16] border border-white/20 text-white placeholder-gray-500 text-sm focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-500/25 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)]"
-                  style={{ backgroundColor: '#090d16', color: '#ffffff' }}
+                  className="w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border-2 border-slate-300 text-black placeholder-slate-500 text-sm font-semibold focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-100 transition-all"
                 />
               </div>
 
-              <div className="text-[11px] text-gray-400 font-mono space-y-1">
-                <div className="flex items-center gap-1.5 text-emerald-400">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+              <div className="text-[11px] text-slate-800 font-mono space-y-1.5 font-bold">
+                <div className="flex items-center gap-1.5 text-emerald-800">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Unlocked: Citizen Dashboard, Live Map, Learn, About</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <span className="w-3.5 text-center font-bold">✕</span>
+                <div className="flex items-center gap-1.5 text-slate-600 font-semibold">
+                  <span className="w-4 text-center font-bold">✕</span>
                   <span>Government Portal is securely hidden</span>
                 </div>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 px-6 rounded-xl font-mono text-sm font-bold text-white bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 shadow-[0_4px_20px_rgba(59,130,246,0.4),inset_0_1px_0_rgba(255,255,255,0.25)] hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 group cursor-pointer"
+                className="w-full py-3.5 px-6 rounded-xl font-mono text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 group cursor-pointer"
               >
                 <span>ENTER CITIZEN DASHBOARD</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -213,19 +201,19 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               onSubmit={handleLogin}
               className="space-y-5"
             >
-              <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 text-amber-200 text-xs leading-relaxed space-y-1 backdrop-blur-sm shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
-                <div className="flex items-center gap-1.5 font-bold text-amber-400">
-                  <Building2 className="w-4 h-4" />
+              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-300 text-amber-950 text-xs leading-relaxed space-y-1">
+                <div className="flex items-center gap-1.5 font-black text-amber-950">
+                  <Building2 className="w-4 h-4 text-amber-700" />
                   <span>Authorized Government & Disaster Management</span>
                 </div>
-                <p className="text-gray-300 text-[11px]">
+                <p className="text-slate-800 text-[11px] font-semibold">
                   High-level tactical command: 788-district nationwide monitoring, municipal section 144 triggers, hospital bed capacities, and priority state heatwave response.
                 </p>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-mono font-bold text-gray-300 mb-1.5 uppercase">
+                  <label className="block text-xs font-mono font-black text-slate-950 mb-1.5 uppercase tracking-wide">
                     Official Officer ID
                   </label>
                   <div className="relative">
@@ -235,17 +223,16 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       onChange={(e) => { setGovId(e.target.value); setGovError(''); }}
                       required
                       placeholder="e.g. NDMA-HQ-882"
-                      className={`w-full px-4 py-3 rounded-xl bg-[#090d16] border text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/25 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] ${
-                        govError ? 'border-red-500/50' : 'border-white/20'
+                      className={`w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border-2 text-black font-mono font-bold text-sm focus:outline-none focus:bg-white focus:border-amber-600 focus:ring-2 focus:ring-amber-100 transition-all ${
+                        govError ? 'border-red-500' : 'border-slate-300'
                       }`}
-                      style={{ backgroundColor: '#090d16', color: '#fcd34d' }}
                     />
-                    <Shield className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
+                    <Shield className="w-4 h-4 text-slate-600 absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-mono font-bold text-gray-300 mb-1.5 uppercase">
+                  <label className="block text-xs font-mono font-black text-slate-950 mb-1.5 uppercase tracking-wide">
                     Official Security Passcode
                   </label>
                   <div className="relative">
@@ -255,35 +242,34 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                       onChange={(e) => { setPasscode(e.target.value); setGovError(''); }}
                       required
                       placeholder="Enter official passcode..."
-                      className={`w-full px-4 py-3 rounded-xl bg-[#090d16] border text-amber-300 font-mono text-sm focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/25 transition-all shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] ${
-                        govError ? 'border-red-500/50' : 'border-white/20'
+                      className={`w-full px-4 py-3 rounded-xl bg-[#F8FAFC] border-2 text-black font-mono font-bold text-sm focus:outline-none focus:bg-white focus:border-amber-600 focus:ring-2 focus:ring-amber-100 transition-all ${
+                        govError ? 'border-red-500' : 'border-slate-300'
                       }`}
-                      style={{ backgroundColor: '#090d16', color: '#fcd34d' }}
                     />
-                    <Lock className="w-4 h-4 text-amber-400 absolute right-3.5 top-3.5 pointer-events-none" />
+                    <Lock className="w-4 h-4 text-slate-600 absolute right-3.5 top-3.5 pointer-events-none" />
                   </div>
                   {govError && (
-                    <p className="text-red-400 text-[10px] font-mono mt-1.5 bg-red-500/10 p-2 rounded-lg border border-red-500/20">{govError}</p>
+                    <p className="text-red-700 font-bold text-xs font-mono mt-1.5 bg-red-100 p-2 rounded-lg border border-red-300">{govError}</p>
                   )}
                 </div>
 
                 {/* AUTHORIZED CREDENTIALS AUDIT HINT */}
-                <div className="p-3 rounded-xl bg-dark-950/90 border border-white/5 text-[11px] font-mono text-gray-400 space-y-1">
-                  <p className="text-amber-400/90 font-bold">Authorized Test Credentials:</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[10px] text-gray-300">
-                    <span>Officer: <strong className="text-white">NDMA-HQ-882</strong> (Pass: NDMA@Secure2026)</span>
-                    <span>Admin: <strong className="text-white">DISASTER-ADMIN-99</strong> (Pass: Admin@ThermoSafe2026)</span>
+                <div className="p-3.5 rounded-xl bg-[#EDF5FD] border border-blue-200 text-xs font-mono text-slate-900 space-y-1">
+                  <p className="text-blue-900 font-black">Authorized Test Credentials:</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] text-slate-800">
+                    <span>Officer: <strong className="text-black font-black">NDMA-HQ-882</strong> (Pass: NDMA@Secure2026)</span>
+                    <span>Admin: <strong className="text-black font-black">DISASTER-ADMIN-99</strong> (Pass: Admin@ThermoSafe2026)</span>
                   </div>
                 </div>
               </div>
 
-              <div className="text-[11px] text-gray-400 font-mono space-y-1">
-                <div className="flex items-center gap-1.5 text-amber-400">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
+              <div className="text-[11px] text-slate-800 font-mono space-y-1.5 font-bold">
+                <div className="flex items-center gap-1.5 text-amber-900">
+                  <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />
                   <span>Unlocked: Gov Portal, Learn THERMOS, About</span>
                 </div>
-                <div className="flex items-center gap-1.5 text-gray-500">
-                  <span className="w-3.5 text-center font-bold">✕</span>
+                <div className="flex items-center gap-1.5 text-slate-600 font-semibold">
+                  <span className="w-4 text-center font-bold">✕</span>
                   <span>Citizen Dashboard & Live Map are hidden</span>
                 </div>
               </div>
@@ -291,7 +277,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full py-3.5 px-6 rounded-xl font-mono text-sm font-bold text-dark-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 shadow-[0_4px_20px_rgba(245,158,11,0.4),inset_0_1px_0_rgba(255,255,255,0.3)] hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
+                className="w-full py-3.5 px-6 rounded-xl font-mono text-sm font-bold text-white bg-slate-900 hover:bg-black shadow-md hover:-translate-y-0.5 active:translate-y-0.5 transition-all flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-50"
               >
                 <span>{isSubmitting ? 'VALIDATING CREDENTIALS...' : 'ACCESS GOVERNMENT PORTAL'}</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

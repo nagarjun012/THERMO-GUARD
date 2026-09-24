@@ -19,15 +19,14 @@ export const OfficialTopBanner: React.FC = () => {
       </a>
 
       <div
-        className="w-full border-b border-white/10 text-xs"
-        style={{ background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.85) 100%)' }}
+        className="w-full border-b border-blue-200/60 text-xs bg-white/75 backdrop-blur-md text-slate-700 shadow-xs"
         role="banner"
         aria-label="Official utility bar"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1.5 flex flex-wrap items-center justify-between gap-y-1 gap-x-4">
           {/* Left: Emergency helplines */}
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="flex items-center gap-1.5 font-semibold text-red-300">
+            <span className="flex items-center gap-1.5 font-bold text-red-700">
               <Phone className="w-3 h-3" aria-hidden="true" />
               <span>{tr.banner.emergencyHelplines}:</span>
             </span>
@@ -35,7 +34,7 @@ export const OfficialTopBanner: React.FC = () => {
               <a
                 key={h.number}
                 href={`tel:${h.number}`}
-                className="px-2 py-0.5 rounded-md bg-red-500/10 border border-red-500/20 text-red-200 hover:bg-red-500/20 hover:-translate-y-0.5 active:translate-y-0 transition-all font-mono font-bold shadow-sm"
+                className="px-2 py-0.5 rounded-md bg-red-100/80 border border-red-200 text-red-800 hover:bg-red-200/80 hover:-translate-y-0.5 active:translate-y-0 transition-all font-mono font-bold shadow-xs"
                 title={`${h.label}: ${h.description}`}
                 aria-label={`Call ${h.label} at ${h.number}. ${h.description}`}
               >
@@ -47,15 +46,15 @@ export const OfficialTopBanner: React.FC = () => {
           {/* Right: Language + Low Bandwidth + Readiness */}
           <div className="flex items-center gap-2 flex-wrap">
             <div className="flex items-center gap-1">
-              <Globe className="w-3 h-3 text-gray-400" aria-hidden="true" />
+              <Globe className="w-3 h-3 text-slate-500" aria-hidden="true" />
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value as Language)}
-                className="bg-transparent border border-white/10 rounded-md px-1.5 py-0.5 text-gray-200 text-xs focus:outline-none focus:ring-1 focus:ring-blue-400 cursor-pointer"
+                className="bg-white/90 border border-blue-200/80 rounded-md px-1.5 py-0.5 text-slate-700 text-xs focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer shadow-xs"
                 aria-label={tr.banner.language}
               >
                 {(Object.keys(LANGUAGE_NAMES) as Language[]).map((lang) => (
-                  <option key={lang} value={lang} className="bg-gray-900 text-gray-200">
+                  <option key={lang} value={lang} className="bg-white text-slate-800">
                     {LANGUAGE_NAMES[lang]}
                   </option>
                 ))}
@@ -66,8 +65,8 @@ export const OfficialTopBanner: React.FC = () => {
               onClick={toggleLowBandwidthMode}
               className={`flex items-center gap-1 px-2 py-0.5 rounded-md border text-xs font-semibold transition-colors cursor-pointer ${
                 lowBandwidthMode
-                  ? 'bg-green-500/15 border-green-500/30 text-green-300'
-                  : 'bg-white/5 border-white/10 text-gray-400 hover:text-gray-200'
+                  ? 'bg-green-100 border-green-300 text-green-800'
+                  : 'bg-white/80 border-blue-200/80 text-slate-600 hover:text-slate-900 shadow-xs'
               }`}
               aria-label={tr.nav.lowBandwidth}
               aria-pressed={lowBandwidthMode}
@@ -80,8 +79,6 @@ export const OfficialTopBanner: React.FC = () => {
               )}
               <span className="hidden sm:inline">{tr.nav.lowBandwidth}</span>
             </button>
-
-
           </div>
         </div>
       </div>
