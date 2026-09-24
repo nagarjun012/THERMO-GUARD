@@ -49,7 +49,6 @@ const navSections: NavSection[] = [
   { id: 'humidex', label: 'Humidex' },
   { id: 'comparison', label: 'Indices Compared' },
   { id: 'risk-score', label: 'Risk Score' },
-  { id: 'map', label: 'GIS Map' },
   { id: 'district-risk', label: 'District Risk System' },
   { id: 'forecast', label: 'Forecasts' },
   { id: 'alerts', label: 'Alerts' },
@@ -732,38 +731,7 @@ export const LearnPage: React.FC = () => {
           </div>
         </section>
 
-        {/* GIS MAP EXPLAINED */}
-        <section id="map" className="space-y-6">
-          <div className="border-l-4 border-blue-500 pl-4">
-            <h2 className="text-2xl md:text-3xl font-bold text-white">Understanding the THERMOS Risk Map</h2>
-            <p className="text-gray-400 text-sm mt-1">How interactive GIS visualization pinpoints high-risk hotspots</p>
-          </div>
 
-          <div className="glass-card p-6 md:p-8 space-y-6">
-            <p className="text-gray-200 text-sm md:text-base leading-relaxed">
-              The THERMOS GIS Map uses satellite basemaps and meteorological data to color-code risk intensity across Indian states, cities, and districts in real time.
-            </p>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold">
-              <div className="p-3 bg-dark-700 rounded-xl border border-dark-600 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-emerald-400" />
-                <span>📍 Location Coordinates</span>
-              </div>
-              <div className="p-3 bg-dark-700 rounded-xl border border-dark-600 flex items-center gap-2">
-                <Activity className="w-4 h-4 text-orange-400" />
-                <span>📊 District Risk Score</span>
-              </div>
-              <div className="p-3 bg-dark-700 rounded-xl border border-dark-600 flex items-center gap-2">
-                <Flame className="w-4 h-4 text-red-400" />
-                <span>⚠️ Risk Category</span>
-              </div>
-              <div className="p-3 bg-dark-700 rounded-xl border border-dark-600 flex items-center gap-2">
-                <Users className="w-4 h-4 text-purple-400" />
-                <span>👥 Population Density</span>
-              </div>
-            </div>
-          </div>
-        </section>
 
         {/* DISTRICT-LEVEL HEAT RISK SYSTEM SECTION */}
         <section id="district-risk" className="space-y-8">

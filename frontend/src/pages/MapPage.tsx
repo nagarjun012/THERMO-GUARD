@@ -4,7 +4,7 @@ import { useAppStore } from '../stores/appStore';
 import { HeatRiskMap } from '../components/map/HeatRiskMap';
 import { MapLegend } from '../components/map/MapLegend';
 import { MapEducationalModal } from '../components/map/MapEducationalModal';
-import { Info, Layers, MapPin, Sliders, Activity, Sparkles } from 'lucide-react';
+import { Info, MapPin, Sliders, Activity, Sparkles } from 'lucide-react';
 
 
 import { LocationSelector } from '../components/location/LocationSelector';
@@ -16,7 +16,7 @@ export const MapPage: React.FC = () => {
   const [isEduModalOpen, setIsEduModalOpen] = useState(false);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [gisResolution, setGisResolution] = useState('District / City Level Risk');
-  const [layerFilter, setLayerFilter] = useState<'all' | 'risk' | 'temp' | 'wbgt' | 'hi'>('all');
+  const [layerFilter] = useState<'all' | 'risk' | 'temp' | 'wbgt' | 'hi'>('all');
 
   if (isLoading || !data) {
     return (
@@ -81,25 +81,6 @@ export const MapPage: React.FC = () => {
                 <option value="District / City Level Risk">District / City Level</option>
                 <option value="All-India District Overview">All-India Districts</option>
                 <option value="State / Regional Level Risk">State / Regional Level</option>
-              </select>
-            </div>
-
-            <div className="h-4 w-px bg-dark-700 hidden md:block flex-shrink-0" />
-
-            {/* LAYER FILTER SELECTOR */}
-            <div className="flex items-center gap-1 text-[11px] text-gray-300 hidden sm:flex flex-shrink-0">
-              <Layers className="w-3.5 h-3.5 text-orange-400 flex-shrink-0" />
-              <span className="text-gray-400 font-medium hidden lg:inline">Layer:</span>
-              <select
-                value={layerFilter}
-                onChange={(e) => setLayerFilter(e.target.value as any)}
-                className="bg-dark-800 text-white font-semibold rounded-lg px-2 py-1 border border-dark-600 text-xs focus:outline-none focus:border-accent cursor-pointer"
-              >
-                <option value="all">District Risk Overlay</option>
-                <option value="risk">Thermal Heatmap</option>
-                <option value="temp">Air Temp (°C)</option>
-                <option value="wbgt">WBGT Index</option>
-                <option value="hi">Heat Index</option>
               </select>
             </div>
 
