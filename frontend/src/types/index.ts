@@ -108,3 +108,66 @@ export interface HistoricalData {
   htss: number[];
   temperature: number[];
 }
+
+export interface VulnerableGroupAlert {
+  group_name: string;
+  target_risk_level: string;
+  vulnerability_description: string;
+  recommended_interventions: string[];
+  urgency: 'low' | 'medium' | 'high' | 'extreme';
+}
+
+export interface DayPrediction {
+  day_offset: number;
+  target_date: string;
+  warning_stage: string;
+  predicted_temperature_max: number;
+  predicted_temperature_min: number;
+  predicted_humidity: number;
+  predicted_heat_index: number;
+  predicted_htss: number;
+  risk_level: 'Safe' | 'Low' | 'Moderate' | 'High' | 'Extreme';
+  heat_health_risk_score: number;
+  hospitalization_risk_index: number;
+  mortality_risk_index: number;
+  confidence_score: number;
+  requires_human_review: boolean;
+  autonomous_action_allowed: boolean;
+  primary_contributing_factors: {
+    factor: string;
+    impact: string;
+    contribution_pct: number;
+  }[];
+  action_checklist: string[];
+}
+
+export interface MultiDayHealthRiskForecast {
+  location: string;
+  generated_at: string;
+  model_version: string;
+  threshold_version: string;
+  health_outcome_status: string;
+  decision_support_notice: string;
+  operating_threshold: number;
+  is_live_telemetry?: boolean;
+  daily_predictions: DayPrediction[];
+  localized_vulnerable_alerts: VulnerableGroupAlert[];
+  human_in_the_loop_protocol: {
+    authorized_review_required: boolean;
+    governing_principle: string;
+    authorized_roles: string[];
+    audit_trail_recorded: boolean;
+    decision_support_disclaimer: string;
+  };
+}
+
+export interface ModelBenchmark {
+  model_name: string;
+  validation_type: string;
+  n_splits: number;
+  optimal_threshold: number;
+  metrics_at_default_threshold: Record<string, any>;
+  metrics_at_optimized_threshold: Record<string, any>;
+  decision_threshold_gain: Record<string, any>;
+}
+

@@ -7,6 +7,7 @@ import refreshHandler from './api/refresh'
 import authHandler from './api/auth'
 import adminHandler from './api/admin'
 import facilitiesHandler from './api/facilities'
+import healthRiskHandler from './api/health-risk'
 
 function localVercelApiPlugin(): Plugin {
   return {
@@ -65,6 +66,10 @@ function localVercelApiPlugin(): Plugin {
           }
           if (pathname === '/api/htss') {
             await htssHandler(req as any, res as any);
+            return;
+          }
+          if (pathname === '/api/health-risk' || pathname.startsWith('/api/health-risk')) {
+            await healthRiskHandler(req as any, res as any);
             return;
           }
           if (pathname.startsWith('/api/facilities') || pathname.startsWith('/api/health')) {

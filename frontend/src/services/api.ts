@@ -11,6 +11,9 @@ import {
   GovernmentDashboard,
   HistoricalData,
   MLPrediction,
+  MultiDayHealthRiskForecast,
+  ModelBenchmark,
+  VulnerableGroupAlert,
 } from '../types';
 
 // All /api/* calls go to Vercel Serverless Functions (same origin in production,
@@ -256,4 +259,38 @@ export const apiService = {
       predicted_htss: 85,
       confidence: 90,
     }),
+
+  // 3 to 5 Day Heat-Health Warning Horizon with hospitalization & mortality risk indices
+  getHealthRiskPrediction: async (lat: number, lon: number): Promise<MultiDayHealthRiskForecast> => {
+    try {
+      const res = await api.get('/api/health-risk', { params: { lat, lon, mode: 'prediction' } });
+      return res.data;
+    } catch (err: any) {
+      console.warn('API call failed for health-risk prediction:', err?.message);
+      throw new Error('DATA UNAVAILABLE');
+    }
+  },
+
+  // Transparent Time-Series Cross-Validation Benchmarks & Threshold Tuning Report
+  getModelBenchmarks: async (): Promise<ModelBenchmark[]> => {
+    try {
+      const res = await api.get('/api/health-risk', { params: { mode: 'benchmarks' } });
+      return res.data;
+    } catch (err: any) {
+      console.warn('API call failed for model benchmarks:', err?.message);
+      return [];
+    }
+  },
+
+  // Localized Vulnerable Group Alerts
+  getVulnerableAlerts: async (riskLevel = 'High', location = 'Local District'): Promise<VulnerableGroupAlert[]> => {
+    try {
+      const res = await api.get('/api/health-risk', { params: { mode: 'vulnerable-alerts', risk_level: riskLevel, location } });
+      return res.data;
+    } catch (err: any) {
+      console.warn('API call failed for vulnerable alerts:', err?.message);
+      return [];
+    }
+  },
 };
+

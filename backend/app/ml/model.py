@@ -1,62 +1,55 @@
 import os
-import numpy as np
-import pandas as pd
-import joblib
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, precision_score, recall_score
+from typing import Dict, Any
+from app.ml.health_risk_engine import (
+    health_risk_engine,
+    MODEL_ENGINE_VERSION,
+    THRESHOLD_TUNING_VERSION,
+    HEALTH_OUTCOME_DATA_STATUS,
+)
 
 class RiskModel:
     def __init__(self):
-        self.model_path = os.path.join(os.path.dirname(__file__), "risk_rf_model.joblib")
-        self.model = None
-        self.feature_names = ['temp', 'humidity', 'wind_speed', 'solar_radiation', 'pressure', 'temp_humidity_interaction', 'is_peak_summer']
-        self.metrics = {}
-        
+        self.model_version = MODEL_ENGINE_VERSION
+        self.threshold_version = THRESHOLD_TUNING_VERSION
+        self.health_outcome_status = HEALTH_OUTCOME_DATA_STATUS
+        self.feature_names = health_risk_engine.FEATURE_NAMES
+        self.metrics: Dict[str, Any] = {}
+        self.benchmarks: Dict[str, Any] = {}
+        self.optimal_threshold: float = 0.35
+        self.engine = health_risk_engine
+
     def train_if_needed(self):
-        if os.path.exists(self.model_path):
-            self.model = joblib.load(self.model_path)
-            self.metrics = {'accuracy': 0.92, 'precision': 0.91, 'recall': 0.93} # mock loaded metrics
-            return
+        if not self.engine.is_initialized:
+            print("[RiskModel] Initializing time-series cross-validation and multi-model benchmark...")
+            self.engine.train_and_evaluate_all_models()
             
-        print("Training Random Forest model on synthetic data...")
-        # Generate synthetic data
-        np.random.seed(42)
-        n_samples = 1000
-        
-        temp = np.random.uniform(25, 50, n_samples)
-        rh = np.random.uniform(10, 90, n_samples)
-        wind = np.random.uniform(0, 20, n_samples)
-        solar = np.random.uniform(200, 1000, n_samples)
-        press = np.random.uniform(1000, 1020, n_samples)
-        interaction = temp * rh / 100.0
-        peak = np.random.choice([0, 1], n_samples)
-        
-        # Target logic
-        y = []
-        for i in range(n_samples):
-            score = temp[i] * 1.5 + interaction[i] * 2 + (solar[i]/100)
-            if score > 120: y.append("Extreme")
-            elif score > 100: y.append("High")
-            elif score > 80: y.append("Moderate")
-            elif score > 60: y.append("Low")
-            else: y.append("Safe")
-            
-        X = pd.DataFrame({
-            'temp': temp, 'humidity': rh, 'wind_speed': wind, 'solar_radiation': solar,
-            'pressure': press, 'temp_humidity_interaction': interaction, 'is_peak_summer': peak
-        })
-        
-        self.model = RandomForestClassifier(n_estimators=50, max_depth=10, random_state=42)
-        self.model.fit(X, y)
-        
-        preds = self.model.predict(X)
-        self.metrics = {
-            'accuracy': accuracy_score(y, preds),
-            'precision': precision_score(y, preds, average='weighted', zero_division=0),
-            'recall': recall_score(y, preds, average='weighted', zero_division=0)
-        }
-        
-        joblib.dump(self.model, self.model_path)
-        print("Model trained and saved.")
+        if not self.metrics and self.engine.comparison_benchmarks:
+            best_model_res = self.engine.comparison_benchmarks[self.engine.model_name]
+            opt_metrics = best_model_res.metrics_at_optimized_threshold
+            self.metrics = {
+                "precision": opt_metrics.precision,
+                "recall": opt_metrics.recall,
+                "f1": opt_metrics.f1,
+                "f2_score": opt_metrics.f2,
+                "brier_score_calibration": opt_metrics.brier_score,
+                "roc_auc": opt_metrics.roc_auc if opt_metrics.roc_auc is not None else 0.0,
+                "false_alarm_rate": opt_metrics.false_alarm_rate,
+                "missed_event_rate": opt_metrics.missed_event_rate,
+                "true_positives": opt_metrics.true_positives,
+                "false_positives": opt_metrics.false_positives,
+                "true_negatives": opt_metrics.true_negatives,
+                "false_negatives": opt_metrics.false_negatives,
+                "validation_methodology": best_model_res.validation_type,
+                "clinical_outcome_data_status": self.health_outcome_status,
+                "decision_support_only": True,
+            }
+            self.optimal_threshold = self.engine.optimal_threshold
+            print(f"[RiskModel] Completed TimeSeriesSplit validation. Optimal operational threshold: {self.optimal_threshold:.2f}")
+
+    @property
+    def model(self):
+        if not self.engine.is_initialized:
+            self.train_if_needed()
+        return self.engine.trained_model
 
 risk_model = RiskModel()
