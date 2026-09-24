@@ -48,7 +48,7 @@ export const StateRiskBar: React.FC<Props> = ({ locations }) => {
                 borderColor: 'rgba(255,255,255,0.15)',
                 color: '#fff',
                 borderRadius: '12px',
-                fontFamily: 'monospace',
+                fontFamily: "'Inter', -apple-system, sans-serif",
                 fontSize: '12px',
                 boxShadow: '0 10px 25px rgba(0,0,0,0.8)',
               }}

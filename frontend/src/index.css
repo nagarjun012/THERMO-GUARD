@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,7 +11,7 @@
 }
 
 body {
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
   background: radial-gradient(circle at 50% -10%, #152037 0%, #0b0f19 50%, #06090f 100%);
   background-attachment: fixed;
   color: #f1f5f9;
@@ -19,8 +19,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-code, pre, .font-mono {
-  font-family: 'JetBrains Mono', monospace;
+code, pre {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+.font-mono {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif !important;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 /* Custom scrollbar */

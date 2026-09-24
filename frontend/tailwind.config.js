@@ -8,7 +8,10 @@ export default {
         risk: { safe: '#10b981', low: '#eab308', moderate: '#f97316', high: '#ef4444', extreme: '#a855f7' },
         accent: { DEFAULT: '#3b82f6', light: '#60a5fa', dark: '#2563eb' },
       },
-      fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+        mono: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+      },
     },
   },
   plugins: [],
