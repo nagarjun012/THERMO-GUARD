@@ -150,6 +150,7 @@ export interface MultiDayHealthRiskForecast {
   decision_support_notice: string;
   operating_threshold: number;
   is_live_telemetry?: boolean;
+  telemetry_source?: string;
   daily_predictions: DayPrediction[];
   localized_vulnerable_alerts: VulnerableGroupAlert[];
   human_in_the_loop_protocol: {
