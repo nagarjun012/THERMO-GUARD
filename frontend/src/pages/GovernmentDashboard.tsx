@@ -9,6 +9,7 @@ import { MapLegend } from '../components/map/MapLegend';
 import { StateRiskBar } from '../components/charts/StateRiskBar';
 import { VulnerabilityRadar } from '../components/charts/VulnerabilityRadar';
 import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
+import { HeatHealthPredictionPanel } from '../components/dashboard/HeatHealthPredictionPanel';
 import { computeFullAudit } from '../lib/htssEngine';
 import { Siren, Calculator } from 'lucide-react';
 
@@ -103,6 +104,13 @@ export const GovernmentDashboard: React.FC = () => {
           <StateRiskBar locations={topLocations} />
         </div>
       </div>
+
+      {/* 3-5 DAY HEAT-HEALTH WARNING & EPIDEMIOLOGICAL RISK INTELLIGENCE */}
+      <HeatHealthPredictionPanel
+        lat={selectedLocation.lat || 28.6139}
+        lon={selectedLocation.lon || 77.2090}
+        locationName={selectedLocation.name || 'Selected Region'}
+      />
 
       {/* ALL-INDIA RANKINGS TABLE & VULNERABILITY RADAR */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

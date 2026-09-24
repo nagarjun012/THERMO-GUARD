@@ -12,6 +12,7 @@ import { HeatwaveProbability } from '../components/dashboard/HeatwaveProbability
 import { HTSSDetailPanel } from '../components/dashboard/HTSSDetailPanel';
 import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
 import { OfficialThresholdReconciliation } from '../components/common/OfficialThresholdReconciliation';
+import { HeatHealthPredictionPanel } from '../components/dashboard/HeatHealthPredictionPanel';
 import { useAppStore } from '../stores/appStore';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
 import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity } from 'lucide-react';
@@ -523,6 +524,15 @@ export const CitizenDashboard: React.FC = () => {
         currentTemp={Number(weather.temperature)}
         currentHtss={Number(thermal.htss)}
       />
+
+      {/* 3-5 DAY HEAT-HEALTH WARNING WINDOW & EPIDEMIOLOGICAL RISK INTELLIGENCE */}
+      {currentLocation && (
+        <HeatHealthPredictionPanel
+          lat={currentLocation.latitude}
+          lon={currentLocation.longitude}
+          locationName={currentLocation.displayName}
+        />
+      )}
 
       {/* HEAT STRESS FACTOR DECOMPOSITION */}
       <RiskContributionBar factors={risk.primaryFactors} />
