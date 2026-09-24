@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import {
   BookOpen,
   Thermometer,
@@ -12,6 +13,8 @@ import {
   AlertTriangle,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Search,
   ArrowRight,
   ArrowUp,
@@ -31,32 +34,29 @@ import {
   Layers,
 } from 'lucide-react';
 
-
-
-
-
 // Section interface for sub-nav
 interface NavSection {
   id: string;
   label: string;
+  icon: React.ElementType;
 }
 
 const navSections: NavSection[] = [
-  { id: 'overview', label: 'Overview' },
-  { id: 'data', label: 'Data Inputs' },
-  { id: 'wbgt', label: 'WBGT' },
-  { id: 'heat-index', label: 'Heat Index' },
-  { id: 'humidex', label: 'Humidex' },
-  { id: 'comparison', label: 'Indices Compared' },
-  { id: 'risk-score', label: 'Risk Score' },
-  { id: 'district-risk', label: 'District Risk System' },
-  { id: 'forecast', label: 'Forecasts' },
-  { id: 'alerts', label: 'Alerts' },
-  { id: 'vulnerability', label: 'Vulnerability' },
-  { id: 'safety', label: 'Safety & Actions' },
-  { id: 'simulator', label: 'Live Calculator' },
-  { id: 'faq', label: 'FAQ' },
-  { id: 'glossary', label: 'Glossary' },
+  { id: 'overview', label: 'Overview', icon: BookOpen },
+  { id: 'data', label: 'Data Inputs', icon: Layers },
+  { id: 'wbgt', label: 'WBGT', icon: Sun },
+  { id: 'heat-index', label: 'Heat Index', icon: Thermometer },
+  { id: 'humidex', label: 'Humidex', icon: Droplets },
+  { id: 'comparison', label: 'Indices Compared', icon: Sliders },
+  { id: 'risk-score', label: 'Risk Score', icon: Activity },
+  { id: 'district-risk', label: 'District Risk System', icon: MapPin },
+  { id: 'forecast', label: 'Forecasts', icon: Calendar },
+  { id: 'alerts', label: 'Alerts', icon: Bell },
+  { id: 'vulnerability', label: 'Vulnerability', icon: Users },
+  { id: 'safety', label: 'Safety & Actions', icon: ShieldCheck },
+  { id: 'simulator', label: 'Live Calculator', icon: Zap },
+  { id: 'faq', label: 'FAQ', icon: HelpCircle },
+  { id: 'glossary', label: 'Glossary', icon: Info },
 ];
 
 export const LearnPage: React.FC = () => {
@@ -71,6 +71,28 @@ export const LearnPage: React.FC = () => {
   const [simHumidity, setSimHumidity] = useState(55);
   const [simWind, setSimWind] = useState(10);
   const [simSolar, setSimSolar] = useState(700);
+
+  const tabRefs = useRef<{ [key: string]: HTMLButtonElement | null }>({});
+  const tabContainerRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    // Keep active tab centered in horizontal scroll view
+    const activeEl = tabRefs.current[activeSection];
+    if (activeEl && tabContainerRef.current) {
+      activeEl.scrollIntoView({
+        behavior: 'smooth',
+        inline: 'center',
+        block: 'nearest',
+      });
+    }
+  }, [activeSection]);
+
+  const scrollNav = (direction: 'left' | 'right') => {
+    if (tabContainerRef.current) {
+      const scrollAmount = direction === 'left' ? -260 : 260;
+      tabContainerRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -216,22 +238,98 @@ export const LearnPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-dark-900 text-gray-200 pb-20 relative">
-      {/* STICKY SUB-NAVIGATION BAR */}
-      <div className="sticky top-16 z-40 bg-[#090e18]/92 backdrop-blur-xl border-b border-slate-700/60 shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
-        <div className="max-w-7xl mx-auto px-4 overflow-x-auto py-2.5 flex items-center gap-2 no-scrollbar">
-          {navSections.map((sec) => (
-            <button
-              key={sec.id}
-              onClick={() => scrollTo(sec.id)}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer ${
-                activeSection === sec.id
-                  ? 'bg-gradient-to-b from-orange-500 via-amber-600 to-orange-600 text-white font-bold border border-orange-400/50 shadow-[0_2px_12px_rgba(249,115,22,0.35),inset_0_1px_0_rgba(255,255,255,0.3)] -translate-y-0.5'
-                  : 'bg-slate-900/80 text-slate-300 border border-slate-700/60 hover:border-slate-600 hover:bg-slate-800/80 hover:text-white hover:-translate-y-0.5 active:translate-y-0'
-              }`}
-            >
-              {sec.label}
-            </button>
-          ))}
+      {/* STICKY SUB-NAVIGATION BAR WITH EFFECTS, ANIMATIONS & HIGH VISIBILITY */}
+      <div className="sticky top-16 z-40 bg-[#070d18]/94 backdrop-blur-2xl border-b border-slate-700/80 shadow-[0_8px_32px_rgba(0,0,0,0.65)] transition-all">
+        {/* Ambient Top Glow Line */}
+        <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 py-2.5 flex items-center relative gap-2">
+          {/* Left Arrow Button (Desktop) */}
+          <button
+            onClick={() => scrollNav('left')}
+            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/90 hover:border-slate-500 shadow-md transition-all shrink-0 cursor-pointer active:scale-95 z-20"
+            title="Scroll tabs left"
+            aria-label="Scroll tabs left"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+
+          {/* Left Gradient Fade Mask */}
+          <div className="pointer-events-none absolute left-0 lg:left-10 top-0 bottom-0 w-8 bg-gradient-to-r from-[#070d18] to-transparent z-10" />
+
+          {/* Tabs Scrollable Container */}
+          <div
+            ref={tabContainerRef}
+            className="flex-1 overflow-x-auto py-1 px-1 flex items-center gap-2.5 no-scrollbar scroll-smooth"
+          >
+            {navSections.map((sec) => {
+              const Icon = sec.icon;
+              const isActive = activeSection === sec.id;
+
+              return (
+                <motion.button
+                  key={sec.id}
+                  ref={(el) => { tabRefs.current[sec.id] = el; }}
+                  onClick={() => scrollTo(sec.id)}
+                  whileHover={{ scale: 1.04, y: -1 }}
+                  whileTap={{ scale: 0.96 }}
+                  className={`relative group px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-colors duration-200 cursor-pointer flex items-center gap-1.5 z-10 shrink-0 ${
+                    isActive
+                      ? 'text-white font-bold'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  {/* Sliding Active Pill Background Animation */}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeLearnTab"
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-orange-500 via-amber-500 to-orange-600 border border-amber-300/40 shadow-[0_2px_16px_rgba(249,115,22,0.45),inset_0_1px_1px_rgba(255,255,255,0.4)]"
+                      transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+                      style={{ zIndex: -1 }}
+                    />
+                  )}
+
+                  {/* Inactive Tab Pill Background with frosted glass and clear visibility */}
+                  {!isActive && (
+                    <div className="absolute inset-0 rounded-full bg-slate-800/90 border border-slate-700/80 shadow-sm backdrop-blur-md transition-all duration-200 group-hover:bg-slate-700/90 group-hover:border-slate-500/80 group-hover:shadow-[0_0_12px_rgba(249,115,22,0.2)] -z-10" />
+                  )}
+
+                  {/* Tab Icon */}
+                  <Icon
+                    className={`w-3.5 h-3.5 transition-transform duration-200 ${
+                      isActive
+                        ? 'text-white scale-110 drop-shadow'
+                        : 'text-slate-400 group-hover:text-amber-400 group-hover:scale-110'
+                    }`}
+                  />
+
+                  {/* Tab Label */}
+                  <span className="relative z-10 tracking-wide">{sec.label}</span>
+
+                  {/* Active Pulse Glow Dot */}
+                  {isActive && (
+                    <span className="relative flex h-2 w-2 ml-0.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-[0_0_6px_#fff]" />
+                    </span>
+                  )}
+                </motion.button>
+              );
+            })}
+          </div>
+
+          {/* Right Gradient Fade Mask */}
+          <div className="pointer-events-none absolute right-0 lg:right-10 top-0 bottom-0 w-8 bg-gradient-to-l from-[#070d18] to-transparent z-10" />
+
+          {/* Right Arrow Button (Desktop) */}
+          <button
+            onClick={() => scrollNav('right')}
+            className="hidden lg:flex items-center justify-center w-8 h-8 rounded-full bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700/90 hover:border-slate-500 shadow-md transition-all shrink-0 cursor-pointer active:scale-95 z-20"
+            title="Scroll tabs right"
+            aria-label="Scroll tabs right"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
