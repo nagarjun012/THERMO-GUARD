@@ -237,9 +237,9 @@ export const LearnPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-dark-900 text-gray-200 pb-20 relative">
+    <div className="min-h-screen bg-dark-900 text-gray-200 pb-20 relative -mt-2">
       {/* STICKY SUB-NAVIGATION BAR WITH EFFECTS, ANIMATIONS & HIGH VISIBILITY */}
-      <div className="sticky top-16 z-40 bg-[#070d18]/94 backdrop-blur-2xl border-b border-slate-700/80 shadow-[0_8px_32px_rgba(0,0,0,0.65)] transition-all">
+      <div className="sticky top-16 z-40 bg-[#070d18]/95 backdrop-blur-2xl border-b border-slate-700/80 shadow-[0_8px_32px_rgba(0,0,0,0.65)] transition-all">
         {/* Ambient Top Glow Line */}
         <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-orange-500/60 to-transparent pointer-events-none" />
 
