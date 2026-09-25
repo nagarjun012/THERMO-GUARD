@@ -118,12 +118,9 @@ export const LearnPage: React.FC = () => {
     setActiveSection(id);
     const el = document.getElementById(id);
     if (el) {
-      const offset = 140;
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = el.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
-      const offsetPosition = elementPosition - offset;
-      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+      const offset = 135;
+      const targetY = window.scrollY + el.getBoundingClientRect().top - offset;
+      window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
     }
   };
 
@@ -237,9 +234,9 @@ export const LearnPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 pb-20 relative -mt-2 learn-page-root overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 pb-20 relative learn-page-root">
       {/* STICKY SUB-NAVIGATION BAR WITH EFFECTS, ANIMATIONS & HIGH VISIBILITY */}
-      <div className="sticky top-16 z-40 bg-white/80 backdrop-blur-2xl border-b border-blue-200/60 shadow-[0_4px_20px_rgba(20,80,180,0.06)] transition-all overflow-hidden">
+      <div className="sticky top-16 z-40 bg-white/95 backdrop-blur-2xl border-b border-blue-200/80 shadow-[0_4px_20px_rgba(20,80,180,0.08)] transition-all">
         {/* Ambient Top Glow Line */}
         <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent pointer-events-none" />
 
