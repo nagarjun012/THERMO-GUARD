@@ -1,33 +1,19 @@
 import React, { useState } from 'react';
-import { useGovernmentDashboard } from '../hooks/useApi';
 import { useAppStore } from '../stores/appStore';
 import { HeatRiskMap } from '../components/map/HeatRiskMap';
 import { MapLegend } from '../components/map/MapLegend';
 import { MapEducationalModal } from '../components/map/MapEducationalModal';
-import { Info, MapPin, Sliders, Activity, Sparkles } from 'lucide-react';
-
+import { Info, MapPin, Sliders, Sparkles } from 'lucide-react';
 
 import { LocationSelector } from '../components/location/LocationSelector';
 
 export const MapPage: React.FC = () => {
-  const { data, isLoading } = useGovernmentDashboard();
   const { selectedLocation } = useAppStore();
 
   const [isEduModalOpen, setIsEduModalOpen] = useState(false);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [gisResolution, setGisResolution] = useState('District / City Level Risk');
   const [layerFilter] = useState<'all' | 'risk' | 'temp' | 'wbgt' | 'hi'>('all');
-
-  if (isLoading || !data) {
-    return (
-      <div className="h-[calc(100vh-64px)] w-full flex items-center justify-center bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-700">
-        <div className="flex flex-col items-center gap-3 bg-white/90 p-8 rounded-3xl border border-white/80 shadow-lg">
-          <Activity className="w-8 h-8 text-blue-600 animate-spin" />
-          <span className="text-sm font-bold text-slate-800">Loading Live Heat Risk GIS Map...</span>
-        </div>
-      </div>
-    );
-  }
 
   const locationName = selectedLocation?.name || 'Delhi, India';
   const currentCenter: [number, number] = [selectedLocation.lat, selectedLocation.lon];
@@ -36,7 +22,7 @@ export const MapPage: React.FC = () => {
     <div className="h-[calc(100vh-64px)] w-full relative overflow-hidden bg-[#CCE5FD]">
       {/* GIS MAP CONTAINER */}
       <HeatRiskMap
-        cities={data.cities}
+        cities={[]}
         center={currentCenter}
         activeLayer={layerFilter}
         gisResolution={gisResolution}

@@ -8,6 +8,7 @@
  * Now: /api/htss → Supabase → this hook → React components.
  */
 import { useState, useEffect, useMemo } from 'react';
+import { useAppStore } from '../stores/appStore';
 import { getDistrictPopulation } from '../data/districtPopulations';
 
 export interface LiveDistrictData {
@@ -51,12 +52,23 @@ function riskCategoryToLevel(cat: string): 'Extreme' | 'High' | 'Moderate' | 'Lo
 }
 
 export function useAllIndiaLiveTelemetry() {
+  const { currentUser, userRole } = useAppStore();
+  const isOfficer = userRole === 'gov' || currentUser?.role === 'OFFICER' || currentUser?.role === 'ADMIN';
+
   const [rawDistricts, setRawDistricts] = useState<any[]>([]);
-  const [isLiveLoading, setIsLiveLoading] = useState(true);
+  const [isLiveLoading, setIsLiveLoading] = useState(false);
   const [loadedCount, setLoadedCount] = useState(0);
   const [dataStatus, setDataStatus] = useState<'ok' | 'no_data' | 'error'>('ok');
 
   useEffect(() => {
+    if (!isOfficer) {
+      setRawDistricts([]);
+      setLoadedCount(0);
+      setIsLiveLoading(false);
+      setDataStatus('ok');
+      return;
+    }
+
     let cancelled = false;
 
     const load = async () => {
@@ -96,7 +108,7 @@ export function useAllIndiaLiveTelemetry() {
 
     load();
     return () => { cancelled = true; };
-  }, []);
+  }, [isOfficer]);
 
   const districts: LiveDistrictData[] = useMemo(() => {
     if (!rawDistricts.length) return [];
