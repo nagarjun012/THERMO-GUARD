@@ -76,13 +76,17 @@ export const LearnPage: React.FC = () => {
   const tabContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    // Keep active tab centered in horizontal scroll view
+    // Keep active tab centered in horizontal scroll view WITHOUT touching window scroll
     const activeEl = tabRefs.current[activeSection];
-    if (activeEl && tabContainerRef.current) {
-      activeEl.scrollIntoView({
+    const container = tabContainerRef.current;
+    if (activeEl && container) {
+      const containerWidth = container.offsetWidth;
+      const elOffsetLeft = activeEl.offsetLeft;
+      const elWidth = activeEl.offsetWidth;
+      const targetScroll = elOffsetLeft - containerWidth / 2 + elWidth / 2;
+      container.scrollTo({
+        left: targetScroll,
         behavior: 'smooth',
-        inline: 'center',
-        block: 'nearest',
       });
     }
   }, [activeSection]);
@@ -95,21 +99,32 @@ export const LearnPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const handleScroll = () => {
-      setShowBackToTop(window.scrollY > 400);
+    let ticking = false;
 
-      // Determine active section
-      for (const sec of navSections) {
-        const el = document.getElementById(sec.id);
-        if (el) {
-          const rect = el.getBoundingClientRect();
-          if (rect.top <= 200 && rect.bottom >= 100) {
-            setActiveSection(sec.id);
-            break;
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          setShowBackToTop(window.scrollY > 400);
+
+          // Find which section is currently active
+          const scrollPosition = window.scrollY + 140;
+          for (let i = navSections.length - 1; i >= 0; i--) {
+            const sec = navSections[i];
+            const el = document.getElementById(sec.id);
+            if (el) {
+              const elTop = window.scrollY + el.getBoundingClientRect().top;
+              if (scrollPosition >= elTop - 30) {
+                setActiveSection((prev) => (prev !== sec.id ? sec.id : prev));
+                break;
+              }
+            }
           }
-        }
+          ticking = false;
+        });
+        ticking = true;
       }
     };
+
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -118,7 +133,7 @@ export const LearnPage: React.FC = () => {
     setActiveSection(id);
     const el = document.getElementById(id);
     if (el) {
-      const offset = 135;
+      const offset = 125;
       const targetY = window.scrollY + el.getBoundingClientRect().top - offset;
       window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
     }

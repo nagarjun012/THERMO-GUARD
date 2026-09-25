@@ -47,7 +47,7 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="bg-white/80 backdrop-blur-xl sticky top-0 z-50 border-b border-blue-200/60 shadow-[0_4px_25px_rgba(20,80,180,0.06)] safe-top">
+      <nav className="bg-white/85 backdrop-blur-xl sticky top-0 z-50 border-b border-blue-200/60 shadow-[0_4px_25px_rgba(20,80,180,0.06)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             {/* BRAND LOGO WITH HIGH-PRECISION SHIELD EMBLEM */}
