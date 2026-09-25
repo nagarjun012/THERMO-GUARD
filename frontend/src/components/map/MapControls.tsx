@@ -40,10 +40,10 @@ export const MapControls: React.FC<Props> = ({
   return (
     <div className="absolute top-[68px] right-4 z-[450] flex flex-col gap-2 pointer-events-auto">
       {/* GLASS CONTROL PILL STACK */}
-      <div className="glass-card p-1.5 bg-dark-900/90 backdrop-blur-md border border-dark-600 shadow-2xl rounded-2xl flex flex-col gap-1 text-gray-300">
+      <div className="p-1.5 bg-white/95 backdrop-blur-md border border-slate-200 shadow-xl rounded-2xl flex flex-col gap-1 text-slate-800">
         <button
           onClick={onZoomIn}
-          className="p-2 rounded-xl hover:bg-dark-700 hover:text-white transition-all cursor-pointer"
+          className="p-2 rounded-xl hover:bg-slate-100 hover:text-blue-600 text-slate-800 transition-all cursor-pointer"
           title="Zoom In"
         >
           <Plus className="w-4 h-4" />
@@ -51,17 +51,17 @@ export const MapControls: React.FC<Props> = ({
 
         <button
           onClick={onZoomOut}
-          className="p-2 rounded-xl hover:bg-dark-700 hover:text-white transition-all cursor-pointer"
+          className="p-2 rounded-xl hover:bg-slate-100 hover:text-blue-600 text-slate-800 transition-all cursor-pointer"
           title="Zoom Out"
         >
           <Minus className="w-4 h-4" />
         </button>
 
-        <div className="h-px bg-dark-700 mx-1 my-0.5" />
+        <div className="h-px bg-slate-200 mx-1 my-0.5" />
 
         <button
           onClick={onLocateMe}
-          className="p-2 rounded-xl hover:bg-dark-700 hover:text-orange-400 transition-all cursor-pointer"
+          className="p-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 text-slate-800 transition-all cursor-pointer"
           title="Locate Me (GPS)"
         >
           <Navigation className="w-4 h-4" />
@@ -69,17 +69,17 @@ export const MapControls: React.FC<Props> = ({
 
         <button
           onClick={onResetView}
-          className="p-2 rounded-xl hover:bg-dark-700 hover:text-orange-400 transition-all cursor-pointer"
+          className="p-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 text-slate-800 transition-all cursor-pointer"
           title="Reset View to Default"
         >
           <RotateCcw className="w-4 h-4" />
         </button>
 
-        <div className="h-px bg-dark-700 mx-1 my-0.5" />
+        <div className="h-px bg-slate-200 mx-1 my-0.5" />
 
         <button
           onClick={onToggleLayers}
-          className="p-2 rounded-xl hover:bg-dark-700 hover:text-orange-400 transition-all cursor-pointer"
+          className="p-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 text-slate-800 transition-all cursor-pointer"
           title="Layer Switcher"
         >
           <Layers className="w-4 h-4" />
@@ -87,7 +87,7 @@ export const MapControls: React.FC<Props> = ({
 
         <button
           onClick={onToggleSearch}
-          className="p-2 rounded-xl hover:bg-dark-700 hover:text-orange-400 transition-all cursor-pointer"
+          className="p-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 text-slate-800 transition-all cursor-pointer"
           title="Search Location"
         >
           <Search className="w-4 h-4" />
@@ -95,17 +95,17 @@ export const MapControls: React.FC<Props> = ({
 
         <button
           onClick={toggleFullscreen}
-          className="p-2 rounded-xl hover:bg-dark-700 hover:text-white transition-all cursor-pointer"
+          className="p-2 rounded-xl hover:bg-slate-100 hover:text-blue-600 text-slate-800 transition-all cursor-pointer"
           title="Toggle Fullscreen"
         >
           <Maximize className="w-4 h-4" />
         </button>
 
-        <div className="h-px bg-dark-700 mx-1 my-0.5" />
+        <div className="h-px bg-slate-200 mx-1 my-0.5" />
 
         <button
           onClick={onOpenGuide}
-          className="p-2 rounded-xl bg-orange-500/20 text-orange-400 hover:bg-orange-500 hover:text-white transition-all cursor-pointer"
+          className="p-2 rounded-xl bg-orange-100 text-orange-700 hover:bg-orange-200 transition-all cursor-pointer font-bold"
           title="Understand This Map Guide"
         >
           <BookOpen className="w-4 h-4" />

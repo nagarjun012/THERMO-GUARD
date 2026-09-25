@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { X, Bug, ArrowDown, CheckCircle2 } from 'lucide-react';
 import { HTSSCalculationAudit } from '../../lib/htssEngine';
 import { formatISTTimestamp } from '../../lib/dataProvenance';
@@ -19,27 +20,28 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
 
   const { inputs, thermalIndicators, normalization, contributions, result, factorDecomposition } = audit;
 
-  return (
-    <div className="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto neu-card border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl bg-gradient-to-b from-dark-800 to-dark-900">
+  const modal = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
+      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto neu-card border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl bg-gradient-to-b from-dark-800 to-dark-900 my-auto">
         {/* Close */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+          className="absolute top-3.5 right-3.5 sm:top-5 sm:right-5 p-1.5 sm:p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
           type="button"
+          aria-label="Close Audit View"
         >
           <X className="w-5 h-5" />
         </button>
 
         {/* Title */}
-        <div className="flex items-center gap-2 mb-6">
-          <Bug className="w-5 h-5 text-orange-400" />
-          <h2 className="text-lg font-black font-mono text-white tracking-tight">
+        <div className="flex items-center gap-2 mb-4 sm:mb-6">
+          <Bug className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 shrink-0" />
+          <h2 className="text-base sm:text-lg font-black font-mono text-white tracking-tight">
             HTSS AUDIT / DEBUG VIEW
           </h2>
         </div>
 
-        <div className="space-y-5 text-xs font-mono">
+        <div className="space-y-3.5 sm:space-y-5 text-[11px] sm:text-xs font-mono">
           {/* Pipeline Visualization */}
           <PipelineStep
             step={1}
@@ -79,7 +81,7 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
             title="Normalization (0–100 Scale)"
             status="success"
             content={
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 break-words">
                 <div className="text-gray-400">
                   n_wbgt = clamp((WBGT − 20) / 15 × 100, 0, 100) = <span className="text-white font-bold">{normalization.n_wbgt}</span>
                 </div>
@@ -100,7 +102,7 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
             title="Weighted Contributions"
             status="success"
             content={
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 break-words">
                 <div className="text-gray-400">
                   WBGT (45%): 0.45 × {normalization.n_wbgt} = <span className="text-cyan-300 font-bold">{contributions.wbgtContribution}</span>
                 </div>
@@ -125,11 +127,11 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
             status="success"
             content={
               <div className="flex items-center gap-4">
-                <div className="text-3xl font-black text-orange-400">
-                  {result.htss}<span className="text-lg text-gray-500">/100</span>
+                <div className="text-2xl sm:text-3xl font-black text-orange-400">
+                  {result.htss}<span className="text-base sm:text-lg text-gray-500">/100</span>
                 </div>
                 <div>
-                  <span className={`px-3 py-1 rounded-lg text-xs font-bold border ${
+                  <span className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold border ${
                     result.riskCategory === 'EXTREME' ? 'text-red-400 border-red-500/30 bg-red-500/10' :
                     result.riskCategory === 'HIGH' ? 'text-orange-400 border-orange-500/30 bg-orange-500/10' :
                     result.riskCategory === 'MODERATE' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10' :
@@ -155,14 +157,14 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
               <div className="space-y-2">
                 {factorDecomposition.map((f, i) => (
                   <div key={i} className="flex items-center gap-2">
-                    <span className="text-gray-400 w-24">{f.factor}:</span>
-                    <div className="flex-1 h-3 bg-dark-950 rounded-full overflow-hidden">
+                    <span className="text-gray-400 w-20 sm:w-24 text-[11px] sm:text-xs truncate">{f.factor}:</span>
+                    <div className="flex-1 h-2.5 sm:h-3 bg-dark-950 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-500"
                         style={{ width: `${f.contribution}%` }}
                       />
                     </div>
-                    <span className="text-white font-bold w-10 text-right">{f.contribution}%</span>
+                    <span className="text-white font-bold w-9 sm:w-10 text-right text-[11px] sm:text-xs">{f.contribution}%</span>
                   </div>
                 ))}
               </div>
@@ -180,6 +182,8 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
       </div>
     </div>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modal, document.body) : null;
 };
 
 function PipelineStep({ step, title, status, content }: {

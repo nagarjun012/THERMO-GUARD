@@ -18,16 +18,16 @@ export const MapLegend: React.FC<Props> = ({ onOpenGuide }) => {
   ];
 
   return (
-    <div className="glass-card p-4 absolute bottom-6 left-6 z-[400] text-xs max-w-xs bg-dark-900/95 backdrop-blur-md border border-dark-600 shadow-2xl rounded-2xl space-y-3">
-      <div className="flex items-center justify-between border-b border-dark-700 pb-2">
-        <h4 className="font-extrabold text-white tracking-wide text-xs uppercase flex items-center gap-1.5">
+    <div className="p-4 absolute bottom-6 left-6 z-[400] text-xs max-w-xs bg-white/95 backdrop-blur-xl border border-white/80 shadow-2xl rounded-2xl space-y-3 font-sans">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-2">
+        <h4 className="font-black text-slate-900 tracking-wide text-xs uppercase flex items-center gap-1.5">
           <span>🗺️ Risk Level Legend</span>
         </h4>
         <div className="flex items-center gap-2">
           {onOpenGuide && (
             <button
               onClick={onOpenGuide}
-              className="text-[10px] text-orange-400 hover:text-orange-300 font-bold flex items-center gap-0.5"
+              className="text-[11px] text-amber-700 hover:text-amber-800 bg-amber-50 hover:bg-amber-100 px-2 py-0.5 rounded-lg border border-amber-300 font-bold flex items-center gap-1 transition-colors cursor-pointer"
               title="Open detailed map guide"
             >
               <Info className="w-3 h-3" /> Guide
@@ -35,7 +35,7 @@ export const MapLegend: React.FC<Props> = ({ onOpenGuide }) => {
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="text-[10px] text-gray-400 hover:text-white font-bold bg-dark-800 px-2 py-0.5 rounded border border-dark-600 transition-colors"
+            className="text-[11px] text-slate-800 hover:text-slate-950 font-bold bg-slate-100 hover:bg-slate-200 px-2.5 py-0.5 rounded-lg border border-slate-300 transition-colors cursor-pointer"
           >
             {isCollapsed ? 'Show ▼' : 'Hide ▲'}
           </button>
@@ -49,30 +49,31 @@ export const MapLegend: React.FC<Props> = ({ onOpenGuide }) => {
               const isSelected = selectedLevel === lvl.name;
               const color = getRiskColorByCategory(lvl.name);
               return (
-                <div key={lvl.name} className="rounded-lg overflow-hidden border border-dark-700/50">
+                <div key={lvl.name} className="rounded-xl overflow-hidden border border-slate-200 bg-white hover:bg-slate-50 transition-all shadow-sm">
                   <button
                     onClick={() => setSelectedLevel(isSelected ? null : lvl.name)}
-                    className="w-full p-2 flex items-center justify-between text-left hover:bg-dark-700/50 transition-all cursor-pointer"
+                    className="w-full p-2.5 flex items-center justify-between text-left hover:bg-slate-50 transition-all cursor-pointer"
                   >
                     <div className="flex items-center gap-2">
                       <div
-                        className="w-3.5 h-3.5 rounded-full border border-white/30 flex-shrink-0"
-                        style={{ backgroundColor: color, boxShadow: `0 0 8px ${color}` }}
+                        className="w-3.5 h-3.5 rounded-full border border-black/10 flex-shrink-0"
+                        style={{ backgroundColor: color, boxShadow: `0 0 6px ${color}80` }}
                       />
-                      <span className="text-gray-200 font-bold text-xs">{lvl.name}</span>
+                      <span className="text-slate-950 font-black text-xs tracking-wider">{lvl.name}</span>
                     </div>
-                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-gray-400">
+                    <div className="flex items-center gap-1.5 text-[11px] font-mono text-slate-800 font-bold">
                       <span>HTSS {lvl.range}</span>
-                      {isSelected ? <ChevronUp className="w-3 h-3 text-orange-400" /> : <ChevronDown className="w-3 h-3 text-gray-500" />}
+                      {isSelected ? <ChevronUp className="w-3.5 h-3.5 text-slate-800" /> : <ChevronDown className="w-3.5 h-3.5 text-slate-600" />}
                     </div>
                   </button>
 
                   {isSelected && (
                     <div
-                      className="p-2.5 pt-1 text-[11px] text-gray-300 border-t border-dark-700/50 space-y-1 animate-fadeIn"
-                      style={{ backgroundColor: `${color}10` }}
+                      className="p-2.5 pt-2 text-xs border-t border-slate-200 space-y-1 animate-fadeIn"
+                      style={{ backgroundColor: `${color}15` }}
                     >
-                      <p className="font-semibold text-white">{lvl.desc}</p>
+                      <p className="font-black text-slate-950">{lvl.label}</p>
+                      <p className="font-semibold text-slate-800 leading-snug">{lvl.desc}</p>
                     </div>
                   )}
                 </div>
@@ -80,7 +81,7 @@ export const MapLegend: React.FC<Props> = ({ onOpenGuide }) => {
             })}
           </div>
 
-          <p className="text-[10px] text-gray-400 italic text-center pt-2 border-t border-dark-700/40">
+          <p className="text-[11px] text-slate-700 font-bold italic text-center pt-2 border-t border-slate-200">
             Click any category for general safety advisories
           </p>
         </>
