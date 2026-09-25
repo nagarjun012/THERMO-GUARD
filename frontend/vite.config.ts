@@ -103,5 +103,20 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    // Optimize for native app: split vendor chunks for better caching
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-charts': ['recharts'],
+          'vendor-map': ['leaflet', 'react-leaflet'],
+          'vendor-motion': ['framer-motion'],
+          'vendor-query': ['@tanstack/react-query'],
+        },
+      },
+    },
+    // Increase warning limit since we've split chunks properly
+    chunkSizeWarningLimit: 600,
+  },
 })
-

@@ -17,7 +17,7 @@ export const OfficialFooter: React.FC = () => {
 
   return (
     <footer
-      className="w-full border-t border-blue-200/60 mt-8 bg-white/75 backdrop-blur-md text-slate-600 shadow-sm"
+      className="w-full border-t border-blue-200/60 mt-8 bg-white/75 backdrop-blur-md text-slate-600 shadow-sm safe-bottom"
       role="contentinfo"
       aria-label="Site footer"
     >

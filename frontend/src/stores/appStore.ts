@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 import { Language } from '../i18n/translations';
 import { VulnerabilityProfile } from '../utils/thermalEngine';
+import { API_CONFIG } from '../config/apiConfig';
 
 export interface Location {
   lat: number;
@@ -209,8 +210,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   setUserRole: (role) => set({ userRole: role }),
 
   checkServerSession: async () => {
+    const base = API_CONFIG.baseUrl;
     try {
-      const res = await fetch('/api/auth', { credentials: 'same-origin' });
+      const res = await fetch(`${base}/api/auth`, {
+        credentials: API_CONFIG.isNative ? 'omit' : 'same-origin',
+      });
       if (res.ok) {
         const data = await res.json();
         if (data.authenticated && data.user) {
@@ -256,16 +260,17 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   loginCitizen: async (name?: string) => {
+    const base = API_CONFIG.baseUrl;
     const fallbackUser: UserProfile = {
       userId: `CITIZEN-${Date.now()}`,
       name: (name || '').trim() || 'Citizen User',
       role: 'CITIZEN',
     };
     try {
-      const res = await fetch('/api/auth', {
+      const res = await fetch(`${base}/api/auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
+        credentials: API_CONFIG.isNative ? 'omit' : 'same-origin',
         body: JSON.stringify({ role: 'user', citizenName: name }),
       });
       if (res.ok) {
@@ -301,11 +306,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   loginOfficer: async (officerId: string, passcode: string) => {
+    const base = API_CONFIG.baseUrl;
     try {
-      const res = await fetch('/api/auth', {
+      const res = await fetch(`${base}/api/auth`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'same-origin',
+        credentials: API_CONFIG.isNative ? 'omit' : 'same-origin',
         body: JSON.stringify({ officerId, passcode }),
       });
       const data = await res.json();
@@ -335,8 +341,12 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   logout: async () => {
+    const base = API_CONFIG.baseUrl;
     try {
-      await fetch('/api/auth?action=logout', { method: 'POST', credentials: 'same-origin' });
+      await fetch(`${base}/api/auth?action=logout`, {
+        method: 'POST',
+        credentials: API_CONFIG.isNative ? 'omit' : 'same-origin',
+      });
     } catch {}
     try {
       localStorage.removeItem('thermosafe_auth_role');

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { calculateHeatIndex, computeFactorDecomposition } from '../utils/thermalEngine';
+import { API_CONFIG } from '../config/apiConfig';
 import {
   WeatherData,
   ThermalStressData,
@@ -16,9 +17,14 @@ import {
   VulnerableGroupAlert,
 } from '../types';
 
-// All /api/* calls go to Vercel Serverless Functions (same origin in production,
-// or the Vite dev server proxy in local development).
-const api = axios.create({ baseURL: '' });
+// API base URL is environment-aware:
+// - Web (dev/prod): '' (same origin)
+// - Native (Capacitor): production Vercel URL
+const api = axios.create({
+  baseURL: API_CONFIG.baseUrl,
+  timeout: API_CONFIG.timeout,
+  withCredentials: !API_CONFIG.isNative, // cookies only for same-origin web
+});
 
 // Deduplication and coordinate cache for /api/weather to prevent simultaneous request storms
 const weatherPromiseCache = new Map<string, Promise<any>>();
