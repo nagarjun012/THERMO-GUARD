@@ -237,9 +237,9 @@ export const LearnPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 pb-20 relative -mt-2 learn-page-root">
+    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 pb-20 relative -mt-2 learn-page-root overflow-x-hidden">
       {/* STICKY SUB-NAVIGATION BAR WITH EFFECTS, ANIMATIONS & HIGH VISIBILITY */}
-      <div className="sticky top-16 z-40 bg-white/80 backdrop-blur-2xl border-b border-blue-200/60 shadow-[0_4px_20px_rgba(20,80,180,0.06)] transition-all">
+      <div className="sticky top-16 z-40 bg-white/80 backdrop-blur-2xl border-b border-blue-200/60 shadow-[0_4px_20px_rgba(20,80,180,0.06)] transition-all overflow-hidden">
         {/* Ambient Top Glow Line */}
         <div className="absolute top-0 inset-x-0 h-[1.5px] bg-gradient-to-r from-transparent via-blue-500/40 to-transparent pointer-events-none" />
 
@@ -319,7 +319,7 @@ export const LearnPage: React.FC = () => {
           </div>
 
           {/* Right Gradient Fade Mask */}
-          <div className="pointer-events-none absolute right-0 lg:right-10 top-0 bottom-0 w-8 bg-gradient-to-l from-[#070d18] to-transparent z-10" />
+          <div className="pointer-events-none absolute right-0 lg:right-10 top-0 bottom-0 w-8 bg-gradient-to-l from-white/80 to-transparent z-10" />
 
           {/* Right Arrow Button (Desktop) */}
           <button

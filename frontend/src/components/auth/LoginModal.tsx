@@ -253,12 +253,37 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   )}
                 </div>
 
-                {/* AUTHORIZED CREDENTIALS AUDIT HINT */}
-                <div className="p-3.5 rounded-xl bg-[#EDF5FD] border border-blue-200 text-xs font-mono text-slate-900 space-y-1">
-                  <p className="text-blue-900 font-black">Authorized Test Credentials:</p>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-[11px] text-slate-800">
-                    <span>Officer: <strong className="text-black font-black">NDMA-HQ-882</strong> (Pass: NDMA@Secure2026)</span>
-                    <span>Admin: <strong className="text-black font-black">DISASTER-ADMIN-99</strong> (Pass: Admin@ThermoSafe2026)</span>
+                {/* AUTHORIZED CREDENTIALS AUDIT HINT WITH 1-CLICK AUTOFILL */}
+                <div className="p-3.5 rounded-xl bg-[#EDF5FD] border border-blue-200 text-xs font-mono text-slate-900 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <p className="text-blue-900 font-black">Authorized Test Credentials:</p>
+                    <span className="text-[10px] text-blue-700 font-semibold">(Tap to autofill)</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-[11px]">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGovId('NDMA-HQ-882');
+                        setPasscode('NDMA@Secure2026');
+                        setGovError('');
+                      }}
+                      className="text-left p-1.5 rounded-lg bg-white/80 hover:bg-white border border-blue-200 text-slate-800 transition-colors cursor-pointer"
+                    >
+                      Officer: <strong className="text-blue-800 font-black">NDMA-HQ-882</strong>
+                      <span className="block text-[10px] text-slate-600">Pass: NDMA@Secure2026</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setGovId('DISASTER-ADMIN-99');
+                        setPasscode('Admin@ThermoSafe2026');
+                        setGovError('');
+                      }}
+                      className="text-left p-1.5 rounded-lg bg-white/80 hover:bg-white border border-blue-200 text-slate-800 transition-colors cursor-pointer"
+                    >
+                      Admin: <strong className="text-purple-800 font-black">DISASTER-ADMIN-99</strong>
+                      <span className="block text-[10px] text-slate-600">Pass: Admin@ThermoSafe2026</span>
+                    </button>
                   </div>
                 </div>
               </div>

@@ -71,41 +71,41 @@ export const LandingPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 overflow-x-hidden">
       {/* AMBIENT GRADIENTS */}
-      <div className="absolute inset-0 z-0 pointer-events-none">
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/40 rounded-full blur-[140px]" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-300/30 rounded-full blur-[140px]" />
       </div>
 
       <div className="relative z-10">
         {/* TOP NAVBAR */}
-        <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto">
-          <div className="text-2xl font-bold flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-white border border-blue-200/80 text-blue-600 shadow-xs">
-              <ShieldAlert className="w-6 h-6" />
+        <nav className="p-3.5 sm:p-6 flex justify-between items-center gap-2 max-w-7xl mx-auto safe-top">
+          <div className="text-xl sm:text-2xl font-bold flex items-center gap-2 sm:gap-3 shrink-0">
+            <div className="p-1.5 sm:p-2 rounded-xl bg-white border border-blue-200/80 text-blue-600 shadow-xs">
+              <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
             </div>
-            <span className="font-mono tracking-tight font-black text-slate-950">
+            <span className="font-mono tracking-tight font-black text-slate-950 text-base sm:text-2xl">
               THERMOSAFE
             </span>
           </div>
 
           {/* DUAL LOGIN BUTTONS */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
             <button
               onClick={() => openLogin('user')}
               type="button"
-              className="flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-blue-700 border border-blue-200 bg-white hover:bg-blue-50 shadow-xs transition-colors cursor-pointer"
+              className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono font-bold rounded-xl text-blue-700 border border-blue-200 bg-white hover:bg-blue-50 shadow-xs transition-colors cursor-pointer"
             >
               <User className="w-3.5 h-3.5 text-blue-600" />
-              <span>CITIZEN LOGIN</span>
+              <span>CITIZEN</span>
             </button>
 
             <button
               onClick={() => openLogin('gov')}
               type="button"
-              className="flex items-center gap-2 px-3.5 py-2 text-xs font-mono font-bold rounded-xl text-slate-900 border border-blue-300/80 bg-[#EDF5FD] hover:bg-blue-100 shadow-xs transition-colors cursor-pointer"
+              className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono font-bold rounded-xl text-slate-950 border border-blue-300/80 bg-[#EDF5FD] hover:bg-blue-100 shadow-xs transition-colors cursor-pointer"
             >
               <Shield className="w-3.5 h-3.5 text-amber-600" />
-              <span>OFFICIAL LOGIN</span>
+              <span>OFFICIAL</span>
             </button>
           </div>
         </nav>
