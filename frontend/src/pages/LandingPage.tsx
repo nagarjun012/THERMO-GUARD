@@ -17,7 +17,7 @@ import { LoginModal } from '../components/auth/LoginModal';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setUserRole } = useAppStore();
+  const { loginCitizen } = useAppStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalRole, setModalRole] = useState<AuthRole>('user');
 
@@ -26,11 +26,11 @@ export const LandingPage: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleQuickLogin = (role: AuthRole) => {
-    setUserRole(role);
+  const handleQuickLogin = async (role: AuthRole) => {
     if (role === 'gov') {
-      navigate('/government');
+      openLogin('gov');
     } else {
+      await loginCitizen();
       navigate('/dashboard');
     }
   };
@@ -69,7 +69,7 @@ export const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 overflow-x-hidden">
       {/* AMBIENT GRADIENTS */}
       <div className="absolute inset-0 z-0 pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/40 rounded-full blur-[140px]" />

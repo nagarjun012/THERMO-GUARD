@@ -63,21 +63,21 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       }
 
       setIsSubmitting(false);
+      onClose();
       if (onSuccess) {
         onSuccess('gov');
       } else {
         navigate('/government');
       }
-      onClose();
     } else {
       await loginCitizen(userName.trim() || undefined);
       setIsSubmitting(false);
+      onClose();
       if (onSuccess) {
         onSuccess('user');
       } else {
         navigate('/dashboard');
       }
-      onClose();
     }
   };
 
