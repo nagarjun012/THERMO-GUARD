@@ -66,14 +66,15 @@ export const MapLayerSwitcherModal: React.FC<Props> = ({
   const groups = Array.from(new Set(layerItems.map((item) => item.group)));
 
   return (
-    <div className="absolute top-[68px] right-16 z-[550] w-80 max-h-[calc(100%-80px)] overflow-y-auto bg-dark-900/95 backdrop-blur-2xl border border-dark-600 shadow-2xl rounded-2xl p-4 text-xs animate-fadeIn">
-      <div className="flex items-center justify-between border-b border-dark-700 pb-2.5 mb-3">
-        <h4 className="font-black text-white text-xs uppercase tracking-wider flex items-center gap-1.5">
-          <Layers className="w-4 h-4 text-orange-400" /> GIS Layer Control Center
+    <div className="absolute top-[68px] right-16 z-[550] w-80 max-h-[calc(100%-80px)] overflow-y-auto bg-white/95 backdrop-blur-xl border border-blue-200/90 shadow-[0_20px_50px_rgba(15,23,42,0.2)] rounded-3xl p-4 text-xs text-slate-800 animate-fadeIn">
+      <div className="flex items-center justify-between border-b border-slate-200 pb-2.5 mb-3">
+        <h4 className="font-black text-slate-950 text-xs uppercase tracking-wider flex items-center gap-1.5">
+          <Layers className="w-4 h-4 text-blue-600" /> GIS Layer Control Center
         </h4>
         <button
           onClick={onClose}
-          className="p-1 rounded-lg bg-dark-800 hover:bg-dark-700 text-gray-400 hover:text-white"
+          className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-950 border border-slate-200 transition-colors cursor-pointer"
+          title="Close layers"
         >
           <X className="w-4 h-4" />
         </button>
@@ -82,7 +83,7 @@ export const MapLayerSwitcherModal: React.FC<Props> = ({
       <div className="space-y-4 max-h-[420px] overflow-y-auto custom-scrollbar pr-1">
         {groups.map((grp) => (
           <div key={grp}>
-            <span className="text-[10px] font-black uppercase text-gray-400 tracking-widest block mb-1.5">
+            <span className="text-[10px] font-black uppercase text-slate-500 tracking-widest block mb-1.5">
               {grp}
             </span>
             <div className="space-y-1">
@@ -95,21 +96,21 @@ export const MapLayerSwitcherModal: React.FC<Props> = ({
                     <button
                       key={item.key}
                       onClick={() => onToggleLayer(item.key)}
-                      className={`w-full p-2 rounded-xl flex items-center justify-between border text-left transition-all cursor-pointer ${
+                      className={`w-full p-2.5 rounded-xl flex items-center justify-between border text-left transition-all cursor-pointer ${
                         isActive
-                          ? 'bg-orange-500/10 border-orange-500/40 text-white font-bold shadow-md'
-                          : 'bg-dark-800/40 border-dark-700 text-gray-400 hover:bg-dark-800 hover:text-gray-200'
+                          ? 'bg-blue-50 border-blue-300 text-blue-950 font-bold shadow-2xs'
+                          : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-950'
                       }`}
                     >
                       <div className="flex items-center gap-2">
-                        <Icon className={`w-4 h-4 ${isActive ? 'text-orange-400' : 'text-gray-400'}`} />
-                        <span>{item.label}</span>
+                        <Icon className={`w-4 h-4 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
+                        <span className="font-semibold">{item.label}</span>
                       </div>
                       <div
-                        className={`w-4 h-4 rounded-md border flex items-center justify-center ${
+                        className={`w-4 h-4 rounded-md border flex items-center justify-center transition-colors ${
                           isActive
-                            ? 'bg-orange-500 border-orange-400 text-white'
-                            : 'border-dark-600 bg-dark-900'
+                            ? 'bg-blue-600 border-blue-600 text-white'
+                            : 'border-slate-300 bg-white'
                         }`}
                       >
                         {isActive && <Check className="w-3 h-3 stroke-[3]" />}

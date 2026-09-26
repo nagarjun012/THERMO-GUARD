@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useAppStore } from '../stores/appStore';
 import { HeatRiskMap } from '../components/map/HeatRiskMap';
 import { MapLegend } from '../components/map/MapLegend';
@@ -8,7 +9,7 @@ import { Info, MapPin, Sliders, Sparkles } from 'lucide-react';
 import { LocationSelector } from '../components/location/LocationSelector';
 
 export const MapPage: React.FC = () => {
-  const { selectedLocation } = useAppStore();
+  const { selectedLocation, lowBandwidthMode } = useAppStore();
 
   const [isEduModalOpen, setIsEduModalOpen] = useState(false);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
@@ -83,35 +84,11 @@ export const MapPage: React.FC = () => {
               <Sparkles className="w-3 h-3 text-amber-500 animate-pulse" />
             </button>
           </div>
-
-          {/* MODAL OVERLAY FOR LOCATION SELECTOR */}
-          {showLocationSelector && (
-            <div
-              className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn pointer-events-auto"
-              onClick={(e) => {
-                if (e.target === e.currentTarget) setShowLocationSelector(false);
-              }}
-            >
-              <div className="relative w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-3 shadow-2xl">
-                <div className="flex justify-end p-2 pb-0">
-                  <button
-                    onClick={() => setShowLocationSelector(false)}
-                    className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
-                  >
-                    Close ✕
-                  </button>
-                </div>
-                <div>
-                  <LocationSelector onClose={() => setShowLocationSelector(false)} />
-                </div>
-              </div>
-            </div>
-          )}
         </div>
       </div>
 
-      {/* MAP LEGEND OVERLAY */}
-      <MapLegend onOpenGuide={() => setIsEduModalOpen(true)} />
+      {/* MAP LEGEND OVERLAY (Interactive map mode only) */}
+      {!lowBandwidthMode && <MapLegend onOpenGuide={() => setIsEduModalOpen(true)} />}
 
       {/* EDUCATIONAL GLASSMORPHISM MODAL PANEL */}
       <MapEducationalModal
@@ -119,6 +96,32 @@ export const MapPage: React.FC = () => {
         onClose={() => setIsEduModalOpen(false)}
         currentLocationName={locationName}
       />
+
+      {/* MODAL OVERLAY FOR LOCATION SELECTOR (PORTALED TO DOCUMENT.BODY) */}
+      {showLocationSelector &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setShowLocationSelector(false);
+            }}
+          >
+            <div className="relative w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-3 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+              <div className="flex justify-end p-2 pb-0">
+                <button
+                  onClick={() => setShowLocationSelector(false)}
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
+                >
+                  Close ✕
+                </button>
+              </div>
+              <div>
+                <LocationSelector onClose={() => setShowLocationSelector(false)} />
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

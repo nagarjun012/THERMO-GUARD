@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   X,
   Info,
@@ -72,12 +73,15 @@ export const MapEducationalModal: React.FC<Props> = ({
     },
   ];
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[1000] flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-md overflow-y-auto animate-fadeIn"
+      className="fixed inset-0 z-[2000] flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-md overflow-y-auto animate-fadeIn"
       role="dialog"
       aria-modal="true"
       aria-labelledby="map-guide-title"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       {/* Modal Container */}
       <div className="relative w-full max-w-5xl bg-white border border-blue-200/90 rounded-3xl shadow-[0_24px_70px_rgba(15,23,42,0.25)] overflow-hidden my-auto max-h-[92vh] flex flex-col text-slate-800">
@@ -584,6 +588,7 @@ export const MapEducationalModal: React.FC<Props> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

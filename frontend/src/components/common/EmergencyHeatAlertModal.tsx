@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Flame,
@@ -35,16 +36,16 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
 
   const isExtreme = alert.level === 'Extreme';
 
-  return (
+  return createPortal(
     <AnimatePresence>
-      <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
         {/* BACKDROP BLUR WITH AMBIENT RISK GLOW */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={onAcknowledge}
-          className="fixed inset-0 bg-slate-950/70 backdrop-blur-md"
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
         />
 
         {/* EMERGENCY DIALOG MODAL */}
@@ -56,10 +57,10 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="alert-dialog-title"
-          className={`relative w-full max-w-lg rounded-3xl p-6 sm:p-8 text-white shadow-2xl border-2 overflow-hidden z-10 ${
+          className={`relative w-full max-w-lg my-auto max-h-[92vh] overflow-y-auto rounded-3xl p-5 sm:p-8 text-white shadow-2xl border-2 z-10 ${
             isExtreme
-              ? 'bg-slate-950/95 border-red-500/90 shadow-[0_0_80px_rgba(239,68,68,0.4)]'
-              : 'bg-slate-950/95 border-amber-500/90 shadow-[0_0_80px_rgba(245,158,11,0.35)]'
+              ? 'bg-slate-950/98 border-red-500/90 shadow-[0_0_80px_rgba(239,68,68,0.5)]'
+              : 'bg-slate-950/98 border-amber-500/90 shadow-[0_0_80px_rgba(245,158,11,0.45)]'
           }`}
         >
           {/* AMBIENT RADAR PULSE IN BACKGROUND */}
@@ -206,6 +207,7 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
           </button>
         </motion.div>
       </div>
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
