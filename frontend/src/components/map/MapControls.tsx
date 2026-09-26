@@ -4,7 +4,6 @@ import {
   Minus,
   Navigation,
   RotateCcw,
-  Layers,
   Maximize,
   Search,
   BookOpen,
@@ -15,7 +14,6 @@ interface Props {
   onZoomOut: () => void;
   onLocateMe: () => void;
   onResetView: () => void;
-  onToggleLayers: () => void;
   onToggleSearch: () => void;
   onOpenGuide: () => void;
 }
@@ -25,7 +23,6 @@ export const MapControls: React.FC<Props> = ({
   onZoomOut,
   onLocateMe,
   onResetView,
-  onToggleLayers,
   onToggleSearch,
   onOpenGuide,
 }) => {
@@ -76,14 +73,6 @@ export const MapControls: React.FC<Props> = ({
         </button>
 
         <div className="h-px bg-slate-200 mx-1 my-0.5" />
-
-        <button
-          onClick={onToggleLayers}
-          className="p-2 rounded-xl hover:bg-blue-50 hover:text-blue-600 text-slate-800 transition-all cursor-pointer"
-          title="Layer Switcher"
-        >
-          <Layers className="w-4 h-4" />
-        </button>
 
         <button
           onClick={onToggleSearch}

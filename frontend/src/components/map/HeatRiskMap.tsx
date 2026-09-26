@@ -8,7 +8,6 @@ import { useWeather, useThermalStress, useRisk } from '../../hooks/useApi';
 import { getRiskColorByCategory } from '../../utils/helpers';
 import { computeRealThermalRisk } from '../../utils/thermalEngine';
 import { MapControls } from './MapControls';
-import { MapLayerSwitcherModal, ActiveMapLayers } from './MapLayerSwitcherModal';
 import { MapLoadingOverlay } from './MapLoadingOverlay';
 import { LocationSelector } from '../location/LocationSelector';
 import { INDIA_LOCATIONS } from '../../data/indiaLocations';
@@ -66,7 +65,6 @@ const MapInstanceRegistrar: React.FC<{ setMap: (map: L.Map) => void }> = ({ setM
 export const HeatRiskMap: React.FC<Props> = ({
   center,
   zoom,
-  activeLayer = 'all',
   gisResolution = 'District / City Level Risk',
   onSelectResolution,
   onOpenGuide,
@@ -155,28 +153,8 @@ export const HeatRiskMap: React.FC<Props> = ({
   }
 
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
-  const [isLayerModalOpen, setIsLayerModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Active Map Layer States
-  const [mapLayers, setMapLayers] = useState<ActiveMapLayers>({
-    thermalRisk: true,
-    districtBoundaries: true,
-    stateBoundaries: true,
-    heatPulseGradient: false,
-    temperature: activeLayer === 'temp',
-    humidity: false,
-    wind: false,
-    solarRadiation: false,
-    wbgt: activeLayer === 'wbgt',
-    heatIndex: activeLayer === 'hi',
-    humidex: false,
-  });
-
-  const handleToggleLayer = (key: keyof ActiveMapLayers) => {
-    setMapLayers((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
 
   // Map control toolbar handlers
   const handleZoomIn = () => {
@@ -527,7 +505,6 @@ export const HeatRiskMap: React.FC<Props> = ({
         onZoomOut={handleZoomOut}
         onLocateMe={handleLocateMe}
         onResetView={handleResetView}
-        onToggleLayers={() => setIsLayerModalOpen(!isLayerModalOpen)}
         onToggleSearch={() => setIsSearchOpen(!isSearchOpen)}
         onOpenGuide={onOpenGuide || (() => {})}
       />
@@ -557,14 +534,6 @@ export const HeatRiskMap: React.FC<Props> = ({
           </div>,
           document.body
         )}
-
-      {/* MAP LAYER SWITCHER MODAL */}
-      <MapLayerSwitcherModal
-        isOpen={isLayerModalOpen}
-        onClose={() => setIsLayerModalOpen(false)}
-        layers={mapLayers}
-        onToggleLayer={handleToggleLayer}
-      />
     </div>
   );
 };
