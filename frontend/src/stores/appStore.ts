@@ -25,7 +25,7 @@ export interface UserProfile {
 }
 
 export type AuthRole = 'user' | 'gov';
-export type OfficialModalType = 'privacy' | 'terms' | 'accessibility' | 'ai' | 'governance' | null;
+export type OfficialModalType = 'privacy' | 'terms' | 'accessibility' | 'ai' | 'governance' | 'developers' | null;
 
 interface AppState {
   selectedLocation: Location;

@@ -13,6 +13,7 @@ export const OfficialFooter: React.FC = () => {
     { label: tr.footer.accessibilityStatement, modal: 'accessibility' as const },
     { label: tr.footer.aiTransparency, modal: 'ai' as const },
     { label: tr.footer.governanceContact, modal: 'governance' as const },
+    { label: tr.footer.developers, modal: 'developers' as const },
   ];
 
   return (
