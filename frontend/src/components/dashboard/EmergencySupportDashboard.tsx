@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useAppStore } from '../../stores/appStore';
 import { useFacilityStore } from '../../stores/facilityStore';
 import { facilityService } from '../../services/facilityService';
@@ -22,8 +22,16 @@ export const EmergencySupportDashboard: React.FC = () => {
   } = useFacilityStore();
 
   const [loading, setLoading] = useState<boolean>(true);
+  const isMountedRef = useRef<boolean>(true);
 
-  const loadData = async () => {
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       const data = await facilityService.getNearbyFacilities(
@@ -33,20 +41,26 @@ export const EmergencySupportDashboard: React.FC = () => {
         selectedLocation.stateName,
         selectedLocation.districtName
       );
-      setFacilities(data.hospitals, data.coolingCentres);
+      if (isMountedRef.current) {
+        setFacilities(data.hospitals, data.coolingCentres);
+      }
 
       const stats = await facilityService.getDataFreshness();
-      if (stats) setFreshnessStats(stats);
+      if (isMountedRef.current && stats) {
+        setFreshnessStats(stats);
+      }
     } catch (err) {
       console.error('Error fetching facility data:', err);
     } finally {
-      setLoading(false);
+      if (isMountedRef.current) {
+        setLoading(false);
+      }
     }
-  };
+  }, [selectedLocation.lat, selectedLocation.lon, selectedLocation.stateName, selectedLocation.districtName, setFacilities, setFreshnessStats]);
 
   useEffect(() => {
     loadData();
-  }, [selectedLocation.lat, selectedLocation.lon]);
+  }, [loadData]);
 
   // Compute metric breakdowns
   const totalHospitals = hospitals.length;

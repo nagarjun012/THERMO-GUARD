@@ -34,8 +34,8 @@ export const MapPage: React.FC = () => {
       <div className="absolute top-4 left-4 right-4 z-[400] flex items-center justify-between gap-3 pointer-events-none">
         
         {/* LEFT: UNIFIED HORIZONTAL COMMAND STRIP */}
-        <div className="pointer-events-auto flex items-center gap-2 max-w-[calc(100%-220px)]">
-          <div className="px-3.5 py-1.5 bg-white/95 backdrop-blur-xl border border-white/80 shadow-lg rounded-2xl flex items-center gap-3 text-xs overflow-hidden">
+        <div className="pointer-events-auto flex items-center gap-2 max-w-full overflow-x-auto no-scrollbar">
+          <div className="px-3.5 py-1.5 bg-white/95 backdrop-blur-xl border border-white/80 shadow-lg rounded-2xl flex items-center gap-3 text-xs flex-shrink-0">
             {/* LIVE DATA PILL */}
             <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-emerald-100 border border-emerald-300 text-emerald-800 font-mono font-bold text-[10px] flex-shrink-0">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />

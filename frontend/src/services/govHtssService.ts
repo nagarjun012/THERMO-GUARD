@@ -381,7 +381,7 @@ class GovHtssService {
           district.wbgt = wbgt;
           district.utci = utci;
           district.htss = risk.htss;
-          district.riskCategory = (risk.level.toUpperCase() as any) || 'LOW';
+          district.riskCategory = (risk.level?.toUpperCase() as any) || 'LOW';
           district.status = 'SUCCESS';
           district.calculatedAt = now;
           district.source = 'Live Open-Meteo REST API (Synced)';
@@ -430,7 +430,7 @@ class GovHtssService {
           wbgt,
           utci,
           htss: risk.htss,
-          riskCategory: (risk.level.toUpperCase() as any) || 'LOW',
+          riskCategory: (risk.level?.toUpperCase() as any) || 'LOW',
           status: 'SUCCESS',
           calculatedAt: new Date().toISOString(),
           source: 'Live Open-Meteo API (Direct)',
@@ -526,7 +526,7 @@ class GovHtssService {
           d.wbgt = wbgt;
           d.utci = utci;
           d.htss = risk.htss;
-          d.riskCategory = (risk.level.toUpperCase() as any) || 'LOW';
+          d.riskCategory = (risk.level?.toUpperCase() as any) || 'LOW';
           d.status = 'SUCCESS';
           d.calculatedAt = now;
           d.source = 'Live Open-Meteo Batch Pipeline';
@@ -586,7 +586,7 @@ class GovHtssService {
             d.wbgt = wbgt;
             d.utci = utci;
             d.htss = risk.htss;
-            d.riskCategory = (risk.level.toUpperCase() as any) || 'LOW';
+            d.riskCategory = (risk.level?.toUpperCase() as any) || 'LOW';
             d.status = 'SUCCESS';
             d.calculatedAt = now;
             d.source = 'Live Open-Meteo Batch Pipeline';

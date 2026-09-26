@@ -31,6 +31,7 @@ export const HeatHealthPredictionPanel: React.FC<Props> = ({ lat, lon, locationN
     queryFn: () => apiService.getHealthRiskPrediction(lat, lon),
     staleTime: 60000,
     retry: 1,
+    enabled: typeof lat === 'number' && !isNaN(lat) && typeof lon === 'number' && !isNaN(lon),
   });
 
   const { data: benchmarks } = useQuery<ModelBenchmark[]>({

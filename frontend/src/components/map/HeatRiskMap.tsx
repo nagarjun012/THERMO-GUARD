@@ -110,13 +110,13 @@ export const HeatRiskMap: React.FC<Props> = ({
       else if (finalScore >= 25) category = 'MODERATE';
       else category = 'LOW';
     } else if (thermal?.htssCategory) {
-      const upper = thermal.htssCategory.toUpperCase();
+      const upper = (thermal.htssCategory || '').toUpperCase();
       if (upper.includes('EXTREME')) category = 'EXTREME';
       else if (upper.includes('HIGH')) category = 'HIGH';
       else if (upper.includes('MODERATE')) category = 'MODERATE';
       else category = 'LOW';
     } else if (risk?.level) {
-      const upper = risk.level.toUpperCase();
+      const upper = (risk.level || '').toUpperCase();
       if (upper.includes('EXTREME')) category = 'EXTREME';
       else if (upper.includes('HIGH')) category = 'HIGH';
       else if (upper.includes('MODERATE')) category = 'MODERATE';
@@ -287,7 +287,8 @@ export const HeatRiskMap: React.FC<Props> = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {lowBandwidthStations.map((dist, idx) => {
-                const riskCategory = (dist.level.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
+                const levelStr = dist?.level || 'LOW';
+                const riskCategory = (levelStr.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
                 return (
                   <div
                     key={`${dist.name}-${idx}`}
