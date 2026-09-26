@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useQuery } from '@tanstack/react-query';
 import { apiService } from '../services/api';
 import { resolveLocationFromCoords } from '../services/locationService';
@@ -18,6 +19,7 @@ import { useAppStore } from '../stores/appStore';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
 import { useHeatStressAlert } from '../hooks/useHeatStressAlert';
 import { EmergencyHeatAlertModal } from '../components/common/EmergencyHeatAlertModal';
+import { LocationSelector } from '../components/location/LocationSelector';
 import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun, Bell, Flame, ShieldAlert } from 'lucide-react';
 import type { Alert } from '../types';
 
@@ -40,6 +42,7 @@ export const CitizenDashboard: React.FC = () => {
   const [isLocating, setIsLocating] = useState<boolean>(false);
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
 
   // Authoritative real-time browser Geolocation request
   const requestFreshLocation = useCallback(() => {
@@ -147,9 +150,9 @@ export const CitizenDashboard: React.FC = () => {
     requestFreshLocation();
   }, [requestFreshLocation]);
 
-  // Synchronize dashboard location only if appStore has genuine verified GPS (e.g. from Map's "Locate Me")
+  // Synchronize dashboard location when appStore location changes (from GPS, Map click, or Selector)
   useEffect(() => {
-    if (selectedLocation?.isGpsLive && selectedLocation.lat && selectedLocation.lon && selectedLocation.name) {
+    if (selectedLocation && typeof selectedLocation.lat === 'number' && typeof selectedLocation.lon === 'number' && selectedLocation.name) {
       setCurrentLocation((prev) => {
         if (
           prev &&
@@ -309,16 +312,47 @@ export const CitizenDashboard: React.FC = () => {
             <p className="text-xs text-slate-400">
               THERMOS strictly requires real-time device geolocation. Mock, cached, and assumed coordinates are prohibited.
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-3">
               <button
                 onClick={requestFreshLocation}
-                className="px-5 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 mx-auto cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all"
+                className="px-5 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer bg-blue-600 hover:bg-blue-700 text-white shadow-md transition-all"
               >
                 <Crosshair className="w-4 h-4" />
                 <span>Enable / Retry Location Access</span>
               </button>
+              <button
+                onClick={() => setIsSelectorOpen(true)}
+                className="px-5 py-2.5 text-xs font-bold rounded-xl flex items-center gap-2 cursor-pointer bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 shadow-sm transition-all"
+              >
+                <MapPin className="w-4 h-4 text-blue-600" />
+                <span>Select District Manually</span>
+              </button>
             </div>
           </div>
+          {isSelectorOpen &&
+            createPortal(
+              <div
+                className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) setIsSelectorOpen(false);
+                }}
+              >
+                <div className="relative w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-3 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+                  <div className="flex justify-end p-2 pb-0">
+                    <button
+                      onClick={() => setIsSelectorOpen(false)}
+                      className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
+                    >
+                      Close ✕
+                    </button>
+                  </div>
+                  <div>
+                    <LocationSelector onClose={() => setIsSelectorOpen(false)} />
+                  </div>
+                </div>
+              </div>,
+              document.body
+            )}
         </div>
       );
     }
@@ -396,6 +430,15 @@ export const CitizenDashboard: React.FC = () => {
             >
               <Crosshair className={`w-3.5 h-3.5 text-blue-600 ${isLocating ? 'animate-spin' : ''}`} />
               <span>{isLocating ? 'Locating...' : 'Use My Location'}</span>
+            </button>
+
+            <button
+              onClick={() => setIsSelectorOpen(true)}
+              className="px-4 py-2 text-xs font-bold rounded-full flex items-center gap-1.5 text-slate-700 bg-white/90 hover:bg-white transition-all cursor-pointer border border-white shadow-xs"
+              title="Search and select another location"
+            >
+              <MapPin className="w-3.5 h-3.5 text-blue-600" />
+              <span>Change Location</span>
             </button>
 
             {lastUpdated && (
@@ -852,6 +895,32 @@ export const CitizenDashboard: React.FC = () => {
         isAudioEnabled={isAudioEnabled}
         onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
       />
+
+      {/* LOCATION SELECTOR MODAL OVERLAY */}
+      {isSelectorOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsSelectorOpen(false);
+            }}
+          >
+            <div className="relative w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-3 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+              <div className="flex justify-end p-2 pb-0">
+                <button
+                  onClick={() => setIsSelectorOpen(false)}
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
+                >
+                  Close ✕
+                </button>
+              </div>
+              <div>
+                <LocationSelector onClose={() => setIsSelectorOpen(false)} />
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
       </div>
     </div>
   );
