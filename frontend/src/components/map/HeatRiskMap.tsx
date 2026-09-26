@@ -186,7 +186,7 @@ export const HeatRiskMap: React.FC<Props> = ({
         lon,
         true,
         'LIVE',
-        resolved.district,
+        resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
         false,
         true
       );
@@ -350,14 +350,16 @@ export const HeatRiskMap: React.FC<Props> = ({
         {/* ========================================================================= */}
         {/* ALL-INDIA & DISTRICT LEVEL REAL HTSS TELEMETRY OVERLAY                     */}
         {/* ========================================================================= */}
-        {liveDistricts.map((dist, i) => {
-          const riskCategory = (dist.level.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
+        {(liveDistricts || []).map((dist, i) => {
+          if (!dist || typeof dist.lat !== 'number' || typeof dist.lon !== 'number') return null;
+          const levelStr = dist.level || 'Low';
+          const riskCategory = (levelStr.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
           const color = getRiskColorByCategory(riskCategory);
-          const radius = 8 + dist.htss / 10;
+          const radius = 8 + (dist.htss || 0) / 10;
 
           return (
             <CircleMarker
-              key={`${dist.state}-${dist.name}-${i}`}
+              key={`${dist.state || 'IN'}-${dist.name || i}-${i}`}
               center={[dist.lat, dist.lon]}
               radius={radius}
               pathOptions={{
@@ -494,9 +496,6 @@ export const HeatRiskMap: React.FC<Props> = ({
             </div>
           </Popup>
         </CircleMarker>
-
-        {/* CAMERA CONTROLLER */}
-        <MapCameraController center={targetCenter} zoom={targetZoom} />
       </MapContainer>
 
       {/* FLOATING MAP CONTROLS TOOLBAR */}

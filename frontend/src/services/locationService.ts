@@ -22,6 +22,17 @@ function getCacheKey(lat: number, lon: number): string {
  * Always preserves the exact coordinates (real user GPS or physical position).
  * Uses in-memory caching and fast CDNs to resolve in milliseconds.
  */
+function cleanAreaName(rawName?: string, districtName?: string): string {
+  if (!rawName) return '';
+  const cleaned = rawName
+    .replace(/\s*(taluk|taluka|tehsil|mandal|sub-district|circle|district)\b/gi, '')
+    .trim();
+  if (districtName && cleaned.toLowerCase() === districtName.toLowerCase()) {
+    return '';
+  }
+  return cleaned;
+}
+
 export async function resolveLocationFromCoords(
   lat: number,
   lon: number,
@@ -37,44 +48,7 @@ export async function resolveLocationFromCoords(
   // Pre-calculate nearest Indian district instantly (0ms) as a rock-solid baseline
   const nearest: SearchResult = findNearestDistrict(lat, lon);
 
-  // 1. Primary: BigDataCloud reverse geocoding API (Fastest global CDN edge, ~150-300ms)
-  try {
-    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
-    if (res.ok) {
-      const data = await res.json();
-      const adminList: any[] = data.localityInfo?.administrative || [];
-
-      const distObj = adminList.find(
-        (a) =>
-          a.description?.toLowerCase().includes('district') ||
-          a.name?.toLowerCase().includes('district')
-      );
-
-      const rawDist = distObj?.name?.replace(/\s+district/i, '').trim() || data.city || '';
-      // Cross-match with official 788-district dataset from the map
-      const district = nearest.district || (rawDist || nearest.district).replace(/\s+district/i, '').trim();
-      const state = nearest.state || data.principalSubdivision || 'Tamil Nadu';
-
-      const displayName = `${district}, ${state}`;
-
-      const resolved: ResolvedLocation = {
-        lat,
-        lon,
-        locality: district,
-        district,
-        state,
-        displayName,
-        isGpsLive: isGps,
-      };
-      geoCache.set(cacheKey, resolved);
-      return resolved;
-    }
-  } catch (err) {
-    console.warn('Fast reverse geocode failed, trying OpenStreetMap:', err);
-  }
-
-  // 2. Secondary: OpenStreetMap Nominatim reverse geocode (zoom=16 is much faster than zoom=18)
+  // 1. Primary: OpenStreetMap Nominatim reverse geocode (zoom=16 gives exact neighborhood / town / suburb)
   try {
     const osmUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=16&addressdetails=1`;
     const res = await fetch(osmUrl, {
@@ -97,12 +71,29 @@ export async function resolveLocationFromCoords(
       const district = nearest.district || (rawDist || nearest.district).replace(/\s+district/i, '').trim();
       const state = nearest.state || addr.state || 'Tamil Nadu';
 
-      const displayName = `${district}, ${state}`;
+      const rawArea =
+        addr.suburb ||
+        addr.neighbourhood ||
+        addr.residential ||
+        addr.town ||
+        addr.village ||
+        addr.hamlet ||
+        addr.municipality ||
+        addr.city_district ||
+        addr.city ||
+        '';
+
+      const cleanLoc = cleanAreaName(rawArea, district);
+      const hasLoc = cleanLoc.length > 0 && cleanLoc.toLowerCase() !== district.toLowerCase();
+
+      const displayName = hasLoc
+        ? `${cleanLoc}, ${district}, ${state}`
+        : `${district}, ${state}`;
 
       const resolved: ResolvedLocation = {
         lat,
         lon,
-        locality: district,
+        locality: hasLoc ? cleanLoc : district,
         district,
         state,
         displayName,
@@ -112,7 +103,56 @@ export async function resolveLocationFromCoords(
       return resolved;
     }
   } catch (err) {
-    console.warn('OpenStreetMap reverse geocode error, using nearest district:', err);
+    console.warn('OpenStreetMap reverse geocode error, trying BigDataCloud:', err);
+  }
+
+  // 2. Secondary: BigDataCloud reverse geocoding API
+  try {
+    const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(2000) });
+    if (res.ok) {
+      const data = await res.json();
+      const adminList: any[] = data.localityInfo?.administrative || [];
+
+      const distObj = adminList.find(
+        (a) =>
+          a.description?.toLowerCase().includes('district') ||
+          a.name?.toLowerCase().includes('district')
+      );
+
+      const rawDist = distObj?.name?.replace(/\s+district/i, '').trim() || data.city || '';
+      const district = nearest.district || (rawDist || nearest.district).replace(/\s+district/i, '').trim();
+      const state = nearest.state || data.principalSubdivision || 'Tamil Nadu';
+
+      const subAdminObj = adminList.find(
+        (a) =>
+          a.adminLevel >= 6 &&
+          !a.name?.toLowerCase().includes('district') &&
+          !a.description?.toLowerCase().includes('district')
+      );
+
+      const rawArea = data.locality || data.city || subAdminObj?.name || '';
+      const cleanLoc = cleanAreaName(rawArea, district);
+      const hasLoc = cleanLoc.length > 0 && cleanLoc.toLowerCase() !== district.toLowerCase();
+
+      const displayName = hasLoc
+        ? `${cleanLoc}, ${district}, ${state}`
+        : `${district}, ${state}`;
+
+      const resolved: ResolvedLocation = {
+        lat,
+        lon,
+        locality: hasLoc ? cleanLoc : district,
+        district,
+        state,
+        displayName,
+        isGpsLive: isGps,
+      };
+      geoCache.set(cacheKey, resolved);
+      return resolved;
+    }
+  } catch (err) {
+    console.warn('BigDataCloud reverse geocode failed, using nearest district:', err);
   }
 
   // 3. Fallback to 788-district nearest neighbor dataset (0ms, 100% reliable)
@@ -207,7 +247,7 @@ export function detectRealtimeLocation(
             resolved.lon,
             true,
             'LIVE',
-            resolved.district,
+            resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
             false,
             false
           );
@@ -231,7 +271,7 @@ export function detectRealtimeLocation(
         resolved.lon,
         true,
         'LIVE',
-        resolved.district,
+        resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
         true,
         false,
         accuracy,
@@ -323,7 +363,7 @@ export function detectRealtimeLocation(
           resolved.lon,
           true,
           'LIVE',
-          resolved.district,
+          resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
           true,
           false,
           accuracy,

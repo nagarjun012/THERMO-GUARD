@@ -79,7 +79,7 @@ export const CitizenDashboard: React.FC = () => {
           longitude,
           true,
           'LIVE',
-          resolved.district,
+          resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
           true, // isGpsLive = true
           false,
           accuracy,
@@ -381,7 +381,7 @@ export const CitizenDashboard: React.FC = () => {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-                {currentLocation.displayName}
+                {selectedLocation?.name || currentLocation.displayName}
               </h1>
             </div>
           </div>

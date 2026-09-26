@@ -355,9 +355,22 @@ export const useAppStore = create<AppState>((set, get) => ({
     const finalLat = lat;
     const finalLon = lon;
 
-    // Clean display name strictly formatted as "District, State" (matching the map)
+    // Clean display name with exact town / neighborhood if available
+    const cleanLoc = localityName
+      ? localityName.replace(/\s*(taluk|taluka|tehsil|mandal|sub-district|circle|district)\b/gi, '').trim()
+      : undefined;
+
+    const hasLoc =
+      cleanLoc &&
+      cleanLoc.length > 0 &&
+      cleanLoc.toLowerCase() !== districtName.toLowerCase();
+
     let displayName = districtName;
-    if (stateName && stateName.toLowerCase() !== districtName.toLowerCase()) {
+    if (hasLoc && stateName) {
+      displayName = `${cleanLoc}, ${districtName}, ${stateName}`;
+    } else if (hasLoc) {
+      displayName = `${cleanLoc}, ${districtName}`;
+    } else if (stateName && stateName.toLowerCase() !== districtName.toLowerCase()) {
       displayName = `${districtName}, ${stateName}`;
     }
 
@@ -367,7 +380,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       name: displayName,
       stateName,
       districtName,
-      localityName: localityName || undefined,
+      localityName: cleanLoc || undefined,
       dataStatus,
       isGpsLive,
       accuracy,
