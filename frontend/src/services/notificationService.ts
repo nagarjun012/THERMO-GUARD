@@ -85,6 +85,15 @@ export function playEmergencyChime(severity: 'High' | 'Extreme' = 'High'): void 
     osc2.start(now);
     osc1.stop(now + 0.7);
     osc2.stop(now + 0.7);
+
+    // Prevent AudioContext resource leak across repeated alarms
+    setTimeout(() => {
+      try {
+        if (ctx.state !== 'closed') {
+          ctx.close().catch(() => {});
+        }
+      } catch {}
+    }, 1200);
   } catch {
     // Audio autoplay restrictions or headless environment - gracefully ignore
   }
