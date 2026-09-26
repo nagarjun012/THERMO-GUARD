@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "test": "node tests/security_tests.mjs && node tests/health_risk_tests.mjs",
+    "test": "node tests/security_tests.mjs && node tests/health_risk_tests.mjs && node tests/htss_alert_tests.mjs",
     "preview": "vite preview",
     "cap:sync": "npx cap sync",
     "cap:android": "npx cap open android",

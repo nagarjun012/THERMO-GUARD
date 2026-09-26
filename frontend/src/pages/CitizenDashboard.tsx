@@ -16,7 +16,9 @@ import { HeatHealthPredictionPanel } from '../components/dashboard/HeatHealthPre
 import { DynamicWeatherSymbol, getClimateType } from '../components/dashboard/DynamicWeatherSymbol';
 import { useAppStore } from '../stores/appStore';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
-import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun } from 'lucide-react';
+import { useHeatStressAlert } from '../hooks/useHeatStressAlert';
+import { EmergencyHeatAlertModal } from '../components/common/EmergencyHeatAlertModal';
+import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun, Bell, Flame, ShieldAlert } from 'lucide-react';
 
 export interface CurrentDashboardLocation {
   latitude: number;
@@ -219,6 +221,30 @@ export const CitizenDashboard: React.FC = () => {
     );
   }, [weather, vulnerabilityProfile]);
 
+  // Automated Alert Messaging for High & Extreme HTSS
+  const alertLocation = currentLocation?.displayName || selectedLocation?.name || 'Current Location';
+  const {
+    activeAlert,
+    isModalOpen,
+    openAlertModal,
+    acknowledgeAlert,
+    permission,
+    enableSystemNotifications,
+    triggerTestAlert,
+    isAudioEnabled,
+    setIsAudioEnabled,
+  } = useHeatStressAlert(activeThermal?.htss, alertLocation);
+
+  // Expose test alert event listener for QA & automated validation
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const custom = e as CustomEvent<'High' | 'Extreme'>;
+      triggerTestAlert(custom?.detail || 'Extreme');
+    };
+    window.addEventListener('thermo:trigger-test-alert', handler);
+    return () => window.removeEventListener('thermo:trigger-test-alert', handler);
+  }, [triggerTestAlert]);
+
 
   // Compute full HTSS audit when needed
   const auditData = useMemo(() => {
@@ -346,6 +372,40 @@ export const CitizenDashboard: React.FC = () => {
                 <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-[0_0_8px_#10b981]" />
                 <span>LIVE TELEMETRY</span>
               </span>
+            )}
+
+            {/* Real-time High / Extreme Emergency Alert Indicator */}
+            {(activeThermal?.riskCategory === 'HIGH' || activeThermal?.riskCategory === 'EXTREME') && (
+              <button
+                type="button"
+                onClick={openAlertModal}
+                className={`px-3.5 py-1.5 text-xs font-black tracking-wider flex items-center gap-1.5 rounded-full shadow-md animate-pulse cursor-pointer ${
+                  activeThermal.riskCategory === 'EXTREME'
+                    ? 'bg-red-600 text-white hover:bg-red-700'
+                    : 'bg-amber-500 text-slate-950 hover:bg-amber-400'
+                }`}
+                title="View active thermal emergency advisory"
+              >
+                {activeThermal.riskCategory === 'EXTREME' ? (
+                  <ShieldAlert className="w-3.5 h-3.5" />
+                ) : (
+                  <Flame className="w-3.5 h-3.5" />
+                )}
+                <span>{activeThermal.riskCategory} ALERT (HTSS {activeThermal.htss})</span>
+              </button>
+            )}
+
+            {/* Background Push Notification Opt-In */}
+            {permission !== 'granted' && permission !== 'unsupported' && (
+              <button
+                type="button"
+                onClick={enableSystemNotifications}
+                className="px-3 py-1.5 text-xs font-bold rounded-full flex items-center gap-1.5 text-blue-700 bg-blue-50/90 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer shadow-xs"
+                title="Enable OS system push notifications for heat emergencies"
+              >
+                <Bell className="w-3.5 h-3.5 text-blue-600" />
+                <span className="hidden sm:inline">Push Alerts</span>
+              </button>
             )}
           </div>
         </div>
@@ -744,6 +804,17 @@ export const CitizenDashboard: React.FC = () => {
           onClose={() => setIsAuditOpen(false)}
         />
       )}
+
+      {/* EMERGENCY HEAT STRESS ALERT MODAL (HIGH & EXTREME) */}
+      <EmergencyHeatAlertModal
+        alert={activeAlert}
+        isOpen={isModalOpen}
+        onAcknowledge={acknowledgeAlert}
+        permission={permission}
+        onRequestPermission={enableSystemNotifications}
+        isAudioEnabled={isAudioEnabled}
+        onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
+      />
       </div>
     </div>
   );
