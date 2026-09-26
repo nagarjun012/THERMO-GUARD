@@ -79,7 +79,7 @@ export const CitizenDashboard: React.FC = () => {
           longitude,
           true,
           'LIVE',
-          resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
+          resolved.district,
           true, // isGpsLive = true
           false,
           accuracy,

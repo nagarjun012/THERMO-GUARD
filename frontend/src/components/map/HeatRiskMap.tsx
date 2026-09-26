@@ -186,7 +186,7 @@ export const HeatRiskMap: React.FC<Props> = ({
         lon,
         true,
         'LIVE',
-        resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
+        resolved.district,
         false,
         true
       );

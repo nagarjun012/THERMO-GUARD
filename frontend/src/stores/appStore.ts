@@ -96,25 +96,12 @@ const getInitialHighContrast = (): boolean => {
 };
 
 const getInitialLocation = (): Location => {
+  // Clear any legacy stored location so stale data is never restored on load
   try {
-    const saved = localStorage.getItem('thermosafe_user_location');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (
-        parsed &&
-        typeof parsed.lat === 'number' &&
-        typeof parsed.lon === 'number' &&
-        parsed.name &&
-        !parsed.name.includes('Detecting live')
-      ) {
-        return parsed;
-      }
-    }
-  } catch (e) {
-    console.warn('Error reading stored location:', e);
-  }
+    localStorage.removeItem('thermosafe_user_location');
+  } catch {}
 
-  // Baseline initial location (auto-updated by real-time GPS / IP pipeline on load)
+  // Baseline initial location (auto-updated by real-time GPS pipeline on load)
   return {
     lat: 13.0827,
     lon: 80.2707,
@@ -128,13 +115,6 @@ const getInitialLocation = (): Location => {
 };
 
 const getInitialIsManual = (): boolean => {
-  try {
-    const saved = localStorage.getItem('thermosafe_user_location');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return parsed?.isManual === true;
-    }
-  } catch {}
   return false;
 };
 
@@ -356,9 +336,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     set({ userRole: 'user', isAuthenticated: false, currentUser: null, isAuthChecking: false });
   },
   setLocation: (loc) => {
-    try {
-      localStorage.setItem('thermosafe_user_location', JSON.stringify({ ...loc, isManual: true }));
-    } catch {}
     set({ selectedLocation: loc, isManualSelection: true });
   },
   setIndiaLocation: (
@@ -378,22 +355,9 @@ export const useAppStore = create<AppState>((set, get) => ({
     const finalLat = lat;
     const finalLon = lon;
 
-    // Clean up localityName (strip trailing 'taluk', 'district', 'town', whitespace)
-    const cleanLoc = localityName
-      ? localityName.replace(/\s*(taluk|taluka|tehsil|mandal|town|circle|district|municipality|corporation)\b/gi, '').trim()
-      : undefined;
-
-    const hasLoc =
-      cleanLoc &&
-      cleanLoc.length > 0 &&
-      cleanLoc.toLowerCase() !== districtName.toLowerCase();
-
+    // Clean display name strictly formatted as "District, State" (matching the map)
     let displayName = districtName;
-    if (hasLoc && stateName) {
-      displayName = `${cleanLoc}, ${districtName}, ${stateName}`;
-    } else if (hasLoc) {
-      displayName = `${cleanLoc}, ${districtName}`;
-    } else if (stateName && stateName.toLowerCase() !== districtName.toLowerCase()) {
+    if (stateName && stateName.toLowerCase() !== districtName.toLowerCase()) {
       displayName = `${districtName}, ${stateName}`;
     }
 
@@ -403,15 +367,13 @@ export const useAppStore = create<AppState>((set, get) => ({
       name: displayName,
       stateName,
       districtName,
-      localityName: cleanLoc || undefined,
+      localityName: localityName || undefined,
       dataStatus,
       isGpsLive,
       accuracy,
       timestamp,
     };
-    try {
-      localStorage.setItem('thermosafe_user_location', JSON.stringify({ ...newLoc, isManual }));
-    } catch {}
+
     set((state) => ({
       selectedLocation: newLoc,
       isManualSelection: isManual !== undefined ? isManual : state.isManualSelection,
