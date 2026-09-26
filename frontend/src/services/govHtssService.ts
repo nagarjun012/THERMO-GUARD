@@ -124,7 +124,7 @@ class GovHtssService {
    * Retrieve cached result if valid, otherwise return the initial 788-district dataset
    */
   public getCachedResult(): GovPortalPipelineResult {
-    if (this.inMemoryResult && this.inMemoryResult.districts && this.inMemoryResult.districts.length > 0) {
+    if (this.inMemoryResult && this.inMemoryResult.districts && this.inMemoryResult.districts.length > 0 && this.inMemoryResult.counters.successfulCount > 0) {
       return this.inMemoryResult;
     }
 
@@ -134,7 +134,7 @@ class GovHtssService {
       if (liveStored) {
         const parsed: GovPortalPipelineResult = JSON.parse(liveStored);
         const age = Date.now() - new Date(parsed.lastFetchedAt).getTime();
-        if (age < CACHE_TTL_MS && parsed.districts && parsed.districts.length > 0) {
+        if (age < CACHE_TTL_MS && parsed.districts && parsed.districts.length > 0 && (parsed.counters?.successfulCount ?? 0) > 0) {
           this.inMemoryResult = { ...parsed, isCached: true };
           return this.inMemoryResult;
         }
@@ -149,7 +149,7 @@ class GovHtssService {
       if (stored) {
         const parsed: GovPortalPipelineResult = JSON.parse(stored);
         const age = Date.now() - new Date(parsed.lastFetchedAt).getTime();
-        if (age < CACHE_TTL_MS && parsed.districts && parsed.districts.length > 0) {
+        if (age < CACHE_TTL_MS && parsed.districts && parsed.districts.length > 0 && (parsed.counters?.successfulCount ?? 0) > 0) {
           this.inMemoryResult = { ...parsed, isCached: true };
           return this.inMemoryResult;
         }
@@ -617,9 +617,11 @@ class GovHtssService {
     onProgress?: (loaded: number, total: number, partialData?: GovPortalPipelineResult) => void
   ): Promise<GovPortalPipelineResult> {
     // 1. Check in-memory / cache if not force refresh
+    // Only use cache if it has actual computed HTSS data (successfulCount > 0),
+    // not just the initial 788-district skeleton with all nulls
     if (!forceRefresh) {
       const cached = this.getCachedResult();
-      if (cached && cached.districts && cached.districts.length > 0) return cached;
+      if (cached && cached.districts && cached.districts.length > 0 && cached.counters.successfulCount > 0) return cached;
     }
 
     if (this.isProcessing && this.inMemoryResult && this.inMemoryResult.districts.length > 0) {
