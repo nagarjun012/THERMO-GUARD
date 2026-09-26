@@ -19,8 +19,9 @@ import { useAppStore } from '../stores/appStore';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
 import { useHeatStressAlert } from '../hooks/useHeatStressAlert';
 import { EmergencyHeatAlertModal } from '../components/common/EmergencyHeatAlertModal';
+import { HeatSymptomChecker } from '../components/dashboard/HeatSymptomChecker';
 import { LocationSelector } from '../components/location/LocationSelector';
-import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun, Bell, Flame, ShieldAlert } from 'lucide-react';
+import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun, Flame, ShieldAlert, HeartPulse } from 'lucide-react';
 import type { Alert } from '../types';
 
 export interface CurrentDashboardLocation {
@@ -43,6 +44,7 @@ export const CitizenDashboard: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<number | null>(null);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
   const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [isSymptomCheckerOpen, setIsSymptomCheckerOpen] = useState(false);
 
   // Authoritative real-time browser Geolocation request
   const requestFreshLocation = useCallback(() => {
@@ -475,18 +477,16 @@ export const CitizenDashboard: React.FC = () => {
               </button>
             )}
 
-            {/* Background Push Notification Opt-In */}
-            {permission !== 'granted' && permission !== 'unsupported' && (
-              <button
-                type="button"
-                onClick={enableSystemNotifications}
-                className="px-3 py-1.5 text-xs font-bold rounded-full flex items-center gap-1.5 text-blue-700 bg-blue-50/90 hover:bg-blue-100 transition-colors border border-blue-200 cursor-pointer shadow-xs"
-                title="Enable OS system push notifications for heat emergencies"
-              >
-                <Bell className="w-3.5 h-3.5 text-blue-600" />
-                <span className="hidden sm:inline">Push Alerts</span>
-              </button>
-            )}
+            {/* Heat Illness Symptom Self-Triage Button */}
+            <button
+              type="button"
+              onClick={() => setIsSymptomCheckerOpen(true)}
+              className="px-3.5 py-1.5 text-xs font-bold rounded-full flex items-center gap-1.5 text-red-700 bg-red-50/90 hover:bg-red-100 transition-colors border border-red-200 cursor-pointer shadow-xs"
+              title="Open Clinical Heat Symptom Self-Check & Triage"
+            >
+              <HeartPulse className="w-3.5 h-3.5 text-red-600 animate-pulse" />
+              <span>Check Symptoms</span>
+            </button>
           </div>
         </div>
 
@@ -894,6 +894,12 @@ export const CitizenDashboard: React.FC = () => {
         onRequestPermission={enableSystemNotifications}
         isAudioEnabled={isAudioEnabled}
         onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
+      />
+
+      {/* HEAT ILLNESS CLINICAL SYMPTOM TRIAGE MODAL */}
+      <HeatSymptomChecker
+        isOpen={isSymptomCheckerOpen}
+        onClose={() => setIsSymptomCheckerOpen(false)}
       />
 
       {/* LOCATION SELECTOR MODAL OVERLAY */}

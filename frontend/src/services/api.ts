@@ -49,7 +49,22 @@ async function fetchWeatherBundle(lat: number, lon: number): Promise<any> {
         throw new Error('DATA UNAVAILABLE');
       }
       weatherDataCache.set(coordKey, { data: res, timestamp: Date.now() });
+      try {
+        localStorage.setItem(`thermosafe_offline_weather_${coordKey}`, JSON.stringify(res));
+      } catch {}
       return res;
+    } catch (err) {
+      // Offline fallback: retrieve last known telemetry when network is unavailable
+      try {
+        const offlineData = localStorage.getItem(`thermosafe_offline_weather_${coordKey}`);
+        if (offlineData) {
+          const parsed = JSON.parse(offlineData);
+          parsed.isLive = false;
+          parsed.source = 'OFFLINE CACHED TELEMETRY';
+          return parsed;
+        }
+      } catch {}
+      throw err;
     } finally {
       weatherPromiseCache.delete(coordKey);
     }

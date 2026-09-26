@@ -196,3 +196,37 @@ export function formatHeatAlertPayload(
     timestamp: Date.now(),
   };
 }
+
+/**
+ * Audible Speech Synthesizer for illiterate / visually impaired citizens & outdoor laborers.
+ * Automatically adapts speech language to Tamil ('ta-IN'), Hindi ('hi-IN'), or English ('en-IN').
+ */
+export function speakEmergencyAdvisory(text: string, lang: string = 'en'): void {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    if (lang === 'ta') {
+      utterance.lang = 'ta-IN';
+    } else if (lang === 'hi') {
+      utterance.lang = 'hi-IN';
+    } else {
+      utterance.lang = 'en-IN';
+    }
+    utterance.rate = 0.95;
+    utterance.pitch = 1.0;
+    window.speechSynthesis.speak(utterance);
+  } catch (err) {
+    console.warn('[NotificationService] Speech synthesis error:', err);
+  }
+}
+
+/**
+ * Stop any currently playing synthesized speech advisory.
+ */
+export function stopEmergencyAdvisory(): void {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+  } catch {}
+}

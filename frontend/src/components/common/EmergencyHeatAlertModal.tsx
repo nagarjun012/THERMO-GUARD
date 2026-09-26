@@ -9,8 +9,11 @@ import {
   CheckCircle2,
   X,
   ShieldAlert,
+  Mic,
+  Square,
 } from 'lucide-react';
-import { HeatAlertPayload } from '../../services/notificationService';
+import { HeatAlertPayload, speakEmergencyAdvisory, stopEmergencyAdvisory } from '../../services/notificationService';
+import { useAppStore } from '../../stores/appStore';
 
 interface Props {
   alert: HeatAlertPayload | null;
@@ -31,9 +34,29 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
   isAudioEnabled,
   onToggleAudio,
 }) => {
+  const language = useAppStore((s) => s.language);
+  const [isSpeaking, setIsSpeaking] = React.useState(false);
+
+  React.useEffect(() => {
+    return () => {
+      stopEmergencyAdvisory();
+    };
+  }, []);
+
   if (!isOpen || !alert) return null;
 
   const isExtreme = alert.level === 'Extreme';
+
+  const handleToggleVoice = () => {
+    if (isSpeaking) {
+      stopEmergencyAdvisory();
+      setIsSpeaking(false);
+    } else {
+      const speechText = `${alert.title}. ${alert.message}. Important actions: ${alert.actions.join('. ')}`;
+      speakEmergencyAdvisory(speechText, language);
+      setIsSpeaking(true);
+    }
+  };
 
   return createPortal(
     <div className="fixed inset-0 z-[99999] overflow-y-auto">
@@ -87,6 +110,22 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
             </div>
 
             <div className="flex items-center gap-1.5 flex-shrink-0">
+              {/* Audible Voice Speech Button */}
+              <button
+                type="button"
+                onClick={handleToggleVoice}
+                className={`p-2 rounded-xl transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-bold ${
+                  isSpeaking
+                    ? 'bg-blue-600 text-white shadow-md animate-pulse'
+                    : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200'
+                }`}
+                title={isSpeaking ? 'Stop voice reading' : 'Read advisory aloud'}
+                aria-label={isSpeaking ? 'Stop voice reading' : 'Read advisory aloud'}
+              >
+                {isSpeaking ? <Square className="w-4 h-4 fill-white" /> : <Mic className="w-4 h-4" />}
+                <span className="hidden sm:inline">{isSpeaking ? 'Stop Voice' : 'Listen'}</span>
+              </button>
+
               {/* Sound Toggle Button */}
               <button
                 type="button"
