@@ -86,7 +86,12 @@ export const MapPage: React.FC = () => {
 
           {/* MODAL OVERLAY FOR LOCATION SELECTOR */}
           {showLocationSelector && (
-            <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn pointer-events-auto">
+            <div
+              className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn pointer-events-auto"
+              onClick={(e) => {
+                if (e.target === e.currentTarget) setShowLocationSelector(false);
+              }}
+            >
               <div className="relative w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-3 shadow-2xl">
                 <div className="flex justify-end p-2 pb-0">
                   <button
@@ -96,8 +101,8 @@ export const MapPage: React.FC = () => {
                     Close ✕
                   </button>
                 </div>
-                <div onClick={() => setShowLocationSelector(false)}>
-                  <LocationSelector />
+                <div>
+                  <LocationSelector onClose={() => setShowLocationSelector(false)} />
                 </div>
               </div>
             </div>

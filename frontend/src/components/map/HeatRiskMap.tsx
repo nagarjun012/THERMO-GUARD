@@ -500,18 +500,23 @@ export const HeatRiskMap: React.FC<Props> = ({
 
       {/* SEARCH LOCATION MODAL OVERLAY */}
       {isSearchOpen && (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn pointer-events-auto">
-          <div className="relative w-full max-w-lg bg-dark-900 border border-orange-500/30 rounded-2xl p-2 shadow-2xl">
+        <div
+          className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn pointer-events-auto"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsSearchOpen(false);
+          }}
+        >
+          <div className="relative w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-3 shadow-2xl">
             <div className="flex justify-end p-2 pb-0">
               <button
                 onClick={() => setIsSearchOpen(false)}
-                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-dark-800 text-gray-400 hover:text-white border border-dark-600 transition cursor-pointer"
+                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
               >
                 Close ✕
               </button>
             </div>
-            <div onClick={() => setIsSearchOpen(false)}>
-              <LocationSelector />
+            <div>
+              <LocationSelector onClose={() => setIsSearchOpen(false)} />
             </div>
           </div>
         </div>
