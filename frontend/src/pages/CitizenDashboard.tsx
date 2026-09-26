@@ -19,6 +19,7 @@ import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBul
 import { useHeatStressAlert } from '../hooks/useHeatStressAlert';
 import { EmergencyHeatAlertModal } from '../components/common/EmergencyHeatAlertModal';
 import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun, Bell, Flame, ShieldAlert } from 'lucide-react';
+import type { Alert } from '../types';
 
 export interface CurrentDashboardLocation {
   latitude: number;
@@ -244,6 +245,42 @@ export const CitizenDashboard: React.FC = () => {
     window.addEventListener('thermo:trigger-test-alert', handler);
     return () => window.removeEventListener('thermo:trigger-test-alert', handler);
   }, [triggerTestAlert]);
+
+  // Real-time heat alerts strictly for High & Extreme HTSS scores with authentic user score
+  const displayedAlerts = useMemo<Alert[]>(() => {
+    // If activeThermal is not High or Extreme, strictly return NO thermal hazard alerts
+    if (!activeThermal || (activeThermal.riskCategory !== 'HIGH' && activeThermal.riskCategory !== 'EXTREME')) {
+      // Keep only severe air quality pollution dual-hazard alerts if present
+      return (alerts || []).filter((a) => a.id.startsWith('alert-aqi-'));
+    }
+
+    const isExtreme = activeThermal.riskCategory === 'EXTREME';
+    const emergencyAlert: Alert = {
+      id: `alert-htss-${activeThermal.htss}-${activeThermal.riskCategory}`,
+      title: isExtreme ? 'Critical Heat Emergency' : 'Dangerous Heat Advisory',
+      message: isExtreme
+        ? `HTSS ${activeThermal.htss}/100 — Life-threatening thermal stress in ${alertLocation}. Mandatory outdoor work stoppage. Seek cooling centers immediately.`
+        : `HTSS ${activeThermal.htss}/100 — Severe thermal stress in ${alertLocation}. High risk of heat exhaustion for outdoor workers and vulnerable groups. Rest and hydration required.`,
+      severity: isExtreme ? 'red' : 'orange',
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      actions: isExtreme
+        ? [
+            'Mandatory outdoor work stoppage',
+            'Move into air-conditioned public cooling centers',
+            'Drink oral rehydration solutions (ORS) immediately',
+            'Dial 108 Ambulance if symptoms appear',
+          ]
+        : [
+            'Avoid direct midday sun between 11:00 AM and 4:00 PM',
+            'Mandatory 15-minute rest in shade every 45 minutes',
+            'Drink 500ml of water or electrolytes hourly',
+            'Wear loose, light-colored cotton clothing',
+          ],
+    };
+
+    const severeAqiAlerts = (alerts || []).filter((a) => a.id.startsWith('alert-aqi-'));
+    return [emergencyAlert, ...severeAqiAlerts];
+  }, [activeThermal, alertLocation, alerts]);
 
 
   // Compute full HTSS audit when needed
@@ -638,10 +675,10 @@ export const CitizenDashboard: React.FC = () => {
           humidity={weather.humidity}
           windSpeed={weather.windSpeed}
           solarRadiation={weather.solarRadiation}
-          htss={fmt(thermal.htss) as number}
-          riskCategory={thermal.htssCategory || risk.level}
-          wbgt={fmt(thermal.wbgt) as number}
-          utci={fmt(thermal.utci) as number}
+          htss={fmt(activeThermal?.htss ?? thermal.htss) as number}
+          riskCategory={activeThermal?.level || thermal.htssCategory || risk.level}
+          wbgt={fmt(activeThermal?.wbgt ?? thermal.wbgt) as number}
+          utci={fmt(activeThermal?.utci ?? thermal.utci) as number}
           heatIndex={fmt(heatIndex) as number}
           humidex={humidex}
           wetBulbTemp={wetBulbTemp}
@@ -755,7 +792,7 @@ export const CitizenDashboard: React.FC = () => {
       {/* STATUTORY IMD VS AI HTSS RECONCILIATION */}
       <OfficialThresholdReconciliation
         currentTemp={Number(weather.temperature)}
-        currentHtss={Number(thermal.htss)}
+        currentHtss={Number(activeThermal?.htss ?? thermal.htss)}
       />
 
       {/* 3-5 DAY HEAT-HEALTH WARNING WINDOW & EPIDEMIOLOGICAL RISK INTELLIGENCE */}
@@ -776,7 +813,7 @@ export const CitizenDashboard: React.FC = () => {
           <HeatwaveProbability probability={risk.probability} trend="up" />
         </div>
         <div className="lg:col-span-1">
-          <AlertPanel alerts={alerts} />
+          <AlertPanel alerts={displayedAlerts} />
         </div>
         <div className="lg:col-span-1">
           <RecommendationCard risk={risk} />

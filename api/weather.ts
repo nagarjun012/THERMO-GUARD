@@ -343,16 +343,7 @@ function generateAlerts(level: string, htss: number) {
       actions: ['Limit outdoor time', 'Drink water every 20 min', 'Wear loose light clothing'],
     }];
   }
-  if (level === 'Moderate') {
-    return [{
-      id: `alert-${Date.now()}`,
-      title: 'Heat Watch Advisory',
-      message: `HTSS ${htss} — Elevated thermal stress. Take precautions outdoors.`,
-      severity: 'yellow',
-      time: now,
-      actions: ['Stay hydrated', 'Wear sunscreen', 'Avoid strenuous midday activity'],
-    }];
-  }
+  // Moderate and Low thermal conditions do NOT trigger alerts (alerts strictly for High and Extreme)
   return [];
 }
 

@@ -128,6 +128,46 @@ async function runHtssAlertTests() {
       const humidex = calculateHumidex(32, 70);
       assert.ok(humidex > 40, `Humidex correctly reflects humidity amplification: ${humidex}`);
     });
+
+    // Test 7: Strictly alerts ONLY on High and Extreme (Never on Low or Moderate)
+    it('Test 7: Strictly enforces that alerts only trigger when HTSS is High (>=60) or Extreme (>=75)', () => {
+      // Score in Moderate (< 60)
+      const moderateScores = [15, 38, 45, 59];
+      for (const score of moderateScores) {
+        const cat = htssToRiskCategory(score);
+        const shouldTrigger = cat === 'HIGH' || cat === 'EXTREME';
+        assert.strictEqual(shouldTrigger, false, `Score ${score} (category ${cat}) must NEVER trigger alerts`);
+      }
+
+      // Score in High and Extreme
+      const alertScores = [60, 68, 74, 75, 88];
+      for (const score of alertScores) {
+        const cat = htssToRiskCategory(score);
+        const shouldTrigger = cat === 'HIGH' || cat === 'EXTREME';
+        assert.strictEqual(shouldTrigger, true, `Score ${score} (category ${cat}) MUST trigger alerts`);
+      }
+    });
+
+    // Test 8: Real user personalized HTSS score matches exact vulnerability profile
+    it('Test 8: Real user HTSS accurately includes demographic vulnerability offset', async () => {
+      const { computeRealThermalRisk } = await server.ssrLoadModule('./src/lib/htssEngine.ts');
+
+      // 33.8°C, 40% RH, 18 km/h, 704 W/m² (Baseline ~59 Moderate)
+      const general = computeRealThermalRisk(33.8, 40, 18, 704, 'GENERAL_CITIZEN');
+      const laborer = computeRealThermalRisk(33.8, 40, 18, 704, 'OUTDOOR_LABORER');
+      const senior = computeRealThermalRisk(33.8, 40, 18, 704, 'ELDERLY_VULNERABLE');
+
+      assert.strictEqual(general.htss, 59);
+      assert.strictEqual(general.riskCategory, 'MODERATE');
+
+      // Laborer gets +8 offset -> 67 (High Risk)
+      assert.strictEqual(laborer.htss, 67);
+      assert.strictEqual(laborer.riskCategory, 'HIGH');
+
+      // Senior gets +6 offset -> 65 (High Risk)
+      assert.strictEqual(senior.htss, 65);
+      assert.strictEqual(senior.riskCategory, 'HIGH');
+    });
   } finally {
     await server.close();
   }

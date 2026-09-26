@@ -105,6 +105,10 @@ export function useHeatStressAlert(
       dispatchAlert('Extreme', htssScore);
     } else if (htssScore >= 60) {
       dispatchAlert('High', htssScore);
+    } else {
+      // Below 60 (Low or Moderate): strictly NO emergency alert
+      setActiveAlert(null);
+      setIsModalOpen(false);
     }
   }, [htssScore, dispatchAlert]);
 
