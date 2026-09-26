@@ -43,6 +43,7 @@ export function useHeatStressAlert(
 
   // Store last alert in ref to persist during renders
   const lastAlertRef = useRef<CooldownRecord | null>(null);
+  const snoozedUntilRef = useRef<number>(0);
 
   // Refresh permission status on mount
   useEffect(() => {
@@ -56,15 +57,24 @@ export function useHeatStressAlert(
     (level: 'High' | 'Extreme', score: number, bypassCooldown = false) => {
       const now = Date.now();
       const last = lastAlertRef.current;
+      const isUpgrade = last?.level === 'High' && level === 'Extreme';
 
-      // Check anti-spam cooldown
-      if (!bypassCooldown && last && last.location === locationName) {
-        const elapsed = now - last.timestamp;
-        const isUpgrade = last.level === 'High' && level === 'Extreme';
-
-        // Suppress if still within cooldown unless escalating to Extreme
-        if (elapsed < SNOOZE_DURATION_MS && !isUpgrade) {
+      // Check anti-spam cooldown and user snooze
+      if (!bypassCooldown && !isUpgrade) {
+        if (now < snoozedUntilRef.current) {
           return;
+        }
+
+        if (last) {
+          const isSameLoc =
+            last.location === locationName ||
+            last.location.toLowerCase().includes(locationName.toLowerCase()) ||
+            locationName.toLowerCase().includes(last.location.toLowerCase());
+
+          const elapsed = now - last.timestamp;
+          if (isSameLoc && elapsed < SNOOZE_DURATION_MS) {
+            return;
+          }
         }
       }
 
@@ -116,6 +126,7 @@ export function useHeatStressAlert(
    * User acknowledges and dismisses the alert (starts standard snooze)
    */
   const acknowledgeAlert = useCallback(() => {
+    snoozedUntilRef.current = Date.now() + SNOOZE_DURATION_MS;
     setIsModalOpen(false);
   }, []);
 

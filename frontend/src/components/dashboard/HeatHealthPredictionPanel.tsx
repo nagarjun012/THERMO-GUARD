@@ -313,30 +313,30 @@ export const HeatHealthPredictionPanel: React.FC<Props> = ({ lat, lon, locationN
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
           {vulnerableAlerts.map((grp, idx) => (
             <div
               key={idx}
-              className="p-4 rounded-2xl bg-[#EDF5FD] border border-blue-100/80 space-y-2.5 shadow-xs"
+              className="p-4 sm:p-5 rounded-2xl bg-white border border-blue-100 shadow-2xs space-y-2.5"
             >
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-extrabold text-slate-900">{grp.group_name}</span>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <span className="text-xs sm:text-sm font-black text-slate-900">{grp.group_name}</span>
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider ${
                   grp.urgency === 'extreme'
-                    ? 'bg-red-100 text-red-700 border border-red-200'
-                    : 'bg-orange-100 text-orange-700 border border-orange-200'
+                    ? 'bg-red-50 text-red-800 border border-red-200'
+                    : 'bg-amber-50 text-amber-800 border border-amber-200'
                 }`}>
                   {grp.urgency} Urgency
                 </span>
               </div>
-              <p className="text-[11px] text-slate-600 leading-relaxed font-medium">
+              <p className="text-xs text-slate-600 leading-relaxed font-medium">
                 {grp.vulnerability_description}
               </p>
               <div className="space-y-1.5 pt-1">
                 {grp.recommended_interventions.map((action, aidx) => (
-                  <div key={aidx} className="flex items-start gap-2 text-[11px] text-slate-700">
+                  <div key={aidx} className="flex items-start gap-2 text-xs text-slate-700">
                     <span className="text-blue-600 font-bold mt-0.5">•</span>
-                    <span>{action}</span>
+                    <span className="leading-snug">{action}</span>
                   </div>
                 ))}
               </div>
@@ -346,19 +346,25 @@ export const HeatHealthPredictionPanel: React.FC<Props> = ({ lat, lon, locationN
       </div>
 
       {/* HUMAN-IN-THE-LOOP & EPIDEMIOLOGICAL GOVERNANCE NOTICE */}
-      <div className="p-4 rounded-2xl bg-blue-50 border border-blue-200/80 text-xs text-blue-900 flex items-start gap-3 shadow-xs">
+      <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900 flex items-start gap-3 shadow-2xs">
         <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-        <div className="space-y-1 leading-relaxed">
-          <p className="font-extrabold text-blue-950">
-            Decision-Support & Governance Protocol (Non-Autonomous Interventions)
+        <div className="space-y-2 leading-relaxed">
+          <p className="font-black text-blue-950 text-sm">
+            Decision-Support &amp; Governance Protocol (Non-Autonomous Interventions)
           </p>
-          <p className="text-[11px] text-blue-800">
+          <p className="text-xs text-blue-900 font-medium">
             {forecast.human_in_the_loop_protocol?.governing_principle ||
               'AI outputs are strictly for decision-support. Autonomous activation of emergency powers, hospital surge reallocations, or civic restrictions is prohibited without authorized municipal officer confirmation.'}
           </p>
-          <p className="text-[10px] text-blue-700 italic">
-            Status: {forecast.health_outcome_status} — Epidemiological hospitalization and mortality indices represent modeled relative risk based on biometeorological exposure-response functions.
-          </p>
+          <div className="pt-1 flex flex-wrap items-center gap-2 text-xs text-blue-800">
+            <span className="font-bold">Status:</span>
+            <span className="px-2.5 py-0.5 rounded-lg bg-white border border-blue-200 font-mono text-[11px] font-bold text-blue-900 shadow-2xs">
+              {forecast.health_outcome_status}
+            </span>
+            <span className="text-slate-600 text-xs">
+              — Epidemiological hospitalization and mortality indices represent modeled relative risk based on biometeorological exposure-response functions.
+            </span>
+          </div>
         </div>
       </div>
 

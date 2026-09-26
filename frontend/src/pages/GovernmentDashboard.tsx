@@ -95,8 +95,8 @@ export const GovernmentDashboard: React.FC = () => {
       <OverviewCards counters={counters} isLoading={isLoading} progress={progress} />
 
       {/* MAP & PEAK LOCATIONS ROW */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[500px]">
-        <div className="lg:col-span-2 relative rounded-2xl overflow-hidden neu-card border border-white/10 shadow-2xl">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[460px]">
+        <div className="lg:col-span-2 relative rounded-3xl overflow-hidden bg-white/95 border border-blue-200/80 shadow-2xl h-[460px] sm:h-[520px] lg:h-auto min-h-[440px]">
           <HeatRiskMap cities={apiData?.cities || []} center={[selectedLocation.lat, selectedLocation.lon]} />
           <MapLegend />
         </div>

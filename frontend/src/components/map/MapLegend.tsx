@@ -8,7 +8,9 @@ interface Props {
 
 export const MapLegend: React.FC<Props> = ({ onOpenGuide }) => {
   const [selectedLevel, setSelectedLevel] = useState<string | null>(null);
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(
+    () => (typeof window !== 'undefined' ? window.innerWidth < 640 : false)
+  );
 
   const levels: { name: 'LOW' | 'MODERATE' | 'HIGH' | 'EXTREME'; range: string; label: string; desc: string }[] = [
     { name: 'LOW', range: '0–24', label: 'Low Risk (Safe / Cool)', desc: 'Minimal thermal strain. Normal outdoor daily activities.' },
@@ -18,7 +20,7 @@ export const MapLegend: React.FC<Props> = ({ onOpenGuide }) => {
   ];
 
   return (
-    <div className="p-4 absolute bottom-6 left-6 z-[400] text-xs max-w-xs bg-white/95 backdrop-blur-xl border border-white/80 shadow-2xl rounded-2xl space-y-3 font-sans">
+    <div className="p-3 sm:p-4 absolute bottom-4 left-4 sm:bottom-6 sm:left-6 z-[400] text-xs max-w-[280px] sm:max-w-xs bg-white/95 backdrop-blur-xl border border-blue-200/80 shadow-2xl rounded-2xl space-y-3 font-sans">
       <div className="flex items-center justify-between border-b border-slate-200 pb-2">
         <h4 className="font-black text-slate-900 tracking-wide text-xs uppercase flex items-center gap-1.5">
           <span>🗺️ Risk Level Legend</span>

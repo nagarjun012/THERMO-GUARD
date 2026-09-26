@@ -21,12 +21,17 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
   const { inputs, thermalIndicators, normalization, contributions, result, factorDecomposition } = audit;
 
   const modal = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-black/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto neu-card border border-white/10 rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl bg-gradient-to-b from-dark-800 to-dark-900 my-auto">
-        {/* Close */}
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-fadeIn overflow-y-auto"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto bg-white/98 backdrop-blur-2xl border border-blue-200/90 rounded-3xl p-5 sm:p-8 shadow-[0_24px_70px_rgba(15,23,42,0.25)] text-slate-800 my-auto">
+        {/* Close Button */}
         <button
           onClick={onClose}
-          className="absolute top-3.5 right-3.5 sm:top-5 sm:right-5 p-1.5 sm:p-2 rounded-xl text-gray-400 hover:text-white hover:bg-white/10 transition-colors"
+          className="absolute top-4 right-4 sm:top-6 sm:right-6 p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-950 border border-slate-200 transition-colors cursor-pointer"
           type="button"
           aria-label="Close Audit View"
         >
@@ -34,21 +39,28 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
         </button>
 
         {/* Title */}
-        <div className="flex items-center gap-2 mb-4 sm:mb-6">
-          <Bug className="w-4 h-4 sm:w-5 sm:h-5 text-orange-400 shrink-0" />
-          <h2 className="text-base sm:text-lg font-black font-mono text-white tracking-tight">
-            HTSS AUDIT / DEBUG VIEW
-          </h2>
+        <div className="flex items-center gap-3 mb-5 sm:mb-6 pr-10">
+          <div className="p-2 bg-orange-50 border border-orange-200 rounded-xl text-orange-600 flex-shrink-0">
+            <Bug className="w-5 h-5" />
+          </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-black font-mono text-slate-950 tracking-tight">
+              HTSS AUDIT / DEBUG VIEW
+            </h2>
+            <p className="text-xs text-slate-500 font-medium">
+              Transparent biometeorological formula verification pipeline
+            </p>
+          </div>
         </div>
 
-        <div className="space-y-3.5 sm:space-y-5 text-[11px] sm:text-xs font-mono">
-          {/* Pipeline Visualization */}
+        <div className="space-y-3.5 sm:space-y-4 text-xs font-sans">
+          {/* 1. RAW API INPUT */}
           <PipelineStep
             step={1}
             title="Raw API Input"
             status="success"
             content={
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-2 gap-2.5">
                 <AuditField label="Temperature" value={`${inputs.temperature} °C`} />
                 <AuditField label="Humidity" value={`${inputs.humidity} %`} />
                 <AuditField label="Wind Speed" value={`${inputs.windSpeed} km/h`} />
@@ -59,12 +71,13 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
 
           <PipelineArrow />
 
+          {/* 2. THERMAL INDICATORS */}
           <PipelineStep
             step={2}
             title="Thermal Indicators"
             status="success"
             content={
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
                 <AuditField label="Wet Bulb (Stull 2011)" value={`${thermalIndicators.wetBulbTemp} °C`} />
                 <AuditField label="Outdoor WBGT (Liljegren)" value={`${thermalIndicators.outdoorWBGT} °C`} />
                 <AuditField label="UTCI" value={`${thermalIndicators.utci} °C`} />
@@ -76,20 +89,24 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
 
           <PipelineArrow />
 
+          {/* 3. NORMALIZATION */}
           <PipelineStep
             step={3}
             title="Normalization (0–100 Scale)"
             status="success"
             content={
-              <div className="space-y-1.5 break-words">
-                <div className="text-gray-400">
-                  n_wbgt = clamp((WBGT − 20) / 15 × 100, 0, 100) = <span className="text-white font-bold">{normalization.n_wbgt}</span>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-2 text-xs font-mono text-slate-700">
+                <div className="flex flex-wrap items-center justify-between gap-1">
+                  <span>n_wbgt = clamp((WBGT − 20) / 15 × 100, 0, 100)</span>
+                  <span className="px-2 py-0.5 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg font-black">{normalization.n_wbgt}</span>
                 </div>
-                <div className="text-gray-400">
-                  n_utci = clamp((UTCI − 20) / 25 × 100, 0, 100) = <span className="text-white font-bold">{normalization.n_utci}</span>
+                <div className="flex flex-wrap items-center justify-between gap-1">
+                  <span>n_utci = clamp((UTCI − 20) / 25 × 100, 0, 100)</span>
+                  <span className="px-2 py-0.5 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg font-black">{normalization.n_utci}</span>
                 </div>
-                <div className="text-gray-400">
-                  n_temp = clamp((Temp − 20) / 25 × 100, 0, 100) = <span className="text-white font-bold">{normalization.n_temp}</span>
+                <div className="flex flex-wrap items-center justify-between gap-1">
+                  <span>n_temp = clamp((Temp − 20) / 25 × 100, 0, 100)</span>
+                  <span className="px-2 py-0.5 bg-blue-50 text-blue-900 border border-blue-200 rounded-lg font-black">{normalization.n_temp}</span>
                 </div>
               </div>
             }
@@ -97,23 +114,28 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
 
           <PipelineArrow />
 
+          {/* 4. WEIGHTED CONTRIBUTIONS */}
           <PipelineStep
             step={4}
             title="Weighted Contributions"
             status="success"
             content={
-              <div className="space-y-1.5 break-words">
-                <div className="text-gray-400">
-                  WBGT (45%): 0.45 × {normalization.n_wbgt} = <span className="text-cyan-300 font-bold">{contributions.wbgtContribution}</span>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-2 text-xs font-mono text-slate-700">
+                <div className="flex flex-wrap items-center justify-between gap-1">
+                  <span>WBGT (45%): 0.45 × {normalization.n_wbgt}</span>
+                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-black">{contributions.wbgtContribution}</span>
                 </div>
-                <div className="text-gray-400">
-                  UTCI (35%): 0.35 × {normalization.n_utci} = <span className="text-cyan-300 font-bold">{contributions.utciContribution}</span>
+                <div className="flex flex-wrap items-center justify-between gap-1">
+                  <span>UTCI (35%): 0.35 × {normalization.n_utci}</span>
+                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-black">{contributions.utciContribution}</span>
                 </div>
-                <div className="text-gray-400">
-                  Temp (20%): 0.20 × {normalization.n_temp} = <span className="text-cyan-300 font-bold">{contributions.tempContribution}</span>
+                <div className="flex flex-wrap items-center justify-between gap-1">
+                  <span>Temp (20%): 0.20 × {normalization.n_temp}</span>
+                  <span className="px-2 py-0.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-black">{contributions.tempContribution}</span>
                 </div>
-                <div className="pt-1.5 border-t border-white/5 text-gray-300">
-                  Raw sum = <span className="text-white font-bold">{contributions.rawWeightedSum}</span>
+                <div className="pt-2 border-t border-slate-200 flex items-center justify-between font-bold text-slate-900">
+                  <span>Raw sum:</span>
+                  <span className="px-2.5 py-1 bg-blue-600 text-white rounded-lg font-black">{contributions.rawWeightedSum}</span>
                 </div>
               </div>
             }
@@ -121,25 +143,26 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
 
           <PipelineArrow />
 
+          {/* 5. FINAL HTSS SCORE */}
           <PipelineStep
             step={5}
             title="Final HTSS Score"
             status="success"
             content={
-              <div className="flex items-center gap-4">
-                <div className="text-2xl sm:text-3xl font-black text-orange-400">
-                  {result.htss}<span className="text-base sm:text-lg text-gray-500">/100</span>
+              <div className="p-3 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-4">
+                <div className="text-2xl sm:text-3xl font-black text-amber-600 font-mono">
+                  {result.htss} <span className="text-sm text-slate-400 font-bold">/ 100</span>
                 </div>
                 <div>
-                  <span className={`px-2.5 sm:px-3 py-1 rounded-lg text-[11px] sm:text-xs font-bold border ${
-                    result.riskCategory === 'EXTREME' ? 'text-red-400 border-red-500/30 bg-red-500/10' :
-                    result.riskCategory === 'HIGH' ? 'text-orange-400 border-orange-500/30 bg-orange-500/10' :
-                    result.riskCategory === 'MODERATE' ? 'text-yellow-400 border-yellow-500/30 bg-yellow-500/10' :
-                    'text-emerald-400 border-emerald-500/30 bg-emerald-500/10'
+                  <span className={`px-3 py-1 rounded-lg text-xs font-black uppercase tracking-wider border ${
+                    result.riskCategory === 'EXTREME' ? 'text-purple-800 border-purple-300 bg-purple-50' :
+                    result.riskCategory === 'HIGH' ? 'text-red-800 border-red-300 bg-red-50' :
+                    result.riskCategory === 'MODERATE' ? 'text-amber-800 border-amber-300 bg-amber-50' :
+                    'text-emerald-800 border-emerald-300 bg-emerald-50'
                   }`}>
                     {result.riskCategory}
                   </span>
-                  <div className="text-[10px] text-gray-500 mt-1">
+                  <div className="text-[10px] text-slate-500 font-medium mt-1">
                     Clamped to [10, 99] range
                   </div>
                 </div>
@@ -149,22 +172,23 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
 
           <PipelineArrow />
 
+          {/* 6. FACTOR DECOMPOSITION */}
           <PipelineStep
             step={6}
             title="Factor Decomposition"
             status="success"
             content={
-              <div className="space-y-2">
+              <div className="p-3 rounded-xl bg-white border border-slate-200 space-y-2.5">
                 {factorDecomposition.map((f, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <span className="text-gray-400 w-20 sm:w-24 text-[11px] sm:text-xs truncate">{f.factor}:</span>
-                    <div className="flex-1 h-2.5 sm:h-3 bg-dark-950 rounded-full overflow-hidden">
+                  <div key={i} className="flex items-center gap-3">
+                    <span className="text-slate-700 w-24 text-xs font-bold truncate">{f.factor}:</span>
+                    <div className="flex-1 h-3 bg-slate-100 rounded-full overflow-hidden border border-slate-200">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-orange-500 to-red-500 transition-all duration-500"
+                        className="h-full rounded-full bg-gradient-to-r from-amber-500 to-red-500 transition-all duration-500"
                         style={{ width: `${f.contribution}%` }}
                       />
                     </div>
-                    <span className="text-white font-bold w-9 sm:w-10 text-right text-[11px] sm:text-xs">{f.contribution}%</span>
+                    <span className="text-slate-900 font-black w-10 text-right text-xs font-mono">{f.contribution}%</span>
                   </div>
                 ))}
               </div>
@@ -172,11 +196,11 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
           />
 
           {/* Metadata */}
-          <div className="pt-4 border-t border-white/10 text-[10px] text-gray-500 space-y-1">
-            <div>Data Source: <span className="text-gray-300">{audit.dataSource}</span></div>
-            <div>Calculated At: <span className="text-gray-300">{formatISTTimestamp(audit.calculatedAt)}</span></div>
-            <div>Engine: <span className="text-gray-300">Stull & Liljegren Psychrometric Thermodynamic Engine</span></div>
-            <div>Score Type: <span className="text-gray-300">Deterministic — same inputs always produce same HTSS</span></div>
+          <div className="pt-4 border-t border-slate-200 text-[11px] text-slate-500 space-y-1 font-medium">
+            <div>Data Source: <strong className="text-slate-700">{audit.dataSource}</strong></div>
+            <div>Calculated At: <strong className="text-slate-700">{formatISTTimestamp(audit.calculatedAt)}</strong></div>
+            <div>Engine: <strong className="text-slate-700">Stull &amp; Liljegren Psychrometric Thermodynamic Engine</strong></div>
+            <div>Score Type: <strong className="text-slate-700">Deterministic — verified pure meteorological physics</strong></div>
           </div>
         </div>
       </div>
@@ -190,13 +214,13 @@ function PipelineStep({ step, title, status, content }: {
   step: number; title: string; status: 'success' | 'error'; content: React.ReactNode;
 }) {
   return (
-    <div className="p-3 rounded-xl bg-dark-950/40 border border-white/5">
-      <div className="flex items-center gap-2 mb-2">
-        <span className="w-5 h-5 rounded-full bg-orange-500/20 border border-orange-500/30 flex items-center justify-center text-[9px] font-bold text-orange-400">
+    <div className="p-3.5 sm:p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
+      <div className="flex items-center gap-2 mb-2.5">
+        <span className="w-5 h-5 rounded-full bg-blue-100 border border-blue-200 flex items-center justify-center text-[10px] font-black text-blue-800">
           {step}
         </span>
-        <span className="text-gray-200 font-bold uppercase tracking-wider text-[11px]">{title}</span>
-        {status === 'success' && <CheckCircle2 className="w-3 h-3 text-emerald-400 ml-auto" />}
+        <span className="text-slate-900 font-black uppercase tracking-wider text-xs">{title}</span>
+        {status === 'success' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 ml-auto" />}
       </div>
       {content}
     </div>
@@ -206,16 +230,16 @@ function PipelineStep({ step, title, status, content }: {
 function PipelineArrow() {
   return (
     <div className="flex justify-center">
-      <ArrowDown className="w-4 h-4 text-gray-600" />
+      <ArrowDown className="w-4 h-4 text-blue-400" />
     </div>
   );
 }
 
 function AuditField({ label, value }: { label: string; value: string }) {
   return (
-    <div className="px-2 py-1.5 rounded-lg bg-dark-800/50 border border-white/5">
-      <div className="text-[9px] text-gray-500 uppercase">{label}</div>
-      <div className="text-white font-bold">{value}</div>
+    <div className="px-3 py-2 rounded-xl bg-white border border-slate-200 shadow-2xs">
+      <div className="text-[10px] text-slate-500 uppercase font-black tracking-wider">{label}</div>
+      <div className="text-slate-950 font-black text-xs sm:text-sm mt-0.5 font-mono">{value}</div>
     </div>
   );
 }

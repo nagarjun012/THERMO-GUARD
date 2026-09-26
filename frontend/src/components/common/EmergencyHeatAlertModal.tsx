@@ -1,6 +1,5 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   Flame,
   Phone,
@@ -37,56 +36,38 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
   const isExtreme = alert.level === 'Extreme';
 
   return createPortal(
-    <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-        {/* BACKDROP BLUR WITH AMBIENT RISK GLOW */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onAcknowledge}
-          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md"
-        />
+    <div className="fixed inset-0 z-[99999] overflow-y-auto">
+      {/* BACKDROP BLUR WITH AMBIENT RISK GLOW */}
+      <div
+        className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-0 transition-opacity"
+        onClick={onAcknowledge}
+        aria-hidden="true"
+      />
 
-        {/* EMERGENCY DIALOG MODAL */}
-        <motion.div
-          initial={{ scale: 0.9, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 15 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+      {/* SAFE VIEWPORT CENTERING CONTAINER */}
+      <div className="min-h-full flex items-center justify-center p-3 sm:p-6 py-12 sm:py-8 relative z-10 pointer-events-none">
+        {/* ROCK-SOLID STABLE EMERGENCY DIALOG (NO JITTERING / MOVING) */}
+        <div
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="alert-dialog-title"
-          className={`relative w-full max-w-lg my-auto max-h-[92vh] overflow-y-auto rounded-3xl p-5 sm:p-8 text-white shadow-2xl border-2 z-10 ${
+          className={`pointer-events-auto relative w-full max-w-lg my-auto rounded-3xl p-5 sm:p-8 text-white shadow-2xl border-2 animate-fadeIn ${
             isExtreme
-              ? 'bg-slate-950/98 border-red-500/90 shadow-[0_0_80px_rgba(239,68,68,0.5)]'
-              : 'bg-slate-950/98 border-amber-500/90 shadow-[0_0_80px_rgba(245,158,11,0.45)]'
+              ? 'bg-slate-950 border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.4)]'
+              : 'bg-slate-950 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]'
           }`}
         >
-          {/* AMBIENT RADAR PULSE IN BACKGROUND */}
-          <div className="absolute top-0 right-0 -mr-16 -mt-16 w-48 h-48 rounded-full pointer-events-none opacity-20 blur-2xl">
-            <div
-              className={`w-full h-full rounded-full ${
-                isExtreme ? 'bg-red-500 animate-pulse' : 'bg-amber-500 animate-pulse'
-              }`}
-            />
-          </div>
-
           {/* HEADER: SEVERITY BADGE + AUDIO/CLOSE TOGGLE */}
           <div className="flex items-center justify-between gap-3 mb-5">
             <div className="flex items-center gap-2.5">
               <div
-                className={`relative p-2.5 rounded-2xl flex items-center justify-center shadow-lg ${
-                  isExtreme ? 'bg-red-500/20 text-red-400 border border-red-500/40' : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                className={`p-2.5 rounded-2xl flex items-center justify-center shadow-lg ${
+                  isExtreme
+                    ? 'bg-red-500/20 text-red-400 border border-red-500/40'
+                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
                 }`}
               >
-                {/* Ping wave */}
-                <span
-                  className={`animate-ping absolute inline-flex h-full w-full rounded-2xl opacity-75 ${
-                    isExtreme ? 'bg-red-500' : 'bg-amber-500'
-                  }`}
-                />
-                {isExtreme ? <ShieldAlert className="w-6 h-6 relative z-10" /> : <Flame className="w-6 h-6 relative z-10" />}
+                {isExtreme ? <ShieldAlert className="w-6 h-6" /> : <Flame className="w-6 h-6" />}
               </div>
 
               <div>
@@ -97,15 +78,15 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
                 >
                   {isExtreme ? 'CRITICAL EMERGENCY' : 'HIGH THERMAL STRESS'}
                 </span>
-                <div className="text-xs font-mono text-slate-300 flex items-center gap-1.5">
-                  <span>{alert.locationName}</span>
+                <div className="text-xs font-mono text-slate-300 flex items-center gap-1.5 font-semibold">
+                  <span className="truncate max-w-[180px] sm:max-w-[240px]">{alert.locationName}</span>
                   <span>•</span>
                   <span className="font-bold text-white">HTSS {alert.htss}/100</span>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
               {/* Sound Toggle Button */}
               <button
                 type="button"
@@ -148,7 +129,7 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
               {alert.actions.map((act, idx) => (
                 <li key={idx} className="flex items-start gap-2 leading-relaxed">
                   <span
-                    className={`inline-block w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
+                    className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
                       isExtreme ? 'bg-red-400' : 'bg-amber-400'
                     }`}
                   />
@@ -158,35 +139,35 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
             </ul>
           </div>
 
-          {/* EMERGENCY HELPLINES SPEED-DIAL */}
-          <div className="grid grid-cols-2 gap-2.5 mb-6">
+          {/* SPEED DIAL EMERGENCY SERVICES */}
+          <div className="grid grid-cols-2 gap-3 mb-5">
             <a
               href="tel:108"
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-mono text-xs font-bold bg-red-600 hover:bg-red-700 text-white shadow-md active:scale-95 transition-all"
+              className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-red-600/90 hover:bg-red-600 font-mono text-xs font-black text-white transition-all shadow-md active:scale-98"
             >
-              <Phone className="w-3.5 h-3.5" />
+              <Phone className="w-4 h-4" />
               <span>DIAL 108 (AMBULANCE)</span>
             </a>
             <a
               href="tel:112"
-              className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl font-mono text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white border border-slate-700 shadow-md active:scale-95 transition-all"
+              className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 font-mono text-xs font-black text-white transition-all shadow-md active:scale-98 border border-white/10"
             >
-              <Phone className="w-3.5 h-3.5" />
+              <Phone className="w-4 h-4" />
               <span>DIAL 112 (DISASTER)</span>
             </a>
           </div>
 
-          {/* BROWSER NOTIFICATION OPT-IN (IF NOT GRANTED) */}
-          {permission !== 'granted' && permission !== 'unsupported' && (
-            <div className="mb-5 p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 flex items-center justify-between gap-3 text-xs">
-              <div className="flex items-center gap-2 text-blue-200">
+          {/* PERMISSION REQUEST BANNER IF NOT GRANTED */}
+          {permission === 'default' && (
+            <div className="mb-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2 text-blue-300">
                 <Bell className="w-4 h-4 text-blue-400 shrink-0" />
-                <span>Get background push alerts when tab is closed:</span>
+                <span>Enable OS push alerts for life-critical notifications</span>
               </div>
               <button
                 type="button"
                 onClick={onRequestPermission}
-                className="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-mono font-bold text-[11px] shrink-0 cursor-pointer transition-colors"
+                className="px-3 py-1 bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold rounded-lg text-[10px] uppercase font-mono tracking-wider cursor-pointer flex-shrink-0"
               >
                 ENABLE
               </button>
@@ -197,7 +178,7 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={onAcknowledge}
-            className={`w-full py-3.5 px-6 rounded-2xl font-mono text-sm font-black tracking-wider text-slate-950 transition-all cursor-pointer shadow-lg active:scale-95 ${
+            className={`w-full py-3.5 px-6 rounded-2xl font-mono text-sm font-black tracking-wider text-slate-950 transition-all cursor-pointer shadow-lg active:scale-98 ${
               isExtreme
                 ? 'bg-gradient-to-r from-red-400 to-amber-400 hover:from-red-300 hover:to-amber-300'
                 : 'bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200'
@@ -205,9 +186,9 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
           >
             I UNDERSTAND &amp; ACKNOWLEDGE (SNOOZE 30 MIN)
           </button>
-        </motion.div>
+        </div>
       </div>
-    </AnimatePresence>,
+    </div>,
     document.body
   );
 };
