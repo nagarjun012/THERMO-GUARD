@@ -1,7 +1,24 @@
 import React from 'react';
 import { useDemoScenarios, useActivateScenario } from '../../hooks/useApi';
 import { useAppStore } from '../../stores/appStore';
-import * as Icons from 'lucide-react';
+import {
+  Sliders,
+  Sun,
+  Thermometer,
+  Flame,
+  ShieldAlert,
+  Activity,
+  LucideIcon,
+} from 'lucide-react';
+
+const SCENARIO_ICON_MAP: Record<string, LucideIcon> = {
+  Sliders,
+  Sun,
+  Thermometer,
+  Flame,
+  ShieldAlert,
+  Activity,
+};
 
 export const DemoScenarioSelector: React.FC = () => {
   const { data: scenarios } = useDemoScenarios();
@@ -44,7 +61,7 @@ export const DemoScenarioSelector: React.FC = () => {
             : 'skeuo-btn-dark'
         }`}
       >
-        <Icons.Sliders className="w-3.5 h-3.5" />
+        <Sliders className="w-3.5 h-3.5" />
         <span>{activeScenario ? 'DEMO MODE' : 'Simulations'}</span>
       </button>
 
@@ -68,8 +85,7 @@ export const DemoScenarioSelector: React.FC = () => {
           </div>
           <div className="max-h-64 overflow-y-auto divide-y divide-white/5">
             {scenarios?.map((s) => {
-              const Icon =
-                (Icons[s.icon as keyof typeof Icons] as React.ElementType) || Icons.Activity;
+              const Icon = SCENARIO_ICON_MAP[s.icon] || Activity;
               const isActive = activeScenario === s.id;
               return (
                 <button

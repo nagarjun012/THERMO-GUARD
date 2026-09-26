@@ -11,18 +11,32 @@ import { AlertPanel } from '../components/dashboard/AlertPanel';
 import { RecommendationCard } from '../components/dashboard/RecommendationCard';
 import { HeatwaveProbability } from '../components/dashboard/HeatwaveProbability';
 import { HTSSDetailPanel } from '../components/dashboard/HTSSDetailPanel';
-import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
-import { OfficialThresholdReconciliation } from '../components/common/OfficialThresholdReconciliation';
-import { HeatHealthPredictionPanel } from '../components/dashboard/HeatHealthPredictionPanel';
 import { DynamicWeatherSymbol, getClimateType } from '../components/dashboard/DynamicWeatherSymbol';
 import { useAppStore } from '../stores/appStore';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
 import { useHeatStressAlert } from '../hooks/useHeatStressAlert';
-import { EmergencyHeatAlertModal } from '../components/common/EmergencyHeatAlertModal';
-import { HeatSymptomChecker } from '../components/dashboard/HeatSymptomChecker';
-import { LocationSelector } from '../components/location/LocationSelector';
 import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun, Flame, ShieldAlert, HeartPulse } from 'lucide-react';
 import type { Alert } from '../types';
+
+// Lazy-loaded auxiliary modals & heavy panels to optimize initial bundle and eliminate CPU hydration freeze
+const LocationSelector = React.lazy(() =>
+  import('../components/location/LocationSelector').then((m) => ({ default: m.LocationSelector }))
+);
+const EmergencyHeatAlertModal = React.lazy(() =>
+  import('../components/common/EmergencyHeatAlertModal').then((m) => ({ default: m.EmergencyHeatAlertModal }))
+);
+const HeatSymptomChecker = React.lazy(() =>
+  import('../components/dashboard/HeatSymptomChecker').then((m) => ({ default: m.HeatSymptomChecker }))
+);
+const HTSSAuditView = React.lazy(() =>
+  import('../components/dashboard/HTSSAuditView').then((m) => ({ default: m.HTSSAuditView }))
+);
+const HeatHealthPredictionPanel = React.lazy(() =>
+  import('../components/dashboard/HeatHealthPredictionPanel').then((m) => ({ default: m.HeatHealthPredictionPanel }))
+);
+const OfficialThresholdReconciliation = React.lazy(() =>
+  import('../components/common/OfficialThresholdReconciliation').then((m) => ({ default: m.OfficialThresholdReconciliation }))
+);
 
 export interface CurrentDashboardLocation {
   latitude: number;
@@ -349,7 +363,9 @@ export const CitizenDashboard: React.FC = () => {
                     </button>
                   </div>
                   <div>
-                    <LocationSelector onClose={() => setIsSelectorOpen(false)} />
+                    <React.Suspense fallback={<div className="h-40 flex items-center justify-center"><RefreshCw className="w-5 h-5 animate-spin text-blue-600" /></div>}>
+                      <LocationSelector onClose={() => setIsSelectorOpen(false)} />
+                    </React.Suspense>
                   </div>
                 </div>
               </div>,
@@ -833,18 +849,22 @@ export const CitizenDashboard: React.FC = () => {
       </div>
  
       {/* STATUTORY IMD VS AI HTSS RECONCILIATION */}
-      <OfficialThresholdReconciliation
-        currentTemp={Number(weather.temperature)}
-        currentHtss={Number(activeThermal?.htss ?? thermal.htss)}
-      />
+      <React.Suspense fallback={null}>
+        <OfficialThresholdReconciliation
+          currentTemp={Number(weather.temperature)}
+          currentHtss={Number(activeThermal?.htss ?? thermal.htss)}
+        />
+      </React.Suspense>
 
       {/* 3-5 DAY HEAT-HEALTH WARNING WINDOW & EPIDEMIOLOGICAL RISK INTELLIGENCE */}
       {currentLocation && (
-        <HeatHealthPredictionPanel
-          lat={currentLocation.latitude}
-          lon={currentLocation.longitude}
-          locationName={currentLocation.displayName}
-        />
+        <React.Suspense fallback={<div className="h-40 bg-white/50 rounded-3xl animate-pulse" />}>
+          <HeatHealthPredictionPanel
+            lat={currentLocation.latitude}
+            lon={currentLocation.longitude}
+            locationName={currentLocation.displayName}
+          />
+        </React.Suspense>
       )}
 
       {/* HEAT STRESS FACTOR DECOMPOSITION */}
@@ -878,29 +898,35 @@ export const CitizenDashboard: React.FC = () => {
       )}
 
       {auditData && (
-        <HTSSAuditView
-          audit={auditData}
-          isOpen={isAuditOpen}
-          onClose={() => setIsAuditOpen(false)}
-        />
+        <React.Suspense fallback={null}>
+          <HTSSAuditView
+            audit={auditData}
+            isOpen={isAuditOpen}
+            onClose={() => setIsAuditOpen(false)}
+          />
+        </React.Suspense>
       )}
 
       {/* EMERGENCY HEAT STRESS ALERT MODAL (HIGH & EXTREME) */}
-      <EmergencyHeatAlertModal
-        alert={activeAlert}
-        isOpen={isModalOpen}
-        onAcknowledge={acknowledgeAlert}
-        permission={permission}
-        onRequestPermission={enableSystemNotifications}
-        isAudioEnabled={isAudioEnabled}
-        onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
-      />
+      <React.Suspense fallback={null}>
+        <EmergencyHeatAlertModal
+          alert={activeAlert}
+          isOpen={isModalOpen}
+          onAcknowledge={acknowledgeAlert}
+          permission={permission}
+          onRequestPermission={enableSystemNotifications}
+          isAudioEnabled={isAudioEnabled}
+          onToggleAudio={() => setIsAudioEnabled(!isAudioEnabled)}
+        />
+      </React.Suspense>
 
       {/* HEAT ILLNESS CLINICAL SYMPTOM TRIAGE MODAL */}
-      <HeatSymptomChecker
-        isOpen={isSymptomCheckerOpen}
-        onClose={() => setIsSymptomCheckerOpen(false)}
-      />
+      <React.Suspense fallback={null}>
+        <HeatSymptomChecker
+          isOpen={isSymptomCheckerOpen}
+          onClose={() => setIsSymptomCheckerOpen(false)}
+        />
+      </React.Suspense>
 
       {/* LOCATION SELECTOR MODAL OVERLAY */}
       {isSelectorOpen &&
@@ -921,7 +947,9 @@ export const CitizenDashboard: React.FC = () => {
                 </button>
               </div>
               <div>
-                <LocationSelector onClose={() => setIsSelectorOpen(false)} />
+                <React.Suspense fallback={<div className="h-40 flex items-center justify-center"><RefreshCw className="w-5 h-5 animate-spin text-blue-600" /></div>}>
+                  <LocationSelector onClose={() => setIsSelectorOpen(false)} />
+                </React.Suspense>
               </div>
             </div>
           </div>,

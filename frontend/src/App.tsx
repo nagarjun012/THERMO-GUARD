@@ -3,8 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/layout/Header';
 import { Navbar } from './components/layout/Navbar';
-import { LandingPage } from './pages/LandingPage';
-import { GovernmentDashboard } from './pages/GovernmentDashboard';
 import { useAppStore } from './stores/appStore';
 
 import { OfficialTopBanner } from './components/layout/OfficialTopBanner';
@@ -14,7 +12,13 @@ import { OfficialModals } from './components/official/OfficialModals';
 import { ErrorBoundary } from './components/common/ErrorBoundary';
 import { OfflineBanner } from './components/common/OfflineBanner';
 
-// Lazy-loaded pages for better initial bundle size (critical for native apps)
+// Lazy-loaded pages for minimal initial bundle size (critical for low-end devices and slow networks)
+const LandingPage = lazy(() =>
+  import('./pages/LandingPage').then((m) => ({ default: m.LandingPage }))
+);
+const GovernmentDashboard = lazy(() =>
+  import('./pages/GovernmentDashboard').then((m) => ({ default: m.GovernmentDashboard }))
+);
 const CitizenDashboard = lazy(() =>
   import('./pages/CitizenDashboard').then((m) => ({ default: m.CitizenDashboard }))
 );

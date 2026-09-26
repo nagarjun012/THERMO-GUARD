@@ -1,16 +1,39 @@
 import React from 'react';
-import * as LucideIcons from 'lucide-react';
+import {
+  Activity,
+  Thermometer,
+  Droplets,
+  Wind,
+  Sun,
+  Gauge,
+  CloudRain,
+  Compass,
+  SunMedium,
+  LucideIcon,
+} from 'lucide-react';
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Activity,
+  Thermometer,
+  Droplets,
+  Wind,
+  Sun,
+  Gauge,
+  CloudRain,
+  Compass,
+  SunMedium,
+};
 
 interface Props {
   title: string;
   value: string | number;
   unit?: string;
-  icon: keyof typeof LucideIcons;
+  icon: string;
   color?: string;
 }
 
 export const WeatherCard: React.FC<Props> = ({ title, value, unit, icon, color = '#2563eb' }) => {
-  const Icon = (LucideIcons[icon] as React.ElementType) || LucideIcons.Activity;
+  const Icon = ICON_MAP[icon] || Activity;
 
   return (
     <div className="bg-white/95 backdrop-blur-md rounded-[26px] p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative group border border-white/90 shadow-[0_10px_30px_rgba(30,100,200,0.06)] hover:shadow-[0_14px_36px_rgba(30,100,200,0.12)] transition-all duration-300 hover:-translate-y-0.5">

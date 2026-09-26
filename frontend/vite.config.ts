@@ -104,19 +104,50 @@ export default defineConfig({
     },
   },
   build: {
-    // Optimize for native app: split vendor chunks for better caching
+    // Ultra-optimized chunking for low-end devices and slow 2G/3G networks
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-charts': ['recharts'],
-          'vendor-map': ['leaflet', 'react-leaflet'],
-          'vendor-motion': ['framer-motion'],
-          'vendor-query': ['@tanstack/react-query'],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('leaflet') || id.includes('react-leaflet')) {
+              return 'vendor-map';
+            }
+            if (id.includes('framer-motion')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'vendor-query';
+            }
+            if (id.includes('@supabase') || id.includes('axios') || id.includes('date-fns')) {
+              return 'vendor-utils';
+            }
+            if (
+              id.includes('/node_modules/react/') ||
+              id.includes('/node_modules/react-dom/') ||
+              id.includes('/node_modules/react-router/') ||
+              id.includes('/node_modules/react-router-dom/') ||
+              id.includes('/node_modules/scheduler/') ||
+              id.includes('\\node_modules\\react\\') ||
+              id.includes('\\node_modules\\react-dom\\') ||
+              id.includes('\\node_modules\\react-router\\') ||
+              id.includes('\\node_modules\\react-router-dom\\') ||
+              id.includes('\\node_modules\\scheduler\\')
+            ) {
+              return 'vendor-react';
+            }
+          }
+          if (id.includes('indiaLocations') || id.includes('allIndiaDistricts')) {
+            return 'data-india-geo';
+          }
         },
       },
     },
-    // Increase warning limit since we've split chunks properly
     chunkSizeWarningLimit: 600,
   },
 })

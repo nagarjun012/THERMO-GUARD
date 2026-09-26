@@ -1,6 +1,41 @@
 import React from 'react';
-import * as Icons from 'lucide-react';
+import {
+  ShieldCheck,
+  Info,
+  AlertTriangle,
+  Droplets,
+  Sun,
+  Wind,
+  Umbrella,
+  HeartPulse,
+  Activity,
+  Thermometer,
+  Flame,
+  Clock,
+  Users,
+  Shield,
+  Zap,
+  LucideIcon,
+} from 'lucide-react';
 import { RiskAssessment } from '../../types';
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  ShieldCheck,
+  Info,
+  AlertTriangle,
+  Droplets,
+  Sun,
+  Wind,
+  Umbrella,
+  HeartPulse,
+  Activity,
+  Thermometer,
+  Flame,
+  Clock,
+  Users,
+  Shield,
+  Zap,
+};
 
 interface Props {
   risk: RiskAssessment;
@@ -11,7 +46,7 @@ export const RecommendationCard: React.FC<Props> = ({ risk }) => {
     <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 h-full flex flex-col border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.07)]">
       <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
         <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
-          <Icons.ShieldCheck className="w-4 h-4 text-emerald-600" />
+          <ShieldCheck className="w-4 h-4 text-emerald-600" />
           Clinical Advisory
         </h3>
         <span className="px-2.5 py-1 text-[10px] font-bold text-slate-500 bg-[#EDF5FD] rounded-full border border-blue-100/60">
@@ -21,8 +56,7 @@ export const RecommendationCard: React.FC<Props> = ({ risk }) => {
 
       <div className="space-y-3 flex-1 overflow-y-auto pr-1">
         {risk.recommendations.map((rec, i) => {
-          const Icon =
-            (Icons[rec.icon as keyof typeof Icons] as React.ElementType) || Icons.Info;
+          const Icon = ICON_MAP[rec.icon] || Info;
           let color = 'text-blue-600';
           let borderStyle = 'border-blue-100 bg-[#EDF5FD]';
           if (rec.urgency === 'high') {
