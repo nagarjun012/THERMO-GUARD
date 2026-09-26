@@ -51,20 +51,20 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
           role="alertdialog"
           aria-modal="true"
           aria-labelledby="alert-dialog-title"
-          className={`pointer-events-auto relative w-full max-w-lg my-auto rounded-3xl p-5 sm:p-8 text-white shadow-2xl border-2 animate-fadeIn ${
+          className={`pointer-events-auto relative w-full max-w-lg my-auto rounded-3xl p-5 sm:p-8 shadow-2xl border-2 animate-fadeIn ${
             isExtreme
-              ? 'bg-slate-950 border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.4)]'
-              : 'bg-slate-950 border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.35)]'
+              ? 'bg-white border-red-500 shadow-[0_0_60px_rgba(239,68,68,0.25)]'
+              : 'bg-white border-amber-500 shadow-[0_0_60px_rgba(245,158,11,0.2)]'
           }`}
         >
           {/* HEADER: SEVERITY BADGE + AUDIO/CLOSE TOGGLE */}
           <div className="flex items-center justify-between gap-3 mb-5">
             <div className="flex items-center gap-2.5">
               <div
-                className={`p-2.5 rounded-2xl flex items-center justify-center shadow-lg ${
+                className={`p-2.5 rounded-2xl flex items-center justify-center shadow-md ${
                   isExtreme
-                    ? 'bg-red-500/20 text-red-400 border border-red-500/40'
-                    : 'bg-amber-500/20 text-amber-400 border border-amber-500/40'
+                    ? 'bg-red-100 text-red-600 border border-red-300'
+                    : 'bg-amber-100 text-amber-600 border border-amber-300'
                 }`}
               >
                 {isExtreme ? <ShieldAlert className="w-6 h-6" /> : <Flame className="w-6 h-6" />}
@@ -73,15 +73,15 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
               <div>
                 <span
                   className={`text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block mb-0.5 ${
-                    isExtreme ? 'bg-red-500 text-white' : 'bg-amber-500 text-slate-950'
+                    isExtreme ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'
                   }`}
                 >
                   {isExtreme ? 'CRITICAL EMERGENCY' : 'HIGH THERMAL STRESS'}
                 </span>
-                <div className="text-xs font-mono text-slate-300 flex items-center gap-1.5 font-semibold">
+                <div className="text-xs font-mono text-slate-600 flex items-center gap-1.5 font-semibold">
                   <span className="truncate max-w-[180px] sm:max-w-[240px]">{alert.locationName}</span>
                   <span>•</span>
-                  <span className="font-bold text-white">HTSS {alert.htss}/100</span>
+                  <span className="font-bold text-slate-900">HTSS {alert.htss}/100</span>
                 </div>
               </div>
             </div>
@@ -91,18 +91,18 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
               <button
                 type="button"
                 onClick={onToggleAudio}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
                 title={isAudioEnabled ? 'Mute alert chime' : 'Enable alert chime'}
                 aria-label={isAudioEnabled ? 'Mute alert chime' : 'Enable alert chime'}
               >
-                {isAudioEnabled ? <Volume2 className="w-4 h-4 text-emerald-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
+                {isAudioEnabled ? <Volume2 className="w-4 h-4 text-emerald-600" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
               </button>
 
               {/* Close Button */}
               <button
                 type="button"
                 onClick={onAcknowledge}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors cursor-pointer"
                 aria-label="Close alert"
               >
                 <X className="w-4 h-4" />
@@ -111,26 +111,26 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
           </div>
 
           {/* MAIN MESSAGE */}
-          <h2 id="alert-dialog-title" className="text-xl sm:text-2xl font-black font-mono tracking-tight text-white mb-2 leading-snug">
+          <h2 id="alert-dialog-title" className="text-xl sm:text-2xl font-black font-mono tracking-tight text-slate-950 mb-2 leading-snug">
             {alert.title}
           </h2>
 
-          <p className="text-sm text-slate-300 leading-relaxed mb-5 font-medium">
+          <p className="text-sm text-slate-700 leading-relaxed mb-5 font-medium">
             {alert.message}
           </p>
 
           {/* CRITICAL ACTIONS CHECKLIST */}
-          <div className="rounded-2xl bg-white/5 border border-white/10 p-4 mb-5 space-y-2.5">
-            <h3 className="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-blue-400" />
+          <div className="rounded-2xl bg-slate-50 border border-slate-200 p-4 mb-5 space-y-2.5">
+            <h3 className="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
               <span>Immediate Life-Safety Protocols:</span>
             </h3>
-            <ul className="space-y-2 text-xs text-slate-200">
+            <ul className="space-y-2 text-xs text-slate-800">
               {alert.actions.map((act, idx) => (
                 <li key={idx} className="flex items-start gap-2 leading-relaxed">
                   <span
                     className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${
-                      isExtreme ? 'bg-red-400' : 'bg-amber-400'
+                      isExtreme ? 'bg-red-500' : 'bg-amber-500'
                     }`}
                   />
                   <span>{act}</span>
@@ -143,14 +143,14 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
           <div className="grid grid-cols-2 gap-3 mb-5">
             <a
               href="tel:108"
-              className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-red-600/90 hover:bg-red-600 font-mono text-xs font-black text-white transition-all shadow-md active:scale-98"
+              className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-red-600 hover:bg-red-700 font-mono text-xs font-black text-white transition-all shadow-md active:scale-98"
             >
               <Phone className="w-4 h-4" />
               <span>DIAL 108 (AMBULANCE)</span>
             </a>
             <a
               href="tel:112"
-              className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 font-mono text-xs font-black text-white transition-all shadow-md active:scale-98 border border-white/10"
+              className="flex items-center justify-center gap-2 py-3 px-3 rounded-2xl bg-slate-800 hover:bg-slate-700 font-mono text-xs font-black text-white transition-all shadow-md active:scale-98"
             >
               <Phone className="w-4 h-4" />
               <span>DIAL 112 (DISASTER)</span>
@@ -159,15 +159,15 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
 
           {/* PERMISSION REQUEST BANNER IF NOT GRANTED */}
           {permission === 'default' && (
-            <div className="mb-4 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-between gap-2 text-xs">
-              <div className="flex items-center gap-2 text-blue-300">
-                <Bell className="w-4 h-4 text-blue-400 shrink-0" />
+            <div className="mb-4 p-3 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between gap-2 text-xs">
+              <div className="flex items-center gap-2 text-blue-800">
+                <Bell className="w-4 h-4 text-blue-600 shrink-0" />
                 <span>Enable OS push alerts for life-critical notifications</span>
               </div>
               <button
                 type="button"
                 onClick={onRequestPermission}
-                className="px-3 py-1 bg-blue-500 hover:bg-blue-400 text-slate-950 font-bold rounded-lg text-[10px] uppercase font-mono tracking-wider cursor-pointer flex-shrink-0"
+                className="px-3 py-1 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-lg text-[10px] uppercase font-mono tracking-wider cursor-pointer flex-shrink-0"
               >
                 ENABLE
               </button>
@@ -178,10 +178,10 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
           <button
             type="button"
             onClick={onAcknowledge}
-            className={`w-full py-3.5 px-6 rounded-2xl font-mono text-sm font-black tracking-wider text-slate-950 transition-all cursor-pointer shadow-lg active:scale-98 ${
+            className={`w-full py-3.5 px-6 rounded-2xl font-mono text-sm font-black tracking-wider text-white transition-all cursor-pointer shadow-lg active:scale-98 ${
               isExtreme
-                ? 'bg-gradient-to-r from-red-400 to-amber-400 hover:from-red-300 hover:to-amber-300'
-                : 'bg-gradient-to-r from-amber-400 to-yellow-300 hover:from-amber-300 hover:to-yellow-200'
+                ? 'bg-gradient-to-r from-red-600 to-red-500 hover:from-red-500 hover:to-red-400'
+                : 'bg-gradient-to-r from-amber-500 to-amber-400 hover:from-amber-400 hover:to-amber-300'
             }`}
           >
             I UNDERSTAND &amp; ACKNOWLEDGE (SNOOZE 30 MIN)
