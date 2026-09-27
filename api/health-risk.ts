@@ -199,7 +199,7 @@ async function fetchOpenMeteoDaily(lat: number, lon: number): Promise<{ data: an
         const res = await fetch(candidate.url, { signal: controller.signal });
         clearTimeout(timeoutId);
         if (res.ok) {
-          const json = await res.json();
+          const json = (await res.json()) as any;
           if (json?.daily?.time && Array.isArray(json.daily.time) && json.daily.time.length >= 5) {
             return { data: json, source: candidate.source };
           }
