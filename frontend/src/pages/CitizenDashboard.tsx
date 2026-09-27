@@ -441,7 +441,7 @@ export const CitizenDashboard: React.FC = () => {
           </div>
 
           {/* CONTROLS & REAL-TIME BADGE */}
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
             <button
               onClick={requestFreshLocation}
               disabled={isLocating}

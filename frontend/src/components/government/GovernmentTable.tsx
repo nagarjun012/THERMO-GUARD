@@ -78,44 +78,45 @@ export const GovernmentTable: React.FC<Props> = () => {
     <div className="neu-card overflow-hidden shadow-2xl border border-slate-200/80 bg-white/95">
       {/* HEADER BAR & CONTROLS WITH GLASS SPECULAR RIM */}
       <div className="glass-specular p-4 sm:p-5 border-b border-slate-200 bg-[#F8FAFC] space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-xl neu-well text-emerald-600">
-              <Radio className="w-5 h-5" />
+        <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4">
+          <div className="flex items-start sm:items-center gap-2.5 sm:gap-3">
+            <div className="p-2 sm:p-2.5 rounded-xl neu-well text-emerald-600 shrink-0 mt-0.5 sm:mt-0">
+              <Radio className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2.5">
-                <h3 className="text-base sm:text-lg font-black text-slate-950 tracking-tight font-mono">
+              <div className="flex flex-wrap items-center gap-2">
+                <h3 className="text-sm sm:text-base md:text-lg font-black text-slate-950 tracking-tight font-mono">
                   All-India Real-Time Thermal Heat Rankings
                 </h3>
-                <span className="skeuo-pill px-3 py-0.5 text-[11px] font-mono font-bold flex items-center gap-1.5 text-emerald-800 border border-emerald-300 bg-emerald-100">
+                <span className="skeuo-pill px-2.5 sm:px-3 py-0.5 text-[10px] sm:text-[11px] font-mono font-bold flex items-center gap-1.5 text-emerald-800 border border-emerald-300 bg-emerald-100">
                   {isLoading || isRefreshing ? (
                     <>
                       <RefreshCw className="w-3 h-3 animate-spin text-emerald-600" />
-                      FETCHING TELEMETRY ({progress.loaded}/{progress.total})
+                      FETCHING ({progress.loaded}/{progress.total})
                     </>
                   ) : (
                     <>
                       <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                      100% REAL-TIME OPEN-METEO TELEMETRY — {counters.successfulCount}/{counters.totalDistricts} DISTRICTS SYNCED
+                      <span className="hidden md:inline">100% REAL-TIME OPEN-METEO TELEMETRY — </span>
+                      <span>{counters.successfulCount}/{counters.totalDistricts} DISTRICTS SYNCED</span>
                     </>
                   )}
                 </span>
               </div>
-              <p className="text-xs text-slate-600 font-semibold mt-1 flex flex-wrap items-center gap-2">
-                <span>Stull &amp; Liljegren physical thermodynamic HTSS calculations from live Open-Meteo weather</span>
-                <span className="text-slate-400">•</span>
+              <p className="text-[11px] sm:text-xs text-slate-600 font-semibold mt-1 flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <span>Stull &amp; Liljegren physical thermodynamic calculations from live Open-Meteo</span>
+                <span className="text-slate-400 hidden sm:inline">•</span>
                 <span className="text-orange-700 font-mono font-black">Last Updated: {lastUpdated}</span>
               </p>
             </div>
           </div>
 
           {/* SKEUOMORPHIC ACTIONS & RECESSED SEARCH */}
-          <div className="flex flex-wrap items-center gap-2.5">
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
             <button
               onClick={() => refreshData(true)}
               disabled={isLoading || isRefreshing}
-              className="skeuo-btn skeuo-btn-amber btn-shimmer px-3.5 py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 disabled:opacity-50"
+              className="skeuo-btn skeuo-btn-amber btn-shimmer px-3 py-1.5 sm:px-3.5 sm:py-2 text-xs font-bold rounded-xl flex items-center gap-1.5 disabled:opacity-50 flex-1 sm:flex-initial justify-center"
               title="Re-query Open-Meteo REST API for all 788 districts"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
@@ -126,7 +127,7 @@ export const GovernmentTable: React.FC<Props> = () => {
             <div className="neu-well p-1 rounded-xl flex items-center gap-1">
               <button
                 onClick={() => setActiveViewMode('districts')}
-                className={`skeuo-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                className={`skeuo-btn px-2.5 sm:px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1 sm:gap-1.5 ${
                   activeViewMode === 'districts'
                     ? 'skeuo-btn-primary shadow-md'
                     : 'text-slate-700 hover:text-slate-950 font-extrabold'
@@ -137,7 +138,7 @@ export const GovernmentTable: React.FC<Props> = () => {
               </button>
               <button
                 onClick={() => setActiveViewMode('states')}
-                className={`skeuo-btn px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1.5 ${
+                className={`skeuo-btn px-2.5 sm:px-3 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-1 sm:gap-1.5 ${
                   activeViewMode === 'states'
                     ? 'skeuo-btn-primary shadow-md'
                     : 'text-slate-700 hover:text-slate-950 font-extrabold'
@@ -149,7 +150,7 @@ export const GovernmentTable: React.FC<Props> = () => {
             </div>
 
             {/* SUNKEN SEARCH WELL */}
-            <div className="neu-well px-3 py-1.5 flex items-center min-w-[210px] sm:min-w-[240px] focus-within:ring-2 focus-within:ring-blue-500/50 transition-all bg-white border border-slate-300 rounded-xl">
+            <div className="neu-well px-3 py-1.5 flex items-center flex-1 min-w-[200px] focus-within:ring-2 focus-within:ring-blue-500/50 transition-all bg-white border border-slate-300 rounded-xl">
               <Search className="w-3.5 h-3.5 text-slate-500 shrink-0 mr-2" />
               <input
                 type="text"
@@ -163,17 +164,17 @@ export const GovernmentTable: React.FC<Props> = () => {
         </div>
 
         {/* ORDERED RISK CATEGORY TABS & STATE SELECTOR */}
-        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-white/5 text-xs">
+        <div className="flex flex-wrap items-center justify-between gap-2.5 pt-2 border-t border-slate-200 text-xs">
           <div className="flex flex-wrap items-center gap-1.5">
             <button
               onClick={() => {
                 setSelectedRiskCategory('ALL');
                 setSelectedStateFilter('ALL');
               }}
-              className={`skeuo-btn px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all ${
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all border ${
                 selectedRiskCategory === 'ALL' && selectedStateFilter === 'ALL'
-                  ? 'skeuo-btn-primary'
-                  : 'skeuo-btn-dark'
+                  ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                  : 'bg-white text-slate-700 border-slate-300 hover:bg-slate-50'
               }`}
             >
               ALL LOCATIONS ({counters.totalDistricts})
@@ -181,59 +182,59 @@ export const GovernmentTable: React.FC<Props> = () => {
 
             <button
               onClick={() => setSelectedRiskCategory('EXTREME')}
-              className={`skeuo-btn px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 border ${
                 selectedRiskCategory === 'EXTREME'
-                  ? 'skeuo-btn-danger'
-                  : 'neu-plate text-red-400 hover:border-red-500/50'
+                  ? 'bg-red-600 text-white border-red-600 shadow-xs'
+                  : 'bg-red-50 text-red-800 border-red-200 hover:bg-red-100'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-red-400 animate-ping" />
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
               EXTREME ({counters.extremeCount})
             </button>
 
             <button
               onClick={() => setSelectedRiskCategory('HIGH')}
-              className={`skeuo-btn px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 border ${
                 selectedRiskCategory === 'HIGH'
-                  ? 'skeuo-btn-amber'
-                  : 'neu-plate text-orange-400 hover:border-orange-500/50'
+                  ? 'bg-orange-500 text-white border-orange-500 shadow-xs'
+                  : 'bg-orange-50 text-orange-800 border-orange-200 hover:bg-orange-100'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-orange-400" />
+              <span className="w-2 h-2 rounded-full bg-orange-500" />
               HIGH ({counters.highCount})
             </button>
 
             <button
               onClick={() => setSelectedRiskCategory('MODERATE')}
-              className={`skeuo-btn px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 border ${
                 selectedRiskCategory === 'MODERATE'
-                  ? 'skeuo-btn-amber'
-                  : 'neu-plate text-yellow-400 hover:border-yellow-500/50'
+                  ? 'bg-amber-400 text-slate-950 font-black border-amber-400 shadow-xs'
+                  : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-yellow-400" />
+              <span className="w-2 h-2 rounded-full bg-amber-500" />
               MODERATE ({counters.moderateCount})
             </button>
 
             <button
               onClick={() => setSelectedRiskCategory('LOW')}
-              className={`skeuo-btn px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 ${
+              className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 border ${
                 selectedRiskCategory === 'LOW'
-                  ? 'skeuo-btn-emerald'
-                  : 'neu-plate text-emerald-400 hover:border-emerald-500/50'
+                  ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                  : 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100'
               }`}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span className="w-2 h-2 rounded-full bg-emerald-500" />
               LOW ({counters.lowCount})
             </button>
 
             {counters.failedCount > 0 && (
               <button
                 onClick={() => setSelectedRiskCategory('DATA UNAVAILABLE')}
-                className={`skeuo-btn px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 ${
+                className={`px-3 py-1.5 text-[11px] font-bold rounded-xl transition-all flex items-center gap-1.5 border ${
                   selectedRiskCategory === 'DATA UNAVAILABLE'
-                    ? 'skeuo-btn-dark border-gray-400 text-white'
-                    : 'neu-plate text-gray-400'
+                    ? 'bg-slate-700 text-white border-slate-700 shadow-xs'
+                    : 'bg-slate-100 text-slate-600 border-slate-200 hover:bg-slate-200'
                 }`}
               >
                 UNAVAILABLE ({counters.failedCount})
@@ -241,20 +242,20 @@ export const GovernmentTable: React.FC<Props> = () => {
             )}
           </div>
 
-          {/* STATE FILTER DROPDOWN & LIVE SYNC BUTTON */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-gray-400 font-medium hidden sm:inline font-mono text-[11px]">
+          {/* STATE FILTER DROPDOWN & LIVE SYNC BUTTON (ACCESSIBLE LIGHT THEME CONTRAST) */}
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <span className="text-slate-600 font-bold hidden sm:inline font-mono text-[11px]">
               State Filter:
             </span>
-            <div className="neu-well px-2 py-0.5 rounded-xl">
+            <div className="flex-1 sm:flex-initial">
               <select
                 value={selectedStateFilter}
                 onChange={(e) => setSelectedStateFilter(e.target.value)}
-                className="bg-transparent text-white font-semibold text-xs py-1 px-1 focus:outline-none cursor-pointer max-w-[190px] font-mono"
+                className="w-full sm:w-auto bg-white text-slate-950 font-semibold text-xs py-1.5 px-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/40 cursor-pointer max-w-full sm:max-w-[220px] font-mono shadow-2xs"
               >
-                <option value="ALL" className="bg-dark-900 text-white">All States &amp; UTs ({states.length})</option>
+                <option value="ALL" className="bg-white text-slate-950">All States &amp; UTs ({states.length})</option>
                 {states.map((st) => (
-                  <option key={st.name} value={st.name} className="bg-dark-900 text-white">
+                  <option key={st.name} value={st.name} className="bg-white text-slate-950">
                     {st.name} ({st.avgHtss !== null ? `Avg ${st.avgHtss}` : 'Unavailable'})
                   </option>
                 ))}
@@ -280,16 +281,21 @@ export const GovernmentTable: React.FC<Props> = () => {
       {/* 1. STATE-LEVEL HTSS RANKINGS TABLE                                   */}
       {/* ===================================================================== */}
       {activeViewMode === 'states' ? (
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-blue-200 bg-[#DBEAFE] text-[11px] font-black uppercase text-blue-950 tracking-wider font-mono">
-                <th className="py-3.5 px-4 w-16">Rank</th>
-                <th className="py-3.5 px-4">State / Union Territory</th>
-                <th className="py-3.5 px-4 text-center">Districts Valid</th>
-                <th className="py-3.5 px-4 text-center">Calculated Avg HTSS</th>
-                <th className="py-3.5 px-4 text-center">Peak District HTSS</th>
-                <th className="py-3.5 px-4 text-center">State Risk Category</th>
+        <div className="overflow-x-auto relative -webkit-overflow-scrolling-touch">
+          {/* Mobile Swipe Hint */}
+          <div className="md:hidden px-3.5 py-1.5 bg-blue-50/90 border-b border-blue-100 flex items-center justify-between text-[11px] text-blue-900 font-semibold font-mono">
+            <span>Swipe horizontally to view all parameters</span>
+            <span className="text-blue-600 font-bold">⇄</span>
+          </div>
+          <table className="w-full text-left border-collapse min-w-[700px]">
+            <thead className="sticky top-0 z-10 shadow-xs backdrop-blur-md">
+              <tr className="border-b border-blue-200 bg-[#DBEAFE]/95 text-[11px] font-black uppercase text-blue-950 tracking-wider font-mono">
+                <th className="py-3.5 px-3 sm:px-4 w-16 whitespace-nowrap">Rank</th>
+                <th className="py-3.5 px-3 sm:px-4 min-w-[180px] whitespace-nowrap">State / Union Territory</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">Districts Valid</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">Calculated Avg HTSS</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">Peak District HTSS</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">State Risk Category</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-xs font-mono">
@@ -307,25 +313,25 @@ export const GovernmentTable: React.FC<Props> = () => {
 
                 return (
                   <tr key={st.name} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3.5 px-4 font-black text-slate-800">#{st.rank}</td>
-                    <td className="py-3.5 px-4">
+                    <td className="py-3.5 px-3 sm:px-4 font-black text-slate-800 whitespace-nowrap">#{st.rank}</td>
+                    <td className="py-3.5 px-3 sm:px-4">
                       <div className="font-extrabold text-slate-950 text-sm font-sans">{st.name}</div>
                       <div className="text-[10px] text-slate-600 font-mono font-semibold">{st.type}</div>
                     </td>
-                    <td className="py-3.5 px-4 text-center font-bold text-slate-800">
+                    <td className="py-3.5 px-3 sm:px-4 text-center font-bold text-slate-800 whitespace-nowrap">
                       {st.validDistrictsCount} / {st.districtsCount}
                     </td>
-                    <td className="py-3.5 px-4 text-center font-black text-base">
+                    <td className="py-3.5 px-3 sm:px-4 text-center font-black text-base whitespace-nowrap">
                       {st.avgHtss !== null ? (
                         <span style={{ color }}>{st.avgHtss} / 100</span>
                       ) : (
                         <span className="text-slate-500 font-normal italic">Unavailable</span>
                       )}
                     </td>
-                    <td className="py-3.5 px-4 text-center font-bold text-slate-900">
+                    <td className="py-3.5 px-3 sm:px-4 text-center font-bold text-slate-900 whitespace-nowrap">
                       {st.maxHtss !== null ? `${st.maxHtss} / 100` : '—'}
                     </td>
-                    <td className="py-3.5 px-4 text-center">
+                    <td className="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">
                       <span
                         className="skeuo-pill inline-block px-3 py-0.5 text-[10px] font-black uppercase tracking-wider border shadow-sm"
                         style={{
@@ -347,18 +353,23 @@ export const GovernmentTable: React.FC<Props> = () => {
         /* ===================================================================== */
         /* 2. DISTRICT-LEVEL REAL HTSS RANKINGS TABLE                          */
         /* ===================================================================== */
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="border-b border-blue-200 bg-[#DBEAFE] text-[11px] font-black uppercase text-blue-950 tracking-wider font-mono">
-                <th className="py-3.5 px-4 w-16">Rank</th>
-                <th className="py-3.5 px-4 min-w-[200px]">District &amp; State</th>
-                <th className="py-3.5 px-4 text-center min-w-[120px]">Calculated Real HTSS</th>
-                <th className="py-3.5 px-4 text-center min-w-[110px]">Risk Category</th>
-                <th className="py-3.5 px-4 text-center min-w-[100px]">Live Air Temp</th>
-                <th className="py-3.5 px-4 text-center min-w-[100px]">Outdoor WBGT</th>
-                <th className="py-3.5 px-4 text-center min-w-[100px]">UTCI Index</th>
-                <th className="py-3.5 px-4 text-center min-w-[120px]">Inspect Math</th>
+        <div className="overflow-x-auto relative -webkit-overflow-scrolling-touch">
+          {/* Mobile Swipe Hint */}
+          <div className="md:hidden px-3.5 py-1.5 bg-blue-50/90 border-b border-blue-100 flex items-center justify-between text-[11px] text-blue-900 font-semibold font-mono">
+            <span>Swipe horizontally to view all parameters</span>
+            <span className="text-blue-600 font-bold">⇄</span>
+          </div>
+          <table className="w-full text-left border-collapse min-w-[840px]">
+            <thead className="sticky top-0 z-10 shadow-xs backdrop-blur-md">
+              <tr className="border-b border-blue-200 bg-[#DBEAFE]/95 text-[11px] font-black uppercase text-blue-950 tracking-wider font-mono">
+                <th className="py-3.5 px-3 sm:px-4 w-16 whitespace-nowrap">Rank</th>
+                <th className="py-3.5 px-3 sm:px-4 min-w-[180px] sm:min-w-[210px] whitespace-nowrap">District &amp; State</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center min-w-[110px] whitespace-nowrap">Calculated Real HTSS</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center min-w-[110px] whitespace-nowrap">Risk Category</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center min-w-[95px] whitespace-nowrap">Live Air Temp</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center min-w-[95px] whitespace-nowrap">Outdoor WBGT</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center min-w-[95px] whitespace-nowrap">UTCI Index</th>
+                <th className="py-3.5 px-3 sm:px-4 text-center min-w-[110px] whitespace-nowrap">Inspect Math</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-200 text-xs font-mono">
@@ -390,6 +401,8 @@ export const GovernmentTable: React.FC<Props> = () => {
                       ? '#10b981'
                       : '#6b7280';
 
+                  const fmtNum = (v: number | null | undefined) => (typeof v === 'number' ? Math.round(v * 10) / 10 : v ?? '—');
+
                   return (
                     <tr
                       key={loc.id}
@@ -400,16 +413,16 @@ export const GovernmentTable: React.FC<Props> = () => {
                       className="hover:bg-slate-50 transition-colors cursor-pointer group"
                     >
                       {/* RANK */}
-                      <td className="py-3.5 px-4 font-black text-slate-800">
+                      <td className="py-3.5 px-3 sm:px-4 font-black text-slate-800 whitespace-nowrap">
                         {loc.rank !== null ? `#${loc.rank}` : <span className="text-red-600 font-bold text-xs">N/A</span>}
                       </td>
 
                       {/* DISTRICT & STATE */}
-                      <td className="py-3.5 px-4 font-sans">
+                      <td className="py-3.5 px-3 sm:px-4 font-sans">
                         <div className="font-extrabold text-slate-950 text-sm group-hover:text-blue-700 transition-colors">
                           {loc.district}
                         </div>
-                        <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1.5 mt-0.5">
+                        <div className="text-[11px] text-slate-600 font-medium flex items-center gap-1.5 mt-0.5 whitespace-nowrap">
                           <span className="text-blue-700 font-bold">{loc.state}</span>
                           <span>•</span>
                           <span className="font-mono text-slate-600 text-[10px]">
@@ -419,7 +432,7 @@ export const GovernmentTable: React.FC<Props> = () => {
                       </td>
 
                       {/* CALCULATED REAL HTSS */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">
                         {isFailed ? (
                           <span className="text-red-600 font-bold italic text-xs">Unavailable</span>
                         ) : (
@@ -431,7 +444,7 @@ export const GovernmentTable: React.FC<Props> = () => {
                       </td>
 
                       {/* RISK CATEGORY BADGE */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">
                         <span
                           className="skeuo-pill inline-block px-3 py-0.5 text-[10px] font-black uppercase tracking-wider border shadow-sm"
                           style={{
@@ -445,29 +458,29 @@ export const GovernmentTable: React.FC<Props> = () => {
                       </td>
 
                       {/* LIVE AIR TEMP */}
-                      <td className="py-3.5 px-4 text-center font-bold text-slate-900">
-                        {loc.temperature !== null ? `${loc.temperature}°C` : <span className="text-slate-500 font-normal italic">Unavailable</span>}
+                      <td className="py-3.5 px-3 sm:px-4 text-center font-bold text-slate-900 whitespace-nowrap">
+                        {loc.temperature !== null ? `${fmtNum(loc.temperature)}°C` : <span className="text-slate-500 font-normal italic">Unavailable</span>}
                       </td>
 
                       {/* OUTDOOR WBGT */}
-                      <td className="py-3.5 px-4 text-center font-bold text-purple-900">
-                        {loc.wbgt !== null ? `${loc.wbgt}°C` : <span className="text-slate-500 font-normal italic">Unavailable</span>}
+                      <td className="py-3.5 px-3 sm:px-4 text-center font-bold text-purple-900 whitespace-nowrap">
+                        {loc.wbgt !== null ? `${fmtNum(loc.wbgt)}°C` : <span className="text-slate-500 font-normal italic">Unavailable</span>}
                       </td>
 
                       {/* UTCI INDEX */}
-                      <td className="py-3.5 px-4 text-center font-bold text-blue-900">
-                        {loc.utci !== null ? `${loc.utci}°C` : <span className="text-slate-500 font-normal italic">Unavailable</span>}
+                      <td className="py-3.5 px-3 sm:px-4 text-center font-bold text-blue-900 whitespace-nowrap">
+                        {loc.utci !== null ? `${fmtNum(loc.utci)}°C` : <span className="text-slate-500 font-normal italic">Unavailable</span>}
                       </td>
 
                       {/* INSPECT MATH BUTTON */}
-                      <td className="py-3.5 px-4 text-center">
+                      <td className="py-3.5 px-3 sm:px-4 text-center whitespace-nowrap">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
                             setIndiaLocation(loc.state, loc.district, loc.lat, loc.lon, true, 'LIVE', undefined, false, true);
                             inspectDistrict(loc);
                           }}
-                          className="skeuo-btn px-2.5 py-1 rounded-lg text-[11px] font-mono font-bold transition flex items-center gap-1 mx-auto bg-white border border-slate-300 text-slate-800 hover:border-blue-500 hover:text-blue-700 shadow-xs"
+                          className="skeuo-btn px-2.5 py-1.5 rounded-lg text-[11px] font-mono font-bold transition flex items-center gap-1 mx-auto bg-white border border-slate-300 text-slate-800 hover:border-blue-500 hover:text-blue-700 shadow-xs cursor-pointer active:scale-95"
                         >
                           <Cpu className="w-3 h-3 text-blue-600" /> Inspect
                         </button>

@@ -22,6 +22,7 @@ export const DataIntegrityInspector: React.FC<Props> = ({ district, isOpen, onCl
 
   if (!isOpen || !currentDistrict) return null;
 
+  const fmt = (v: number | null | undefined) => (typeof v === 'number' ? Math.round(v * 10) / 10 : v ?? '—');
   const isFailed = currentDistrict.status === 'FAILED' || currentDistrict.htss === null;
 
   const handleVerifyLive = async () => {
@@ -40,7 +41,7 @@ export const DataIntegrityInspector: React.FC<Props> = ({ district, isOpen, onCl
 
   const modalContent = (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/40 backdrop-blur-md animate-fadeIn overflow-y-auto">
-      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl space-y-3.5 sm:space-y-4 bg-white text-slate-900 border border-slate-200 my-auto">
+      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto overflow-x-hidden rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl space-y-3.5 sm:space-y-4 bg-white text-slate-900 border border-slate-200 my-auto">
         {/* HEADER */}
         <div className="flex items-start justify-between border-b border-slate-200 pb-3 gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
@@ -123,19 +124,19 @@ export const DataIntegrityInspector: React.FC<Props> = ({ district, isOpen, onCl
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 text-xs font-mono">
                 <div className="p-2 sm:p-3 rounded-xl bg-[#EDF5FD] border border-blue-100">
                   <span className="text-[9px] sm:text-[10px] text-slate-600 block uppercase font-bold">Air Temp (2m)</span>
-                  <span className="text-base sm:text-lg font-black text-slate-950">{currentDistrict.temperature}°C</span>
+                  <span className="text-base sm:text-lg font-black text-slate-950">{fmt(currentDistrict.temperature)}°C</span>
                 </div>
                 <div className="p-2 sm:p-3 rounded-xl bg-[#EDF5FD] border border-blue-100">
                   <span className="text-[9px] sm:text-[10px] text-slate-600 block uppercase font-bold">Humidity</span>
-                  <span className="text-base sm:text-lg font-black text-blue-700">{currentDistrict.humidity}%</span>
+                  <span className="text-base sm:text-lg font-black text-blue-700">{fmt(currentDistrict.humidity)}%</span>
                 </div>
                 <div className="p-2 sm:p-3 rounded-xl bg-[#EDF5FD] border border-blue-100">
                   <span className="text-[9px] sm:text-[10px] text-slate-600 block uppercase font-bold">Wind (10m)</span>
-                  <span className="text-base sm:text-lg font-black text-teal-700">{currentDistrict.windSpeed} km/h</span>
+                  <span className="text-base sm:text-lg font-black text-teal-700">{fmt(currentDistrict.windSpeed)} km/h</span>
                 </div>
                 <div className="p-2 sm:p-3 rounded-xl bg-[#EDF5FD] border border-blue-100">
                   <span className="text-[9px] sm:text-[10px] text-slate-600 block uppercase font-bold">Solar Rad</span>
-                  <span className="text-base sm:text-lg font-black text-amber-700">{currentDistrict.solarRadiation} W/m²</span>
+                  <span className="text-base sm:text-lg font-black text-amber-700">{fmt(currentDistrict.solarRadiation)} W/m²</span>
                 </div>
               </div>
             </div>
@@ -156,21 +157,21 @@ export const DataIntegrityInspector: React.FC<Props> = ({ district, isOpen, onCl
                 <div className="p-2 sm:p-3 rounded-xl bg-[#EDF5FD] border border-blue-100 flex sm:flex-col justify-between items-center sm:items-start">
                   <div>
                     <span className="text-[9px] sm:text-[10px] text-slate-600 block uppercase font-bold">Wet Bulb (Twb)</span>
-                    <span className="text-sm sm:text-base font-black text-blue-800">{currentDistrict.twb}°C</span>
+                    <span className="text-sm sm:text-base font-black text-blue-800">{fmt(currentDistrict.twb)}°C</span>
                   </div>
                   <span className="text-[9px] text-slate-500 font-sans font-medium block sm:mt-1">Stull (2011) Empirical</span>
                 </div>
                 <div className="p-2 sm:p-3 rounded-xl bg-[#EDF5FD] border border-blue-100 flex sm:flex-col justify-between items-center sm:items-start">
                   <div>
                     <span className="text-[9px] sm:text-[10px] text-slate-600 block uppercase font-bold">Outdoor WBGT</span>
-                    <span className="text-sm sm:text-base font-black text-purple-900">{currentDistrict.wbgt}°C</span>
+                    <span className="text-sm sm:text-base font-black text-purple-900">{fmt(currentDistrict.wbgt)}°C</span>
                   </div>
                   <span className="text-[9px] text-slate-500 font-sans font-medium block sm:mt-1">Liljegren Model</span>
                 </div>
                 <div className="p-2 sm:p-3 rounded-xl bg-[#EDF5FD] border border-blue-100 flex sm:flex-col justify-between items-center sm:items-start">
                   <div>
                     <span className="text-[9px] sm:text-[10px] text-slate-600 block uppercase font-bold">UTCI Index</span>
-                    <span className="text-sm sm:text-base font-black text-orange-900">{currentDistrict.utci}°C</span>
+                    <span className="text-sm sm:text-base font-black text-orange-900">{fmt(currentDistrict.utci)}°C</span>
                   </div>
                   <span className="text-[9px] text-slate-500 font-sans font-medium block sm:mt-1">Universal Climate</span>
                 </div>

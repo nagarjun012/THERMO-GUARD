@@ -93,7 +93,7 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
                 {isExtreme ? <ShieldAlert className="w-6 h-6" /> : <Flame className="w-6 h-6" />}
               </div>
 
-              <div>
+              <div className="min-w-0 flex-1">
                 <span
                   className={`text-[10px] font-mono font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full inline-block mb-0.5 ${
                     isExtreme ? 'bg-red-600 text-white' : 'bg-amber-500 text-white'
@@ -101,10 +101,10 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
                 >
                   {isExtreme ? 'CRITICAL EMERGENCY' : 'HIGH THERMAL STRESS'}
                 </span>
-                <div className="text-xs font-mono text-slate-600 flex items-center gap-1.5 font-semibold">
-                  <span className="truncate max-w-[180px] sm:max-w-[240px]">{alert.locationName}</span>
-                  <span>•</span>
-                  <span className="font-bold text-slate-900">HTSS {alert.htss}/100</span>
+                <div className="text-xs font-mono text-slate-600 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 font-semibold">
+                  <span className="font-bold text-slate-900 break-words">{alert.locationName}</span>
+                  <span className="text-slate-400">•</span>
+                  <span className="font-bold text-red-600 whitespace-nowrap">HTSS {alert.htss}/100</span>
                 </div>
               </div>
             </div>

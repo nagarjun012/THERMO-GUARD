@@ -15,11 +15,11 @@ export const PrivacyPolicyModal: React.FC = () => {
       aria-labelledby="privacy-modal-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md animate-fade-in"
     >
-      <div className="relative w-full max-w-2xl max-h-[85vh] overflow-y-auto bg-white border border-blue-200/90 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-800 space-y-6">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white border border-blue-200/90 rounded-3xl p-4 sm:p-6 md:p-8 shadow-2xl text-slate-800 space-y-5 sm:space-y-6">
         {/* Header */}
         <div className="flex items-start justify-between border-b border-slate-200 pb-4">
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600">
+            <div className="p-2.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-600 shrink-0">
               <Lock className="w-6 h-6" />
             </div>
             <div>
@@ -33,7 +33,7 @@ export const PrivacyPolicyModal: React.FC = () => {
           </div>
           <button
             onClick={() => setActiveOfficialModal(null)}
-            className="p-2 rounded-xl text-slate-500 hover:text-black hover:bg-slate-100 transition-colors cursor-pointer border border-slate-200"
+            className="p-2 rounded-xl text-slate-500 hover:text-black hover:bg-slate-100 transition-colors cursor-pointer border border-slate-200 shrink-0"
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />

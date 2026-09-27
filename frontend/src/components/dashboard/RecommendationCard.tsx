@@ -43,7 +43,7 @@ interface Props {
 
 export const RecommendationCard: React.FC<Props> = ({ risk }) => {
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 h-full flex flex-col border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.07)]">
+    <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-4 sm:p-6 h-full flex flex-col border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.07)]">
       <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
         <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-2">
           <ShieldCheck className="w-4 h-4 text-emerald-600" />
@@ -80,7 +80,7 @@ export const RecommendationCard: React.FC<Props> = ({ risk }) => {
                 <span className="inline-block text-[10px] font-bold text-slate-600 uppercase tracking-wider px-2 py-0.5 mb-1 bg-white rounded-md border border-slate-200/50">
                   {rec.audience}
                 </span>
-                <p className="text-xs text-slate-700 leading-relaxed font-medium">{rec.text}</p>
+                <p className="text-xs text-slate-700 leading-relaxed font-medium break-words">{rec.text}</p>
               </div>
             </div>
           );

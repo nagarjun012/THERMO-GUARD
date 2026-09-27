@@ -349,7 +349,7 @@ export const HeatHealthPredictionPanel: React.FC<Props> = ({ lat, lon, locationN
       {/* HUMAN-IN-THE-LOOP & EPIDEMIOLOGICAL GOVERNANCE NOTICE */}
       <div className="p-4 sm:p-5 rounded-2xl bg-blue-50/80 border border-blue-200 text-xs text-blue-900 flex items-start gap-3 shadow-2xs">
         <Info className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
-        <div className="space-y-2 leading-relaxed">
+        <div className="space-y-2 leading-relaxed min-w-0 flex-1">
           <p className="font-black text-blue-950 text-sm">
             Decision-Support &amp; Governance Protocol (Non-Autonomous Interventions)
           </p>
@@ -359,7 +359,7 @@ export const HeatHealthPredictionPanel: React.FC<Props> = ({ lat, lon, locationN
           </p>
           <div className="pt-1 flex flex-wrap items-center gap-2 text-xs text-blue-800">
             <span className="font-bold">Status:</span>
-            <span className="px-2.5 py-0.5 rounded-lg bg-white border border-blue-200 font-mono text-[11px] font-bold text-blue-900 shadow-2xs">
+            <span className="px-2.5 py-0.5 rounded-lg bg-white border border-blue-200 font-mono text-[11px] font-bold text-blue-900 shadow-2xs break-all sm:break-normal max-w-full">
               {forecast.health_outcome_status}
             </span>
             <span className="text-slate-600 text-xs">
@@ -372,7 +372,7 @@ export const HeatHealthPredictionPanel: React.FC<Props> = ({ lat, lon, locationN
       {/* BENCHMARK TRANSPARENCY MODAL */}
       {showBenchmarkModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 space-y-5 shadow-2xl">
+          <div className="max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 p-4 sm:p-6 md:p-7 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>
                 <h3 className="text-base font-extrabold text-slate-900 flex items-center gap-2">

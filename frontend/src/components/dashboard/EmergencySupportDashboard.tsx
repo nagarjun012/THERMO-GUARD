@@ -73,11 +73,11 @@ export const EmergencySupportDashboard: React.FC = () => {
   const ambulanceAvailableCount = hospitals.filter(h => h.ambulanceAvailable).length;
 
   return (
-    <div className="w-full bg-white rounded-3xl p-6 sm:p-7 border border-blue-200/90 shadow-lg text-slate-800 my-6">
+    <div className="w-full bg-white rounded-3xl p-4 sm:p-6 md:p-7 border border-blue-200/90 shadow-lg text-slate-800 my-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200 pb-5">
         <div>
           <div className="flex items-center gap-3">
-            <div className="p-2.5 rounded-2xl bg-red-50 border border-red-200 text-red-600">
+            <div className="p-2.5 rounded-2xl bg-red-50 border border-red-200 text-red-600 shrink-0">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
@@ -94,7 +94,7 @@ export const EmergencySupportDashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <button
             onClick={() => setAdminModalOpen(true)}
             className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer"
