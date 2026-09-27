@@ -11,6 +11,8 @@ import {
   SunMedium,
   LucideIcon,
 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { TiltCard } from '../common/TiltCard';
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Activity,
@@ -36,10 +38,14 @@ export const WeatherCard: React.FC<Props> = ({ title, value, unit, icon, color =
   const Icon = ICON_MAP[icon] || Activity;
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-[26px] p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative group border border-white/90 shadow-[0_10px_30px_rgba(30,100,200,0.06)] hover:shadow-[0_14px_36px_rgba(30,100,200,0.12)] transition-all duration-300 hover:-translate-y-0.5">
+    <TiltCard
+      maxTilt={6}
+      depth={10}
+      className="bg-white/95 backdrop-blur-md rounded-[26px] p-5 sm:p-6 flex flex-col justify-between overflow-hidden relative group border border-white/90 shadow-[0_10px_30px_rgba(30,100,200,0.06)] hover:shadow-[0_16px_40px_rgba(30,100,200,0.12)] transition-all duration-300"
+    >
       {/* AMBIENT CORNER GLOW */}
       <div
-        className="absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl opacity-10 pointer-events-none transition-opacity duration-500 group-hover:opacity-20"
+        className="absolute -top-10 -right-10 w-28 h-28 rounded-full blur-2xl opacity-10 pointer-events-none transition-opacity duration-500 group-hover:opacity-25"
         style={{ backgroundColor: color }}
       />
 
@@ -67,11 +73,14 @@ export const WeatherCard: React.FC<Props> = ({ title, value, unit, icon, color =
 
       {/* BOTTOM METRIC ACCENT LINE */}
       <div className="w-full bg-[#EDF5FD] h-1.5 rounded-full mt-4 overflow-hidden border border-blue-100/40">
-        <div
-          className="h-full rounded-full transition-all duration-700"
-          style={{ width: '100%', backgroundColor: color }}
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: '100%' }}
+          transition={{ duration: 1, ease: 'easeOut' }}
+          className="h-full rounded-full"
+          style={{ backgroundColor: color }}
         />
       </div>
-    </div>
+    </TiltCard>
   );
 };

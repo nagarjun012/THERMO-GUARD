@@ -27,6 +27,7 @@ build/
 
 # IDE & OS
 .agents/
+skills-lock.json
 .gemini/
 .vscode/
 .idea/

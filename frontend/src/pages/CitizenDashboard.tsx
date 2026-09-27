@@ -16,6 +16,8 @@ import { useAppStore } from '../stores/appStore';
 import { computeFullAudit, calculateHeatIndex, calculateHumidex, calculateWetBulb, computeRealThermalRisk, VULNERABILITY_PROFILES, type VulnerabilityProfile } from '../utils/thermalEngine';
 import { useHeatStressAlert } from '../hooks/useHeatStressAlert';
 import { MapPin, AlertTriangle, Users, Crosshair, RefreshCw, Activity, Wind, Droplets, Droplet, Sun, Flame, ShieldAlert, HeartPulse } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { TiltCard } from '../components/common/TiltCard';
 import type { Alert } from '../types';
 
 // Lazy-loaded auxiliary modals & heavy panels to optimize initial bundle and eliminate CPU hydration freeze
@@ -507,7 +509,11 @@ export const CitizenDashboard: React.FC = () => {
         </div>
 
         {/* DYNAMIC CLIMATE & WEATHER HERO BANNER (EXACT FIGMA REFERENCE LAYOUT) */}
-        <div className="bg-white/95 backdrop-blur-xl rounded-[32px] p-6 sm:p-8 border border-white/90 shadow-[0_14px_40px_rgba(20,90,190,0.08)]">
+        <TiltCard
+          maxTilt={3}
+          depth={8}
+          className="bg-white/95 backdrop-blur-xl rounded-[32px] p-6 sm:p-8 border border-white/90 shadow-[0_14px_40px_rgba(20,90,190,0.08)]"
+        >
           <div className="flex flex-wrap items-center justify-between gap-6 mb-6">
             <div className="space-y-1">
               <div className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
@@ -528,7 +534,11 @@ export const CitizenDashboard: React.FC = () => {
               </p>
             </div>
 
-            <div className="flex flex-col items-center sm:items-end gap-1.5">
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 4.5, repeat: Infinity, ease: 'easeInOut' }}
+              className="flex flex-col items-center sm:items-end gap-1.5"
+            >
               <DynamicWeatherSymbol
                 temp={Number(weather.temperature)}
                 humidity={Number(weather.humidity)}
@@ -543,7 +553,7 @@ export const CitizenDashboard: React.FC = () => {
                   ? '❄️ Low Temp / Cold Wave'
                   : '☀️ Clear Atmospheric Conditions'}
               </span>
-            </div>
+            </motion.div>
           </div>
 
           {/* Quick Inset Metric Tiles with Dynamic Weather Symbols */}
@@ -672,7 +682,7 @@ export const CitizenDashboard: React.FC = () => {
               );
             })()}
           </div>
-        </div>
+        </TiltCard>
 
         {/* PERSONALIZED VULNERABILITY PROFILE SELECTOR */}
         <div className="p-5 rounded-[28px] bg-white/95 backdrop-blur-md border border-white/90 shadow-[0_10px_32px_rgba(30,100,200,0.07)]">
@@ -692,13 +702,16 @@ export const CitizenDashboard: React.FC = () => {
               const prof = VULNERABILITY_PROFILES[profKey];
               const isActive = vulnerabilityProfile === profKey;
               return (
-                <button
+                <motion.button
                   key={profKey}
                   onClick={() => setVulnerabilityProfile(profKey)}
-                  className={`px-4 py-3 rounded-2xl text-xs font-bold transition-all duration-200 text-left flex flex-col gap-0.5 cursor-pointer border ${
+                  whileHover={{ y: -2, scale: 1.01 }}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.2 }}
+                  className={`px-4 py-3 rounded-2xl text-xs font-bold transition-all text-left flex flex-col gap-0.5 cursor-pointer border ${
                     isActive
-                      ? 'bg-blue-600 border-blue-600 text-white shadow-[0_4px_16px_rgba(37,99,235,0.3)] -translate-y-0.5'
-                      : 'bg-[#EDF5FD] border-blue-100/70 text-slate-700 hover:bg-[#E2F0FD] hover:text-slate-900'
+                      ? 'bg-blue-600 border-blue-600 text-white shadow-[0_6px_20px_rgba(37,99,235,0.35)]'
+                      : 'bg-[#EDF5FD] border-blue-100/70 text-slate-700 hover:bg-[#E2F0FD] hover:text-slate-900 shadow-2xs'
                   }`}
                   type="button"
                 >
@@ -706,7 +719,7 @@ export const CitizenDashboard: React.FC = () => {
                   <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-blue-100' : 'text-slate-500'}`}>
                     {prof.metabolicOffset > 0 ? `+${prof.metabolicOffset} HTSS Strain` : 'Standard 150 W/m²'}
                   </span>
-                </button>
+                </motion.button>
               );
             })}
           </div>

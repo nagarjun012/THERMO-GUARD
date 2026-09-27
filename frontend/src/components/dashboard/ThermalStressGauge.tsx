@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { getRiskColor } from '../../utils/helpers';
 import { Activity } from 'lucide-react';
+import { TiltCard } from '../common/TiltCard';
 
 interface Props {
   score: number;
@@ -18,7 +19,11 @@ export const ThermalStressGauge: React.FC<Props> = ({ score, level }) => {
   const strokeDashoffset = circumference - (score / 100) * circumference;
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 sm:p-7 flex flex-col items-center justify-center relative border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.07)] transition-all duration-500 overflow-hidden h-full group">
+    <TiltCard
+      maxTilt={7}
+      depth={14}
+      className="bg-white/95 backdrop-blur-md rounded-[28px] p-6 sm:p-7 flex flex-col items-center justify-center relative border border-white/90 shadow-[0_12px_36px_rgba(30,100,200,0.07)] transition-all duration-500 overflow-hidden h-full group"
+    >
       {/* AMBIENT HEADER */}
       <div className="w-full flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
         <div className="flex items-center gap-2">
@@ -109,6 +114,6 @@ export const ThermalStressGauge: React.FC<Props> = ({ score, level }) => {
         <span>50 Moderate</span>
         <span>100 Extreme</span>
       </div>
-    </div>
+    </TiltCard>
   );
 };

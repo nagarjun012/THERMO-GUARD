@@ -1,5 +1,7 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { getRiskColor } from '../../utils/helpers';
+import { TiltCard } from '../common/TiltCard';
 
 interface Props {
   title: string;
@@ -14,17 +16,21 @@ export const ThermalIndexCard: React.FC<Props> = ({ title, value, max, unit, cat
   const percentage = Math.min(100, Math.max(0, (value / max) * 100));
 
   return (
-    <div className="bg-white/95 backdrop-blur-md rounded-[26px] p-5 sm:p-6 flex flex-col justify-between border border-white/90 shadow-[0_10px_30px_rgba(30,100,200,0.06)] hover:shadow-[0_14px_36px_rgba(30,100,200,0.1)] transition-all">
+    <TiltCard
+      maxTilt={6}
+      depth={8}
+      className="double-bezel rounded-[26px] p-5 sm:p-6 flex flex-col justify-between"
+    >
       <div className="flex justify-between items-start mb-3">
         <div>
           <h3 className="text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">
             {title}
           </h3>
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
+            <span className="text-3xl font-black text-slate-950 tracking-tight font-mono">
               {value}
             </span>
-            <span className="text-xs font-semibold text-slate-500">
+            <span className="text-xs font-bold text-slate-500">
               {unit}
             </span>
           </div>
@@ -43,14 +49,16 @@ export const ThermalIndexCard: React.FC<Props> = ({ title, value, max, unit, cat
 
       {/* LIGHT RECESSED INDICATOR CHANNEL */}
       <div className="h-2 rounded-full overflow-hidden p-[1px] mt-2 bg-[#EDF5FD] border border-blue-100/50">
-        <div
-          className="h-full rounded-full transition-all duration-700 relative overflow-hidden"
+        <motion.div
+          initial={{ width: 0 }}
+          animate={{ width: `${percentage}%` }}
+          transition={{ duration: 0.8, ease: 'easeOut' }}
+          className="h-full rounded-full relative overflow-hidden"
           style={{
-            width: `${percentage}%`,
             backgroundColor: color,
           }}
         />
       </div>
-    </div>
+    </TiltCard>
   );
 };

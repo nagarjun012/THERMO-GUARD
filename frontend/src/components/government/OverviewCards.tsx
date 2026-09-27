@@ -1,6 +1,7 @@
 import React from 'react';
 import { Users, MapPin, AlertTriangle, Activity, Radio } from 'lucide-react';
 import { GovSummaryCounters } from '../../services/govHtssService';
+import { TiltCard } from '../common/TiltCard';
 
 interface Props {
   counters: GovSummaryCounters;
@@ -61,8 +62,10 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
         {cards.map((card, i) => {
           const Icon = card.icon;
           return (
-            <div
+            <TiltCard
               key={i}
+              maxTilt={7}
+              depth={10}
               className="neu-card neu-card-hover card-3d-subtle p-5 flex items-center gap-4 relative overflow-hidden group bg-white/95"
             >
               {/* AMBIENT CORNER GLOW */}
@@ -98,7 +101,7 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
                   {card.sub}
                 </span>
               </div>
-            </div>
+            </TiltCard>
           );
         })}
       </div>
