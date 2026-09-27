@@ -11,13 +11,33 @@ import { VulnerabilityRadar } from '../components/charts/VulnerabilityRadar';
 import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
 import { HeatHealthPredictionPanel } from '../components/dashboard/HeatHealthPredictionPanel';
 import { computeFullAudit } from '../lib/htssEngine';
-import { Siren, Calculator } from 'lucide-react';
+import { generateSitrepPdf } from '../utils/sitrepPdfGenerator';
+import { Siren, Calculator, FileDown } from 'lucide-react';
 
 export const GovernmentDashboard: React.FC = () => {
-  const { selectedLocation } = useAppStore();
+  const { selectedLocation, currentUser } = useAppStore();
   const { data: apiData } = useGovernmentDashboard();
   const { districts, counters, isLoading, progress } = useGovPortalData();
   const [isAuditOpen, setIsAuditOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportSitrep = () => {
+    setIsExporting(true);
+    try {
+      generateSitrepPdf(
+        { districts, counters },
+        {
+          officerName: currentUser?.name || 'Authorized Disaster Management Officer',
+          department: currentUser?.department || 'Disaster Risk Reduction Directorate',
+          role: currentUser?.role || 'OFFICER',
+        }
+      );
+    } catch (err) {
+      console.error('SITREP PDF generation error:', err);
+    } finally {
+      setTimeout(() => setIsExporting(false), 500);
+    }
+  };
 
   // Socioeconomic vulnerability baseline reference data (Census / NITI Aayog Index)
   const baselineVulnerability = {
@@ -70,10 +90,20 @@ export const GovernmentDashboard: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <button
+            onClick={handleExportSitrep}
+            disabled={isExporting}
+            className="skeuo-btn px-3.5 py-2 text-xs font-mono font-bold text-slate-800 bg-white border border-blue-200/80 rounded-lg flex items-center gap-2 hover:bg-blue-50/70 shadow-xs transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
+            title="Download Official NDMA Heat Action Plan Daily Situation Report (PDF)"
+          >
+            <FileDown className="w-3.5 h-3.5 text-blue-600" />
+            <span>{isExporting ? 'Generating PDF...' : 'Daily SITREP (PDF)'}</span>
+          </button>
+
           {auditData && (
             <button
               onClick={() => setIsAuditOpen(true)}
-              className="skeuo-btn px-3.5 py-2 text-xs font-mono font-bold text-slate-800 bg-white border border-slate-300 rounded-lg flex items-center gap-2 hover:bg-slate-50 shadow-xs transition-colors"
+              className="skeuo-btn px-3.5 py-2 text-xs font-mono font-bold text-slate-800 bg-white border border-slate-300 rounded-lg flex items-center gap-2 hover:bg-slate-50 shadow-xs transition-colors cursor-pointer"
               title="Inspect authoritative HTSS calculation formula breakdown"
             >
               <Calculator className="w-3.5 h-3.5 text-emerald-600" />
@@ -83,7 +113,7 @@ export const GovernmentDashboard: React.FC = () => {
 
           <button
             onClick={() => alert('Emergency Heatwave Protocol Broadcast Triggered to State Authorities.')}
-            className="skeuo-btn skeuo-btn-danger px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2"
+            className="skeuo-btn skeuo-btn-danger px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2 cursor-pointer"
           >
             <Siren className="w-3.5 h-3.5 text-white" />
             <span>Broadcast Emergency Alert</span>

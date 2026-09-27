@@ -127,6 +127,9 @@ export default defineConfig({
             if (id.includes('@supabase') || id.includes('axios') || id.includes('date-fns')) {
               return 'vendor-utils';
             }
+            if (id.includes('jspdf')) {
+              return 'vendor-pdf';
+            }
             if (
               id.includes('/node_modules/react/') ||
               id.includes('/node_modules/react-dom/') ||
