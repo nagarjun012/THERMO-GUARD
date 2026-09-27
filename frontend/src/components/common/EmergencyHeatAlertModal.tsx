@@ -62,7 +62,7 @@ export const EmergencyHeatAlertModal: React.FC<Props> = ({
     <div className="fixed inset-0 z-[99999] overflow-y-auto">
       {/* BACKDROP BLUR WITH AMBIENT RISK GLOW */}
       <div
-        className="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-0 transition-opacity"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-0 transition-opacity"
         onClick={onAcknowledge}
         aria-hidden="true"
       />

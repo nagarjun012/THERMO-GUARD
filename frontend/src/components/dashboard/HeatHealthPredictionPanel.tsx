@@ -371,7 +371,7 @@ export const HeatHealthPredictionPanel: React.FC<Props> = ({ lat, lon, locationN
 
       {/* BENCHMARK TRANSPARENCY MODAL */}
       {showBenchmarkModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-md flex items-center justify-center p-4">
           <div className="max-w-3xl w-full max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-slate-200 p-6 sm:p-7 space-y-5 shadow-2xl">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div>

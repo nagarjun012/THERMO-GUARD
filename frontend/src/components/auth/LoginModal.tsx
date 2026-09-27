@@ -83,7 +83,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md perspective-container">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-md perspective-container">
         {/* MODAL CARD WITH CLEAN HIGH-CONTRAST WHITE SURFACE */}
         <motion.div
           initial={{ opacity: 0, scale: 0.94, y: 18 }}

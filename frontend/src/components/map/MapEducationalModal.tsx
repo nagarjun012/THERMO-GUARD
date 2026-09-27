@@ -75,7 +75,7 @@ export const MapEducationalModal: React.FC<Props> = ({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-[2000] flex items-center justify-center p-3 sm:p-6 bg-slate-950/60 backdrop-blur-md overflow-y-auto animate-fadeIn"
+      className="fixed inset-0 z-[2000] flex items-center justify-center p-3 sm:p-6 bg-slate-900/40 backdrop-blur-md overflow-y-auto animate-fadeIn"
       role="dialog"
       aria-modal="true"
       aria-labelledby="map-guide-title"

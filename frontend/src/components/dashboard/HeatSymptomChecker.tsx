@@ -162,7 +162,7 @@ export const HeatSymptomChecker: React.FC<Props> = ({ isOpen, onClose }) => {
     <div className="fixed inset-0 z-[99999] overflow-y-auto">
       {/* BACKDROP */}
       <div
-        className="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-0 transition-opacity"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-0 transition-opacity"
         onClick={handleClose}
         aria-hidden="true"
       />
@@ -171,19 +171,19 @@ export const HeatSymptomChecker: React.FC<Props> = ({ isOpen, onClose }) => {
         <div
           role="dialog"
           aria-modal="true"
-          className="pointer-events-auto relative w-full max-w-2xl my-auto rounded-3xl bg-white shadow-2xl border border-slate-200 overflow-hidden animate-fadeIn"
+          className="pointer-events-auto relative w-full max-w-2xl my-auto rounded-3xl bg-white shadow-2xl border border-blue-200/90 overflow-hidden animate-fadeIn"
         >
           {/* HEADER */}
-          <div className="p-5 sm:p-6 bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 text-white flex items-center justify-between gap-4">
+          <div className="p-5 sm:p-6 bg-white border-b border-slate-200 text-slate-900 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-white/10 border border-white/20 text-red-400">
+              <div className="p-2.5 rounded-2xl bg-red-50 border border-red-200 text-red-600">
                 <HeartPulse className="w-6 h-6 animate-pulse" />
               </div>
               <div>
-                <h2 className="text-lg sm:text-xl font-black font-mono tracking-tight">
+                <h2 className="text-lg sm:text-xl font-black font-mono tracking-tight text-slate-950">
                   HEAT ILLNESS CLINICAL TRIAGE
                 </h2>
-                <p className="text-xs text-blue-200">
+                <p className="text-xs text-slate-500 font-medium">
                   Instant physiological symptom self-check for outdoor laborers &amp; citizens
                 </p>
               </div>
@@ -192,7 +192,7 @@ export const HeatSymptomChecker: React.FC<Props> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2">
               <button
                 onClick={resetSymptoms}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 transition text-xs font-bold flex items-center gap-1 cursor-pointer"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition text-xs font-bold flex items-center gap-1 cursor-pointer"
                 title="Reset Selection"
               >
                 <RefreshCw className="w-4 h-4" />
@@ -200,7 +200,7 @@ export const HeatSymptomChecker: React.FC<Props> = ({ isOpen, onClose }) => {
               </button>
               <button
                 onClick={handleClose}
-                className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 transition cursor-pointer"
+                className="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition cursor-pointer"
                 aria-label="Close"
               >
                 <X className="w-5 h-5" />
@@ -395,7 +395,7 @@ export const HeatSymptomChecker: React.FC<Props> = ({ isOpen, onClose }) => {
             </span>
             <button
               onClick={handleClose}
-              className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer shadow transition"
+              className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs cursor-pointer shadow transition"
             >
               Done &amp; Return
             </button>

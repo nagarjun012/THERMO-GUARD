@@ -22,12 +22,12 @@ export const HTSSAuditView: React.FC<Props> = ({ audit, isOpen, onClose }) => {
 
   const modal = (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-950/70 backdrop-blur-md animate-fadeIn overflow-y-auto"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-3 sm:p-6 bg-slate-900/40 backdrop-blur-md animate-fadeIn overflow-y-auto"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto bg-white/98 backdrop-blur-2xl border border-blue-200/90 rounded-3xl p-5 sm:p-8 shadow-[0_24px_70px_rgba(15,23,42,0.25)] text-slate-800 my-auto">
+      <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto bg-white border border-blue-200/90 rounded-3xl p-5 sm:p-8 shadow-[0_24px_70px_rgba(20,80,180,0.18)] text-slate-800 my-auto">
         {/* Close Button */}
         <button
           onClick={onClose}

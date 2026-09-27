@@ -101,7 +101,7 @@ export const MapPage: React.FC = () => {
       {showLocationSelector &&
         createPortal(
           <div
-            className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm animate-fadeIn"
+            className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn"
             onClick={(e) => {
               if (e.target === e.currentTarget) setShowLocationSelector(false);
             }}

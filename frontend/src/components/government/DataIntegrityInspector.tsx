@@ -39,7 +39,7 @@ export const DataIntegrityInspector: React.FC<Props> = ({ district, isOpen, onCl
   };
 
   const modalContent = (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-950/80 backdrop-blur-md animate-fadeIn overflow-y-auto">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4 md:p-6 bg-slate-900/40 backdrop-blur-md animate-fadeIn overflow-y-auto">
       <div className="relative w-full max-w-2xl max-h-[94vh] sm:max-h-[90vh] overflow-y-auto rounded-2xl sm:rounded-3xl p-3.5 sm:p-6 shadow-2xl space-y-3.5 sm:space-y-4 bg-white text-slate-900 border border-slate-200 my-auto">
         {/* HEADER */}
         <div className="flex items-start justify-between border-b border-slate-200 pb-3 gap-2">
