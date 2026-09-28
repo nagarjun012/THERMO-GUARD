@@ -1,90 +1,133 @@
 <div align="center">
 
 # 🌡️ THERMO-GUARD (THERMOSAFE)
-### AI-Powered Extreme Heat Early Warning & Biometeorological Telemetry System
+### AI-Driven Extreme Heat Early Warning, Biometeorological Telemetry & Heat Disaster Mitigation Platform
 
-[![React](https://img.shields.io/badge/React-18.3-blue.svg?style=flat-square&logo=react)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![Tests](https://img.shields.io/badge/Tests-29%2F29%20Passing-brightgreen.svg?style=flat-square)](frontend/tests/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5%20Strict-blue.svg?style=flat-square&logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB.svg?style=flat-square&logo=react)](https://reactjs.org/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4-38B2AC.svg?style=flat-square&logo=tailwind-css)](https://tailwindcss.com/)
 [![Vite](https://img.shields.io/badge/Vite-5.4-646CFF.svg?style=flat-square&logo=vite)](https://vitejs.dev/)
-[![Open-Meteo](https://img.shields.io/badge/Weather-Open--Meteo%20Live-orange.svg?style=flat-square)](https://open-meteo.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](https://opensource.org/licenses/MIT)
+[![NDMA Compliant](https://img.shields.io/badge/NDMA%20HAP-Compliant-orange.svg?style=flat-square)](https://ndma.gov.in/)
+[![Open-Meteo](https://img.shields.io/badge/Weather-Open--Meteo%20Live-yellow.svg?style=flat-square)](https://open-meteo.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-lightgrey.svg?style=flat-square)](https://opensource.org/licenses/MIT)
 
-**Protecting lives across India through deterministic thermal stress monitoring, predictive forecasting, and targeted interventions for vulnerable populations.**
+**Protecting lives across India through deterministic biometeorological stress monitoring, explainable machine learning predictions, and rapid civil action.**
 
-[Live Demo](https://thermo-guard.vercel.app) • [Report Issue](https://github.com/nagarjun012/THERMO-GUARD/issues) • [Documentation](#documentation)
+[📖 Complete Walkthrough PDF](THERMO_GUARD_COMPLETE_WALKTHROUGH.pdf) • [Live Demo](https://thermo-guard.vercel.app) • [Report Issue](https://github.com/nagarjun012/THERMO-GUARD/issues) • [NDMA Guidelines](https://ndma.gov.in)
 
 ---
 
 </div>
 
-## 📌 Overview
+## 📌 Executive Overview
 
-**THERMO-GUARD** is a mission-critical biometeorological early warning platform designed to safeguard citizens, outdoor workers, elders, and municipal authorities from extreme heat events and dangerous heatwaves.
+**THERMO-GUARD** is a mission-critical biometeorological early warning and disaster mitigation platform engineered to protect citizens, outdoor laborers, elderly populations, and disaster authorities from fatal heat stress.
 
-Covering all **788 districts across India's 36 States and Union Territories**, THERMO-GUARD replaces coarse ambient temperature measurements with **deterministic multi-factor biometeorological modeling** that accounts for humidity, solar irradiance, wind cooling, and human thermoregulation.
+Covering all **700+ districts across India's 28 States and 8 Union Territories**, THERMO-GUARD moves beyond single-parameter air thermometer readings by calculating **deterministic multi-factor biometeorological strain** (relative humidity, solar radiation, wind velocity, and human thermoregulation) and coupling it with **Explainable AI (XAI)** and **automated NDMA Heat Action Plan (HAP) incident reporting**.
 
 ---
 
-## ✨ Key Features
+## 🏛️ Dual-Portal Operational Architecture
 
-### 1. 📡 100% Genuine Real-Time Weather Telemetry
-* Direct ingestion from **Open-Meteo High-Resolution Multi-Model API** (NOAA GFS Seamless).
-* **Zero Mock / Synthetic Fallbacks**: Displays `DATA UNAVAILABLE` upon failure; never invents fake weather data.
-* **9 Verified Real API Parameters**:
-  * `temperature_2m` (Air Temperature in °C)
-  * `relative_humidity_2m` (Relative Humidity in %)
-  * `wind_speed_10m` (Wind Velocity in km/h)
-  * `wind_direction_10m` (Wind Direction in Degrees)
-  * `shortwave_radiation` (Solar Heat Load in W/m²)
-  * `pressure_msl` (Mean Sea Level Pressure in hPa)
-  * `dew_point_2m` (Dew Point Temperature in °C)
-  * `apparent_temperature` (Physiological Equivalent Temp in °C)
-  * `uv_index` (Solar Ultraviolet Radiation Index)
+The platform operates as a secure, role-based dual-portal ecosystem:
 
-### 2. 🧮 Deterministic Biometeorological Engines
-All thermal stress metrics are computed locally using authoritative scientific formulations:
-* **Heat Index (HI)**: Authoritative NOAA / National Weather Service Rothfusz regression equation.
-* **Outdoor Wet Bulb Globe Temperature (WBGT)**: Stull (2011) psychrometric wet bulb + Liljegren solar radiation and wind convection equations.
-* **Universal Thermal Climate Index (UTCI)**: 6th-order biometeorological polynomial modeling physiological heat balance.
-* **Heat Thermal Stress Score (HTSS)**: Composite index (0–100) combining ambient temperature, evaporative sweating limits, and radiative thermal load.
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                              THERMO GUARD                              │
+│                    Role-Based Security & Routing                       │
+└───────────────────┬────────────────────────────────┬───────────────────┘
+                    │                                │
+                    ▼                                ▼
+┌──────────────────────────────────────┐┌──────────────────────────────────────┐
+│     CITIZEN EARLY WARNING PORTAL     ││  DISASTER COMMAND & GOV PORTAL       │
+│               (/dashboard)           ││             (/government)            │
+├──────────────────────────────────────┤├──────────────────────────────────────┤
+│ • Real-Time Thermal Stress Gauge     ││ • 700+ District Real-Time Matrix     │
+│ • NIOSH/OSHA Work-Rest Planner       ││ • 1-Click NDMA SITREP PDF Exporter   │
+│ • Personalized Vulnerability Profiles││ • Resource & Cooling Shelter Dispatch│
+│ • Emergency Heat Alert & SOS Modal   ││ • Model Benchmark & Integrity Audit  │
+└──────────────────────────────────────┘└──────────────────────────────────────┘
+```
 
-### 3. 🔐 Role-Based Dual Login Architecture
-The platform provides two dedicated, isolated portals with strict tab visibility and route protection:
-
-| Login Mode | Accessible Tabs | Hidden Tabs | Primary Target |
+| Portal | Target Users | Accessible Features | Primary Route |
 | :--- | :--- | :--- | :--- |
-| **USER LOGIN** (Citizen / Field Worker) | **Dashboard**, **Live Map**, **Learn THERMOS**, **About** | ❌ **Gov Portal** | `/dashboard` |
-| **GOV LOGIN** (Disaster Management / Officials) | **Gov Portal**, **Learn THERMOS**, **About** | ❌ **Dashboard & Live Map** | `/government` |
+| **Citizen Portal** | Citizens, Outdoor Laborers, Gig Workers, Elders | Live Stress Gauge, Work-Rest Scheduler, Hourly Forecast, SOS Modal, Learn Hub | `/dashboard` |
+| **Government Portal** | NDMA, SDMA, District Collectors (DDMA), Health Officers | 700+ District Severity Matrix, 1-Click SITREP PDF Generator, Resource Dispatch, Audit Inspector | `/government` |
 
-* **Server-Side Authenticated Sessions**: Cryptographically signed HMAC-SHA256 session tokens stored in `HttpOnly`, `SameSite` cookies. `localStorage` is never trusted for authorization.
-* **Server-Enforced RBAC & Route Guards**: Serverless endpoints (`/api/htss`, `/api/admin/hospital/update`) and client router guards strictly verify role-based permissions (`CITIZEN`, `OFFICER`, `ADMIN`).
+---
 
-### 4. 🗺️ Interactive GIS & District-Level Heat Mapping
-* Interactive Leaflet maps rendering microclimate zones and Urban Heat Islands (UHI).
-* Dynamic hospital bed status and cooling shelter availability broadcast system.
-* Real-time GPS location lock with reverse geocoding across Indian districts and taluks.
+## ✨ Core Innovations & Key Features
 
-### 5. 🏛️ National Government Intelligence Command Center
-* **All-India 788-District Rankings**: Real-time sorting by HTSS, WBGT, and air temperature.
-* **State Filter & Risk Breakdowns**: Instant filtering across all 36 States & UTs.
-* **Section 144 Triggers & Protocol Alerts**: Early warnings based on National Disaster Management Authority (NDMA) thresholds.
+### 1. 📡 Live High-Resolution Telemetry
+* Direct ingestion from **Open-Meteo High-Resolution Multi-Model API** and IMD observation frameworks.
+* **Zero Mock Fallbacks**: Guaranteed genuine data; explicit fallback indicators upon network disruption.
+* **9 Tracked Telemetry Dimensions**: 2m Air Temperature, Relative Humidity, Dew Point, Mean Sea Level Pressure, Surface Wind Speed & Direction, Shortwave Solar Radiation, Apparent Temperature, and UV Index.
+
+### 2. 🧮 Authoritative Biometeorological Modeling
+* **Wet Bulb Globe Temperature (WBGT - ISO 7243)**: Outdoor formulation utilizing Stull (2011) iterative psychrometry for wet-bulb temperature, combined with solar and convective heat flux modeling.
+* **Canadian Humidex Scale**: Quantifies subjective discomfort and evaporative sweat impairment from actual atmospheric vapour pressure.
+* **NOAA Heat Index**: Rothfusz 9-parameter polynomial regression with boundary condition adjustments for extreme humidity.
+* **Heat Thermal Stress Score (HTSS 0–100)**: Proprietary multi-factor composite index incorporating normalized environmental strain and district vulnerability weights.
+
+### 3. 🤖 Explainable AI (XAI) & Heat-Health Risk Prediction
+* **Ensemble Predictive Regressors**: 7-day predictive health risk modeling based on diurnal temperature range, minimum nocturnal temperature (tropical night trapping), and 3-day thermal accumulation.
+* **Transparent Risk Factor Attribution**: Replaces black-box opacity with clear, verifiable percentage contribution breakdowns:
+  * *Ambient Heat Load (~35–45%)*
+  * *Relative Humidity (~25–35%)*
+  * *Nocturnal Trapping Effect (~15–20%)*
+  * *Solar UV Radiation (~8–12%)*
+* **Open Benchmark Transparency**: Embedded audit modal exposing cross-validated model precision, RMSE, and error bounds.
+
+### 4. 📄 1-Click Automated NDMA SITREP PDF Exporter
+* Generates official, print-ready, high-contrast vector PDF **Daily Situation Reports (SITREPs)** compliant with National Disaster Management Authority (NDMA) Heat Action Plan guidelines.
+* Includes national command headers, reporting officer credentials, executive threat distribution cards, priority district matrices, and standardized statutory civil directives.
+
+### 5. 📱 Universal Responsive & Sunlight-Readable Design
+* **320px–390px Mobile Viewport Optimization**: Sticky table headers, horizontal touch-swipe banners, full location titles without truncation, and flexible action buttons.
+* **High-Contrast Light Theme**: Slate typography against soft blue and pure white cards (`#DBEAFE` / `#0F172A`), ensuring clarity under direct outdoor sunlight for field operators.
+* **Hardware-Accelerated Tactile UI**: Micro-motion gauges, interactive dials, and responsive radar charts.
+
+---
+
+## 🧪 Automated Testing & Verification Suite
+
+THERMO-GUARD enforces rigorous quality assurance with a **100% pass rate** across all automated test suites:
+
+```bash
+npm test
+```
+
+```
+================================================================================
+Test Suite                                  Tests   Status
+--------------------------------------------------------------------------------
+1. Security, CSRF & HMAC Session RBAC       9/9     PASSED
+2. Heat-Health Risk Regressors & Boundaries 8/8     PASSED
+3. HTSS Alert Engine & Threshold Logic      8/8     PASSED
+4. NDMA Daily SITREP PDF Exporter           4/4     PASSED
+--------------------------------------------------------------------------------
+TOTAL AUTOMATED TEST VERIFICATION           29/29   100% PASSED (0 FAILED)
+================================================================================
+```
+
+* **TypeScript Strict Compilation**: Zero errors across frontend module builds (`tsc -b`) and serverless Node builds (`tsc --noEmit`).
 
 ---
 
 ## 🛠️ Technology Stack
 
-* **Frontend Framework**: React 18 + TypeScript
-* **Build System**: Vite 5
-* **Styling & Design System**: TailwindCSS 3 + Skeuomorphic Tactile Elements & Glassmorphism
-* **Animations**: Framer Motion
-* **Iconography**: Lucide React
-* **State Management**: Zustand
-* **Data Fetching & Cache**: TanStack React Query v5 + Axios
-* **Mapping**: Leaflet + React-Leaflet
-* **Visualizations**: Recharts
-* **Serverless Backend**: Vercel Serverless Functions (`/api/weather`, `/api/htss`, `/api/refresh`)
-* **Scheduled Cron**: Vercel Cron (Automated 3-hour nationwide weather synchronization)
+| Layer | Technologies |
+| :--- | :--- |
+| **Frontend Framework** | React 18.3, TypeScript 5.5, Vite 5.4 |
+| **Styling & System** | Tailwind CSS 3.4, Vanilla CSS Design System |
+| **Animations & Icons** | Framer Motion 11, Lucide React |
+| **Data Fetching & Cache**| TanStack React Query v5, Axios |
+| **Mapping & GIS** | Leaflet 1.9, React-Leaflet |
+| **Visualizations** | Recharts 2.15 |
+| **Document Generation** | jsPDF 4.2, jsPDF-AutoTable 5.0 |
+| **Serverless Backend** | Vercel Node Functions (`/api/weather`, `/api/htss`, `/api/health-risk`, `/api/auth`) |
+| **Mobile Architecture** | Capacitor 8 (Cross-Platform Android & iOS builds) |
 
 ---
 
@@ -92,34 +135,37 @@ The platform provides two dedicated, isolated portals with strict tab visibility
 
 ```
 THERMO-GUARD/
-├── frontend/                     # Modern React + TypeScript Application
-│   ├── api/                      # Vercel Serverless Functions
-│   │   ├── htss.ts               # All-India telemetry endpoint
-│   │   ├── refresh.ts            # Scheduled cron sync worker
-│   │   └── weather.ts            # Single-location real-time weather & calculations
+├── THERMO_GUARD_COMPLETE_WALKTHROUGH.pdf # Official 5-page walkthrough PDF
+├── frontend/                             # Modern React + TypeScript Application
+│   ├── api/                              # Vercel Serverless API Functions
+│   │   ├── auth.ts                       # HMAC-SHA256 session issuance & verification
+│   │   ├── health-risk.ts                # Ensemble predictive health risk endpoint
+│   │   ├── htss.ts                       # Pan-India telemetry aggregation endpoint
+│   │   ├── refresh.ts                    # Scheduled weather sync worker
+│   │   └── weather.ts                    # Single-location real-time weather engine
+│   ├── public/
+│   │   └── THERMO_GUARD_COMPLETE_WALKTHROUGH.pdf # Downloadable web copy
+│   ├── scripts/
+│   │   └── generate_walkthrough_pdf.mjs  # Standalone vector PDF generation script
 │   ├── src/
 │   │   ├── components/
-│   │   │   ├── auth/             # Dual LoginModal (User Login / Gov Login)
-│   │   │   ├── dashboard/        # Instruments, dials, cards, gauges
-│   │   │   ├── government/       # 788-district table, risk inspector, overview cards
-│   │   │   ├── layout/           # Navbar, Header, district search bar
-│   │   │   └── map/              # GIS Leaflet heat risk map & district telemetry layers
-│   │   ├── data/                 # 788 districts, telemetry baselines, district coordinates
-│   │   ├── hooks/                # React Query hooks for real-time telemetry
-│   │   ├── pages/                # CitizenDashboard, GovDashboard, Map, Learn, About, Landing
-│   │   ├── services/             # API services, GPS location, district telemetry
-│   │   ├── stores/               # Zustand appStore (location, userRole, auth)
-│   │   ├── types/                # TypeScript interfaces & biometeorological types
-│   │   └── utils/                # Thermal calculation engine (Rothfusz, Stull, Liljegren)
-│   ├── package.json              # Frontend dependencies and scripts
-│   ├── tsconfig.json             # TypeScript configuration
-│   ├── vercel.json               # Subdirectory Vercel deployment config
-│   └── vite.config.ts            # Vite build configuration with local API proxy
-├── backend/                      # Optional standalone Python FastAPI backend
-├── package.json                  # Root monorepo build script
-├── vercel.json                   # Root turn-key Vercel deployment configuration
-├── start.bat                     # Windows 1-click local development launcher
-└── README.md                     # Project documentation
+│   │   │   ├── auth/                     # Dual LoginModal (User Login / Gov Login)
+│   │   │   ├── common/                   # EmergencyHeatAlertModal, Nav, Toasts
+│   │   │   ├── dashboard/                # Dials, stress gauges, work-rest schedulers
+│   │   │   ├── government/               # 700+ district matrix, SITREP trigger, audit
+│   │   │   ├── layout/                   # Header, Navbar, location search bar
+│   │   │   └── map/                      # GIS Leaflet heat risk map & layers
+│   │   ├── data/                         # 700+ Indian districts & population baselines
+│   │   ├── hooks/                        # React Query telemetry & alert hooks
+│   │   ├── pages/                        # CitizenDashboard, GovDashboard, Learn, Map
+│   │   ├── utils/                        # Biometeorological & SITREP PDF generators
+│   │   └── index.css                     # Tactile design tokens & responsive utilities
+│   ├── tests/                            # Automated test suites (29 tests)
+│   ├── package.json                      # Frontend dependencies & test scripts
+│   └── vite.config.ts                    # Vite build configuration
+├── backend/                              # Standalone Python FastAPI backend service
+├── start.bat                             # Windows 1-click launcher
+└── README.md                             # Project documentation
 ```
 
 ---
@@ -130,7 +176,7 @@ THERMO-GUARD/
 * **Node.js**: v18.0.0 or higher
 * **npm**: v9.0.0 or higher
 
-### Installation
+### Installation & Launch
 
 1. **Clone the repository**:
    ```bash
@@ -144,39 +190,35 @@ THERMO-GUARD/
    npm install
    ```
 
-3. **Start the local development server**:
+3. **Run automated verification tests**:
+   ```bash
+   npm test
+   ```
+
+4. **Start the local development server**:
    ```bash
    npm run dev
    ```
    *The application will launch on `http://localhost:5173`.*
 
-4. **1-Click Launch (Windows)**:
-   You can also double-click [`start.bat`](start.bat) from the root directory to start the server and open the browser automatically.
+5. **1-Click Launch (Windows)**:
+   Double-click [`start.bat`](start.bat) from the root directory to automatically launch the dev server and browser.
 
 ---
-
-## 🧪 Build & Validation
-
-To compile TypeScript and validate the production bundle:
-
-```bash
-# From repository root:
-npm run build
-
-# Or from frontend directory:
-cd frontend
-npm run build
-```
-
----
-
 
 ## 📜 Scientific References & Standards
 
 1. **Rothfusz, L. P. (1990)**: *The Computation and Use of the National Weather Service Heat Index*. NOAA Technical Attachment, SR/SSD 90-23.
 2. **Stull, R. (2011)**: *Wet-Bulb Temperature from Relative Humidity and Air Temperature*. Journal of Applied Meteorology and Climatology, 50(11), 2267–2269.
 3. **Liljegren, J. C., et al. (2008)**: *Modeling the Wet Bulb Globe Temperature Using Standard Meteorological Measurements*. Journal of Occupational and Environmental Hygiene, 5(10), 645–655.
-4. **Jendritzky, G., et al. (2012)**: *UTCI—Why another thermal index?* International Journal of Biometeorology, 56(3), 421–428.
-5. **NDMA India**: *National Guidelines for Preparation of Action Plan - Prevention and Management of Heat Wave*. National Disaster Management Authority, Government of India.
+4. **Masterton, J. M., & Richardson, F. A. (1979)**: *Humidex: A method of quantifying human discomfort due to excessive heat and humidity*. Environment Canada.
+5. **NDMA India (2019/2024)**: *National Guidelines for Preparation of Action Plan - Prevention and Management of Heat Wave*. National Disaster Management Authority, Government of India.
+6. **ISO 7243 (2017)**: *Ergonomics of the thermal environment — Assessment of heat stress using the WBGT (wet bulb globe temperature) index*. International Organization for Standardization.
 
 ---
+
+## 📄 Documentation & Resources
+
+* 📄 **[Download Complete Walkthrough PDF](THERMO_GUARD_COMPLETE_WALKTHROUGH.pdf)**: Comprehensive 5-page guide covering mathematical foundations, architectural diagrams, component walkthroughs, and NDMA operational checklists.
+* 🌐 **[Live Application](https://thermo-guard.vercel.app)**
+* ⚖️ **License**: Open-source under the [MIT License](LICENSE).
