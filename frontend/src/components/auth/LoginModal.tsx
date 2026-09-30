@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore, AuthRole } from '../../stores/appStore';
+import { authService } from '../../services/authService';
 import { Shield, User, X, CheckCircle2, ArrowRight, Building2, Lock, Sparkles } from 'lucide-react';
 
 interface LoginModalProps {
@@ -35,27 +36,43 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
   if (!isOpen) return null;
 
-  const handleLogin = (e: React.FormEvent) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Gov login requires non-empty Officer ID
-    if (activeTab === 'gov' && govId.trim().length === 0) {
-      setGovError('Officer ID is required for Government access');
-      return;
-    }
-
-    setGovError('');
-    loginAs(activeTab);
-    if (onSuccess) {
-      onSuccess(activeTab);
+    if (activeTab === 'gov') {
+      if (govId.trim().length === 0) {
+        setGovError('Officer ID is required for Government access');
+        return;
+      }
+      setIsLoading(true);
+      try {
+        const { role } = await authService.login(govId, department);
+        await loginAs(role);
+        setGovError('');
+        
+        if (onSuccess) {
+          onSuccess(role);
+        } else {
+          navigate('/government');
+        }
+        onClose();
+      } catch (err) {
+        setGovError('Authentication failed. Invalid Officer ID.');
+      } finally {
+        setIsLoading(false);
+      }
     } else {
-      if (activeTab === 'gov') {
-        navigate('/government');
+      // Citizen login doesn't need server validation
+      await loginAs('user');
+      if (onSuccess) {
+        onSuccess('user');
       } else {
         navigate('/dashboard');
       }
+      onClose();
     }
-    onClose();
   };
 
   return (
@@ -225,9 +242,10 @@ export const LoginModal: React.FC<LoginModalProps> = ({
             <button
               type="submit"
               className="w-full py-3.5 px-6 rounded-xl font-mono text-sm font-bold text-dark-950 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 hover:from-amber-300 hover:to-orange-300 shadow-[0_0_20px_rgba(245,158,11,0.4)] transition-all flex items-center justify-center gap-2 group cursor-pointer"
+              disabled={isLoading}
             >
-              <span>ACCESS GOVERNMENT PORTAL</span>
-              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <span>{isLoading ? 'AUTHENTICATING...' : 'ACCESS GOVERNMENT PORTAL'}</span>
+              {!isLoading && <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />}
             </button>
           </form>
         )}

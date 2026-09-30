@@ -13,9 +13,14 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.116.0",
-    "@vercel/node": "^13.0.1"
+    "@vercel/node": "^13.0.1",
+    "cookie": "^2.0.1",
+    "jose": "^6.2.12"
   },
   "optionalDependencies": {
     "@rollup/rollup-linux-x64-gnu": "4.62.5"
+  },
+  "devDependencies": {
+    "@types/cookie": "^0.6.0"
   }
 }
