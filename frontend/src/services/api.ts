@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { calculateHeatIndex, computeFactorDecomposition } from '../utils/thermalEngine';
+import { API_CONFIG } from '../config/apiConfig';
 import {
   WeatherData,
   ThermalStressData,
@@ -11,11 +12,19 @@ import {
   GovernmentDashboard,
   HistoricalData,
   MLPrediction,
+  MultiDayHealthRiskForecast,
+  ModelBenchmark,
+  VulnerableGroupAlert,
 } from '../types';
 
-// All /api/* calls go to Vercel Serverless Functions (same origin in production,
-// or the Vite dev server proxy in local development).
-const api = axios.create({ baseURL: '' });
+// API base URL is environment-aware:
+// - Web (dev/prod): '' (same origin)
+// - Native (Capacitor): production Vercel URL
+const api = axios.create({
+  baseURL: API_CONFIG.baseUrl,
+  timeout: API_CONFIG.timeout,
+  withCredentials: !API_CONFIG.isNative, // cookies only for same-origin web
+});
 
 // Deduplication and coordinate cache for /api/weather to prevent simultaneous request storms
 const weatherPromiseCache = new Map<string, Promise<any>>();
@@ -40,7 +49,22 @@ async function fetchWeatherBundle(lat: number, lon: number): Promise<any> {
         throw new Error('DATA UNAVAILABLE');
       }
       weatherDataCache.set(coordKey, { data: res, timestamp: Date.now() });
+      try {
+        localStorage.setItem(`thermosafe_offline_weather_${coordKey}`, JSON.stringify(res));
+      } catch {}
       return res;
+    } catch (err) {
+      // Offline fallback: retrieve last known telemetry when network is unavailable
+      try {
+        const offlineData = localStorage.getItem(`thermosafe_offline_weather_${coordKey}`);
+        if (offlineData) {
+          const parsed = JSON.parse(offlineData);
+          parsed.isLive = false;
+          parsed.source = 'OFFLINE CACHED TELEMETRY';
+          return parsed;
+        }
+      } catch {}
+      throw err;
     } finally {
       weatherPromiseCache.delete(coordKey);
     }
@@ -256,4 +280,38 @@ export const apiService = {
       predicted_htss: 85,
       confidence: 90,
     }),
+
+  // 3 to 5 Day Heat-Health Warning Horizon with hospitalization & mortality risk indices
+  getHealthRiskPrediction: async (lat: number, lon: number): Promise<MultiDayHealthRiskForecast> => {
+    try {
+      const res = await api.get('/api/health-risk', { params: { lat, lon, mode: 'prediction' } });
+      return res.data;
+    } catch (err: any) {
+      console.warn('API call failed for health-risk prediction:', err?.message);
+      throw new Error('DATA UNAVAILABLE');
+    }
+  },
+
+  // Transparent Time-Series Cross-Validation Benchmarks & Threshold Tuning Report
+  getModelBenchmarks: async (): Promise<ModelBenchmark[]> => {
+    try {
+      const res = await api.get('/api/health-risk', { params: { mode: 'benchmarks' } });
+      return res.data;
+    } catch (err: any) {
+      console.warn('API call failed for model benchmarks:', err?.message);
+      return [];
+    }
+  },
+
+  // Localized Vulnerable Group Alerts
+  getVulnerableAlerts: async (riskLevel = 'High', location = 'Local District'): Promise<VulnerableGroupAlert[]> => {
+    try {
+      const res = await api.get('/api/health-risk', { params: { mode: 'vulnerable-alerts', risk_level: riskLevel, location } });
+      return res.data;
+    } catch (err: any) {
+      console.warn('API call failed for vulnerable alerts:', err?.message);
+      return [];
+    }
+  },
 };
+

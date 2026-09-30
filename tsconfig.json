@@ -2,17 +2,12 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "lib": ["ES2022"],
     "skipLibCheck": true,
     "strict": false,
     "moduleResolution": "node",
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./frontend/src/*"]
-    }
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["api/**/*", "frontend/api/**/*", "frontend/src/**/*"]
+  "include": ["api/**/*"]
 }

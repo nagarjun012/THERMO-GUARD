@@ -1,10 +1,27 @@
 {
+  "outputDirectory": "dist",
   "functions": {
     "api/*.ts": {
       "maxDuration": 10
     }
   },
   "rewrites": [
+    {
+      "source": "/api/facilities/(.*)",
+      "destination": "/api/facilities"
+    },
+    {
+      "source": "/api/health/(.*)",
+      "destination": "/api/facilities"
+    },
+    {
+      "source": "/api/auth/(.*)",
+      "destination": "/api/auth?subpath=$1"
+    },
+    {
+      "source": "/api/admin/(.*)",
+      "destination": "/api/admin?subpath=$1"
+    },
     {
       "source": "/((?!api/).*)",
       "destination": "/index.html"

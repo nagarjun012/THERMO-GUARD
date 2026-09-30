@@ -16,6 +16,7 @@ export {
   computeFullAudit,
   htssToRiskCategory,
   htssToLevel,
+  VULNERABILITY_PROFILES,
 } from '../lib/htssEngine';
 
 export type {
@@ -23,4 +24,6 @@ export type {
   RiskCategory,
   RiskLevel,
   HTSSCalculationAudit,
+  VulnerabilityProfile,
+  ProfileAdjustment,
 } from '../lib/htssEngine';

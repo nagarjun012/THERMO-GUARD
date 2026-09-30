@@ -1,6 +1,7 @@
 import React from 'react';
 import { Users, MapPin, AlertTriangle, Activity, Radio } from 'lucide-react';
 import { GovSummaryCounters } from '../../services/govHtssService';
+import { TiltCard } from '../common/TiltCard';
 
 interface Props {
   counters: GovSummaryCounters;
@@ -36,21 +37,22 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
       value: (counters.affectedPopulation / 1000000).toFixed(1) + 'M',
       icon: Users,
       color: '#a855f7',
-      sub: 'Citizens Exposed',
+      sub: counters.affectedPopulation > 0 ? 'Census 2011 Official' : 'No High-Risk Districts',
+      badge: 'Census Data',
     },
   ];
 
   return (
     <div className="space-y-4 mb-6">
       {isLoading && progress && (
-        <div className="glass-panel px-4 py-3 rounded-2xl border border-orange-500/30 text-orange-400 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-lg animate-pulse">
+        <div className="bg-white px-4 py-3 rounded-2xl border border-orange-300 text-orange-950 flex flex-wrap items-center justify-between gap-3 text-xs font-mono shadow-md animate-pulse">
           <div className="flex items-center gap-2.5">
-            <Radio className="w-4 h-4 text-orange-400 animate-spin" />
-            <span className="font-bold">
+            <Radio className="w-4 h-4 text-orange-600 animate-spin" />
+            <span className="font-bold text-slate-900">
               Connecting Live Open-Meteo REST Pipeline across 788 Districts...
             </span>
           </div>
-          <span className="skeuo-pill px-3 py-1 font-bold text-white bg-orange-500/20 border-orange-500/40">
+          <span className="skeuo-pill px-3 py-1 font-bold text-orange-950 bg-orange-100 border border-orange-300">
             {progress.loaded} / {progress.total} Districts Processed ({progress.percent}%)
           </span>
         </div>
@@ -60,9 +62,11 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
         {cards.map((card, i) => {
           const Icon = card.icon;
           return (
-            <div
+            <TiltCard
               key={i}
-              className="neu-card neu-card-hover p-5 flex items-center gap-4 relative overflow-hidden group"
+              maxTilt={7}
+              depth={10}
+              className="neu-card neu-card-hover card-3d-subtle p-5 flex items-center gap-4 relative overflow-hidden group bg-white/95"
             >
               {/* AMBIENT CORNER GLOW */}
               <div
@@ -71,29 +75,33 @@ export const OverviewCards: React.FC<Props> = ({ counters, isLoading, progress }
               />
 
               {/* SUNKEN ILLUMINATED WELL */}
-              <div className="neu-well p-3.5 rounded-2xl flex items-center justify-center shrink-0 shadow-inner">
+              <div className="neu-well p-3 rounded-xl flex items-center justify-center shrink-0">
                 <Icon
-                  className="w-6 h-6"
-                  style={{
-                    color: card.color,
-                    filter: `drop-shadow(0 0 6px ${card.color}80)`,
-                  }}
+                  className="w-5 h-5"
+                  style={{ color: card.color }}
                 />
               </div>
 
               {/* READOUT */}
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider font-mono">
-                  {card.title}
-                </p>
-                <h3 className="text-2xl sm:text-3xl font-black font-mono text-white mt-0.5 tracking-tight">
+                <div className="flex items-center justify-between gap-1">
+                  <p className="text-xs font-black text-slate-700 uppercase tracking-wider font-mono">
+                    {card.title}
+                  </p>
+                  {card.badge && (
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded font-extrabold bg-purple-100 text-purple-900 border border-purple-300">
+                      {card.badge}
+                    </span>
+                  )}
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-black font-mono text-slate-950 mt-0.5 tracking-tight">
                   {card.value}
                 </h3>
-                <span className="text-[10px] text-gray-500 font-mono block mt-0.5">
+                <span className="text-[11px] text-slate-600 font-semibold font-mono block mt-0.5">
                   {card.sub}
                 </span>
               </div>
-            </div>
+            </TiltCard>
           );
         })}
       </div>

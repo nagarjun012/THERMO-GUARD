@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import {
   govHtssService,
   GovPortalPipelineResult,
@@ -19,13 +19,10 @@ export function useGovPortalData() {
   const [selectedDistrict, setSelectedDistrict] = useState<ProcessedDistrict | null>(null);
   const [isInspectorOpen, setIsInspectorOpen] = useState<boolean>(false);
 
-  const loadPipeline = useCallback(async (forceRefresh: boolean = false) => {
-    if (forceRefresh) {
-      setIsRefreshing(true);
-    } else if (!data || data.counters.successfulCount === 0) {
-      setIsRefreshing(true);
-    }
+  const hasInitialLoadedRef = useRef(false);
 
+  const loadPipeline = useCallback(async (forceRefresh: boolean = false) => {
+    setIsRefreshing(true);
     setProgress({ loaded: 0, total: 788, percent: 0 });
 
     try {
@@ -40,13 +37,14 @@ export function useGovPortalData() {
         }
       });
       setData(result);
+      hasInitialLoadedRef.current = true;
     } catch (err) {
       console.error('Gov Portal Pipeline Execution Failed:', err);
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
-  }, [data]);
+  }, []); // Stable callback — no dependency on data state
 
   useEffect(() => {
     loadPipeline(false);

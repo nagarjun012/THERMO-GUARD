@@ -9,20 +9,14 @@ import {
   Info,
   BookOpen,
   ShieldAlert,
-  User,
-  Shield,
   LogOut,
-  ArrowRightLeft,
   HeartPulse,
 } from 'lucide-react';
 import { useAppStore } from '../../stores/appStore';
 import { TRANSLATIONS } from '../../i18n/translations';
-import { LoginModal } from '../auth/LoginModal';
 
 export const Navbar: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [switchTargetRole, setSwitchTargetRole] = useState<'user' | 'gov'>('user');
   const navigate = useNavigate();
   const { userRole, logout, language } = useAppStore();
   const t = TRANSLATIONS[language];
@@ -46,13 +40,6 @@ export const Navbar: React.FC = () => {
           { to: '/about', label: t.nav.about, icon: Info },
         ];
 
-  // Role switch requires re-authentication via LoginModal
-  const handleSwitchRole = () => {
-    const targetRole = userRole === 'gov' ? 'user' : 'gov';
-    setSwitchTargetRole(targetRole);
-    setIsModalOpen(true);
-  };
-
   const handleLogout = () => {
     logout();
     navigate('/');
@@ -60,20 +47,20 @@ export const Navbar: React.FC = () => {
 
   return (
     <>
-      <nav className="glass-nav glass-specular sticky top-0 z-50 border-b border-white/10">
+      <nav className="bg-white/85 backdrop-blur-xl sticky top-0 z-50 border-b border-blue-200/60 shadow-[0_4px_25px_rgba(20,80,180,0.06)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* BRAND LOGO WITH SKEUOMORPHIC SHIELD EMBLEM */}
+            {/* BRAND LOGO WITH HIGH-PRECISION SHIELD EMBLEM */}
             <div className="flex items-center">
-              <NavLink to="/" className="flex items-center gap-3 group">
-                <div className="relative p-2 rounded-xl bg-gradient-to-b from-orange-500/20 to-red-600/20 border border-orange-500/40 shadow-inner group-hover:scale-105 transition-transform duration-200">
-                  <ShieldAlert className="w-6 h-6 text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.6)]" />
+              <NavLink to="/" className="flex items-center gap-2.5 group">
+                <div className="p-2 rounded-xl bg-[#EDF5FD] border border-blue-200/80 group-hover:border-blue-300 transition-colors shadow-xs">
+                  <ShieldAlert className="w-5 h-5 text-blue-600" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-400 font-mono">
+                  <span className="text-base font-extrabold tracking-tight text-slate-900 font-mono">
                     THERMOSAFE
                   </span>
-                  <span className="text-[9px] font-mono tracking-widest text-gray-400 uppercase -mt-0.5">
+                  <span className="text-[9px] font-mono font-bold tracking-wider text-blue-600 uppercase -mt-0.5">
                     Heat Defense Telemetry
                   </span>
                 </div>
@@ -82,26 +69,24 @@ export const Navbar: React.FC = () => {
 
             {/* DESKTOP NAV TABS (DYNAMICALLY FILTERED BY LOGIN ROLE) */}
             <div className="hidden md:block">
-              <div className="flex items-center gap-1.5 p-1 bg-dark-900/60 rounded-2xl border border-white/5 shadow-inner">
+              <div className="flex items-center gap-1.5 p-1.5 bg-[#EDF5FD] rounded-2xl border border-blue-200/70 shadow-inner">
                 {links.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     className={({ isActive }) =>
-                      `skeuo-btn btn-shimmer flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl transition-all duration-200 ${
+                      `flex items-center gap-2 px-3.5 py-1.5 text-xs font-bold rounded-xl transition-all duration-200 cursor-pointer ${
                         isActive
-                          ? 'skeuo-btn-dark text-white border-accent/50 shadow-[0_2px_10px_rgba(59,130,246,0.3)]'
-                          : 'text-gray-300 hover:text-white hover:bg-white/5'
+                          ? 'bg-[#2563EB] text-white shadow-md -translate-y-[0.5px]'
+                          : 'text-slate-600 hover:text-blue-700 hover:bg-white/80 border border-transparent'
                       }`
                     }
                   >
                     {({ isActive }) => (
                       <>
                         <item.icon
-                          className={`w-3.5 h-3.5 transition-colors ${
-                            isActive
-                              ? 'text-accent drop-shadow-[0_0_6px_rgba(59,130,246,0.8)]'
-                              : 'text-gray-400'
+                          className={`w-3.5 h-3.5 transition-colors duration-200 ${
+                            isActive ? 'text-white' : 'text-slate-500'
                           }`}
                         />
                         <span>{item.label}</span>
@@ -114,44 +99,10 @@ export const Navbar: React.FC = () => {
 
             {/* ROLE BADGE & AUTH SWITCH CONTROLS */}
             <div className="hidden sm:flex items-center gap-2.5">
-              {userRole === 'gov' ? (
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)]">
-                    <Shield className="w-3.5 h-3.5 text-amber-400" />
-                    <span>GOV LOGIN</span>
-                  </span>
-                  <button
-                    onClick={handleSwitchRole}
-                    type="button"
-                    className="skeuo-btn px-3 py-1.5 text-xs font-bold font-mono rounded-xl text-blue-300 border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
-                    title="Switch to User Login"
-                  >
-                    <ArrowRightLeft className="w-3.5 h-3.5" />
-                    <span>Switch to User</span>
-                  </button>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono font-bold rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 shadow-[0_0_12px_rgba(59,130,246,0.2)]">
-                    <User className="w-3.5 h-3.5 text-blue-400" />
-                    <span>USER LOGIN</span>
-                  </span>
-                  <button
-                    onClick={handleSwitchRole}
-                    type="button"
-                    className="skeuo-btn px-3 py-1.5 text-xs font-bold font-mono rounded-xl text-amber-300 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 transition-all flex items-center gap-1.5 cursor-pointer"
-                    title="Switch to Government Login"
-                  >
-                    <ArrowRightLeft className="w-3.5 h-3.5" />
-                    <span>Switch to Gov</span>
-                  </button>
-                </div>
-              )}
-
               <button
                 onClick={handleLogout}
                 type="button"
-                className="p-2 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-500/10 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
+                className="p-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-100 active:scale-95 transition-all cursor-pointer"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />
@@ -162,7 +113,7 @@ export const Navbar: React.FC = () => {
             <div className="md:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="skeuo-btn skeuo-btn-dark p-2 text-gray-300 hover:text-white focus:outline-none"
+                className="p-2 rounded-xl bg-[#EDF5FD] border border-blue-200/70 text-slate-700 hover:text-slate-900 focus:outline-none"
                 aria-label="Toggle navigation menu"
               >
                 {isOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -173,71 +124,41 @@ export const Navbar: React.FC = () => {
 
         {/* MOBILE MENU DROPDOWN */}
         {isOpen && (
-          <div className="md:hidden glass-modal border-t border-white/10 px-4 pt-3 pb-5 space-y-3 animate-fadeIn">
-            {/* MOBILE ROLE BADGE */}
-            <div className="flex items-center justify-between pb-2 border-b border-white/10">
-              <span className="text-xs font-mono font-bold text-gray-400">CURRENT SESSION:</span>
-              <span
-                className={`px-2.5 py-1 text-xs font-mono font-bold rounded-lg border ${
-                  userRole === 'gov'
-                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-300'
-                    : 'bg-blue-500/10 border-blue-500/30 text-blue-300'
-                }`}
-              >
-                {userRole === 'gov' ? 'GOV LOGIN' : 'USER LOGIN'}
-              </span>
-            </div>
-
+          <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-blue-100 px-4 pt-3 pb-5 space-y-2 animate-fadeIn shadow-lg">
             {links.map((item) => (
               <NavLink
                 key={item.to}
                 to={item.to}
                 onClick={() => setIsOpen(false)}
                 className={({ isActive }) =>
-                  `skeuo-btn btn-shimmer w-full flex items-center gap-3 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all ${
+                  `w-full flex items-center gap-3 px-4 py-2.5 text-sm font-bold rounded-xl transition-all ${
                     isActive
-                      ? 'skeuo-btn-dark text-white border-l-4 border-accent shadow-md'
-                      : 'text-gray-300 hover:text-white hover:bg-white/5'
+                      ? 'bg-[#2563EB] text-white shadow-md'
+                      : 'text-slate-700 hover:text-blue-700 hover:bg-[#EDF5FD]'
                   }`
                 }
               >
-                <item.icon className="w-4 h-4 text-accent" />
+                <item.icon className="w-4 h-4" />
                 <span>{item.label}</span>
               </NavLink>
             ))}
 
-            <div className="pt-2 border-t border-white/10 flex gap-2">
-              <button
-                onClick={() => {
-                  setIsOpen(false);
-                  handleSwitchRole();
-                }}
-                className="flex-1 py-2 px-3 text-xs font-mono font-bold rounded-xl border border-white/10 bg-white/5 text-gray-200 flex items-center justify-center gap-2"
-              >
-                <ArrowRightLeft className="w-3.5 h-3.5" />
-                <span>Switch to {userRole === 'gov' ? 'User Login' : 'Gov Login'}</span>
-              </button>
+            <div className="pt-2 border-t border-slate-100">
               <button
                 onClick={() => {
                   setIsOpen(false);
                   handleLogout();
                 }}
-                className="p-2 text-xs font-mono font-bold rounded-xl border border-red-500/20 bg-red-500/10 text-red-300"
+                className="w-full py-2.5 px-3 text-xs font-bold rounded-xl border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 flex items-center justify-center gap-2 cursor-pointer transition-colors"
                 title="Logout"
               >
                 <LogOut className="w-4 h-4" />
+                <span>Logout</span>
               </button>
             </div>
           </div>
         )}
       </nav>
-
-      {/* LOGIN MODAL */}
-      <LoginModal
-        isOpen={isModalOpen}
-        initialRole={switchTargetRole}
-        onClose={() => setIsModalOpen(false)}
-      />
     </>
   );
 };

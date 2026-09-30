@@ -4,6 +4,10 @@ import path from 'path'
 import weatherHandler from './api/weather'
 import htssHandler from './api/htss'
 import refreshHandler from './api/refresh'
+import authHandler from './api/auth'
+import adminHandler from './api/admin'
+import facilitiesHandler from './api/facilities'
+import healthRiskHandler from './api/health-risk'
 
 function localVercelApiPlugin(): Plugin {
   return {
@@ -23,6 +27,20 @@ function localVercelApiPlugin(): Plugin {
         });
         (req as any).query = query;
 
+        // Parse JSON body for POST requests
+        if (req.method === 'POST' && !(req as any).body) {
+          const buffers: any[] = [];
+          for await (const chunk of req) {
+            buffers.push(chunk);
+          }
+          const raw = Buffer.concat(buffers).toString();
+          try {
+            (req as any).body = raw ? JSON.parse(raw) : {};
+          } catch {
+            (req as any).body = {};
+          }
+        }
+
         (res as any).status = function (statusCode: number) {
           res.statusCode = statusCode;
           return res;
@@ -34,12 +52,28 @@ function localVercelApiPlugin(): Plugin {
         };
 
         try {
+          if (pathname.startsWith('/api/auth')) {
+            await authHandler(req as any, res as any);
+            return;
+          }
+          if (pathname.startsWith('/api/admin')) {
+            await adminHandler(req as any, res as any);
+            return;
+          }
           if (pathname === '/api/weather') {
             await weatherHandler(req as any, res as any);
             return;
           }
           if (pathname === '/api/htss') {
             await htssHandler(req as any, res as any);
+            return;
+          }
+          if (pathname === '/api/health-risk' || pathname.startsWith('/api/health-risk')) {
+            await healthRiskHandler(req as any, res as any);
+            return;
+          }
+          if (pathname.startsWith('/api/facilities') || pathname.startsWith('/api/health')) {
+            await facilitiesHandler(req as any, res as any);
             return;
           }
           if (pathname === '/api/refresh') {
@@ -69,5 +103,54 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    // Ultra-optimized chunking for low-end devices and slow 2G/3G networks
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (id.includes('recharts')) {
+              return 'vendor-charts';
+            }
+            if (id.includes('leaflet') || id.includes('react-leaflet')) {
+              return 'vendor-map';
+            }
+            if (id.includes('framer-motion')) {
+              return 'vendor-motion';
+            }
+            if (id.includes('@tanstack/react-query')) {
+              return 'vendor-query';
+            }
+            if (id.includes('@supabase') || id.includes('axios') || id.includes('date-fns')) {
+              return 'vendor-utils';
+            }
+            if (id.includes('jspdf')) {
+              return 'vendor-pdf';
+            }
+            if (
+              id.includes('/node_modules/react/') ||
+              id.includes('/node_modules/react-dom/') ||
+              id.includes('/node_modules/react-router/') ||
+              id.includes('/node_modules/react-router-dom/') ||
+              id.includes('/node_modules/scheduler/') ||
+              id.includes('\\node_modules\\react\\') ||
+              id.includes('\\node_modules\\react-dom\\') ||
+              id.includes('\\node_modules\\react-router\\') ||
+              id.includes('\\node_modules\\react-router-dom\\') ||
+              id.includes('\\node_modules\\scheduler\\')
+            ) {
+              return 'vendor-react';
+            }
+          }
+          if (id.includes('indiaLocations') || id.includes('allIndiaDistricts')) {
+            return 'data-india-geo';
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 600,
+  },
 })
-

@@ -27,6 +27,7 @@ build/
 
 # IDE & OS
 .agents/
+skills-lock.json
 .gemini/
 .vscode/
 .idea/
@@ -41,3 +42,7 @@ Thumbs.db
 *.pkl
 *.joblib
 !backend/app/ml/models/.gitkeep
+
+# Capacitor Native Projects
+android/
+ios/

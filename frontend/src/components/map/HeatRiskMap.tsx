@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Polygon, CircleMarker, Popup, useMap } from 'react-leaflet';
+import { createPortal } from 'react-dom';
+import { MapContainer, TileLayer, CircleMarker, Popup, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { CityData } from '../../types';
 import { useAppStore } from '../../stores/appStore';
 import { useWeather, useThermalStress, useRisk } from '../../hooks/useApi';
-import { generateWardsForLocation, WardGisData, getRiskColorByCategory } from '../../data/wardGisData';
-import { WardDetailPanel } from './WardDetailPanel';
+import { getRiskColorByCategory } from '../../utils/helpers';
+import { computeRealThermalRisk } from '../../utils/thermalEngine';
 import { MapControls } from './MapControls';
-import { MapLayerSwitcherModal, ActiveMapLayers } from './MapLayerSwitcherModal';
 import { MapLoadingOverlay } from './MapLoadingOverlay';
 import { LocationSelector } from '../location/LocationSelector';
+import { INDIA_LOCATIONS } from '../../data/indiaLocations';
 
 import { useAllIndiaLiveTelemetry } from '../../hooks/useAllIndiaLiveTelemetry';
-import { detectRealtimeLocation } from '../../services/locationService';
+import { detectRealtimeLocation, resolveLocationFromCoords } from '../../services/locationService';
 
 interface Props {
   cities: CityData[];
@@ -23,6 +24,16 @@ interface Props {
   onSelectResolution?: (res: string) => void;
   onOpenGuide?: () => void;
 }
+
+// Click handler component to allow clicking anywhere on the map to set location
+const MapClickHandler: React.FC<{ onMapClick: (lat: number, lon: number) => void }> = ({ onMapClick }) => {
+  useMapEvents({
+    click: (e) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+};
 
 // Controller component for smooth cinematic map camera pan/zoom on location shift
 const MapCameraController: React.FC<{ center: [number, number]; zoom: number }> = ({ center, zoom }) => {
@@ -54,8 +65,7 @@ const MapInstanceRegistrar: React.FC<{ setMap: (map: L.Map) => void }> = ({ setM
 export const HeatRiskMap: React.FC<Props> = ({
   center,
   zoom,
-  activeLayer = 'all',
-  gisResolution = 'Hyper-Local Ward GIS Risk',
+  gisResolution = 'District / City Level Risk',
   onSelectResolution,
   onOpenGuide,
 }) => {
@@ -65,13 +75,70 @@ export const HeatRiskMap: React.FC<Props> = ({
   const { data: risk } = useRisk();
   const { districts: liveDistricts } = useAllIndiaLiveTelemetry();
 
+  // Resolve current active location's real-time HTSS score, category and color (matching Map Legend)
+  const currentLocationHtss = useMemo(() => {
+    // 1. Check if selected location matches a live district in liveDistricts
+    const matchedDistrict = liveDistricts.find((d) => {
+      if (selectedLocation.districtName && d.name.toLowerCase() === selectedLocation.districtName.toLowerCase()) {
+        return true;
+      }
+      const distLat = Math.abs(d.lat - selectedLocation.lat);
+      const distLon = Math.abs(d.lon - selectedLocation.lon);
+      return distLat < 0.15 && distLon < 0.15;
+    });
+
+    let score = matchedDistrict?.htss ?? thermal?.htss ?? risk?.score;
+
+    // 2. If no score yet, compute using thermal engine if weather is available
+    if ((score === undefined || score === null) && weather && typeof weather.temperature === 'number' && typeof weather.humidity === 'number') {
+      const computed = computeRealThermalRisk(
+        weather.temperature,
+        weather.humidity,
+        weather.windSpeed || 1,
+        weather.solarRadiation || 0
+      );
+      score = computed.htss;
+    }
+
+    const finalScore = score !== undefined && score !== null ? Math.round(score) : null;
+
+    // Derive category according to Risk Level Legend (0-24: LOW, 25-49: MODERATE, 50-74: HIGH, 75-100: EXTREME)
+    let category: 'LOW' | 'MODERATE' | 'HIGH' | 'EXTREME' = 'LOW';
+    if (finalScore !== null) {
+      if (finalScore >= 75) category = 'EXTREME';
+      else if (finalScore >= 50) category = 'HIGH';
+      else if (finalScore >= 25) category = 'MODERATE';
+      else category = 'LOW';
+    } else if (thermal?.htssCategory) {
+      const upper = (thermal.htssCategory || '').toUpperCase();
+      if (upper.includes('EXTREME')) category = 'EXTREME';
+      else if (upper.includes('HIGH')) category = 'HIGH';
+      else if (upper.includes('MODERATE')) category = 'MODERATE';
+      else category = 'LOW';
+    } else if (risk?.level) {
+      const upper = (risk.level || '').toUpperCase();
+      if (upper.includes('EXTREME')) category = 'EXTREME';
+      else if (upper.includes('HIGH')) category = 'HIGH';
+      else if (upper.includes('MODERATE')) category = 'MODERATE';
+      else category = 'LOW';
+    }
+
+    const color = getRiskColorByCategory(category);
+
+    return {
+      score: finalScore,
+      category,
+      color,
+    };
+  }, [liveDistricts, selectedLocation, thermal, risk, weather]);
+
   const currentCenter: [number, number] = center || [selectedLocation.lat, selectedLocation.lon];
 
   // All-India view toggle check
   const isAllIndiaView = gisResolution === 'All-India District Overview';
 
   // Dynamic zoom & center calculation based on GIS Resolution selection
-  let targetZoom = zoom || 13.5;
+  let targetZoom = zoom || 11.5;
   let targetCenter: [number, number] = currentCenter;
 
   if (isAllIndiaView) {
@@ -81,43 +148,13 @@ export const HeatRiskMap: React.FC<Props> = ({
     targetZoom = 7;
   } else if (gisResolution.includes('City')) {
     targetZoom = 12.8;
-  } else if (gisResolution.includes('Ward')) {
-    targetZoom = 13.5;
   } else if (gisResolution.includes('District')) {
     targetZoom = 11.0;
   }
 
   const [mapInstance, setMapInstance] = useState<L.Map | null>(null);
-  const [selectedWard, setSelectedWard] = useState<WardGisData | null>(null);
-  const [hoveredWard, setHoveredWard] = useState<WardGisData | null>(null);
-  const [isLayerModalOpen, setIsLayerModalOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Clear selected ward when location shifts so side-panel updates cleanly
-  useEffect(() => {
-    setSelectedWard(null);
-  }, [selectedLocation.lat, selectedLocation.lon]);
-
-  // Active Map Layer States
-  const [mapLayers, setMapLayers] = useState<ActiveMapLayers>({
-    thermalRisk: true,
-    wardBoundaries: false,
-    districtBoundaries: true,
-    stateBoundaries: true,
-    heatPulseGradient: false,
-    temperature: activeLayer === 'temp',
-    humidity: false,
-    wind: false,
-    solarRadiation: false,
-    wbgt: activeLayer === 'wbgt',
-    heatIndex: activeLayer === 'hi',
-    humidex: false,
-  });
-
-  const handleToggleLayer = (key: keyof ActiveMapLayers) => {
-    setMapLayers((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
 
   // Map control toolbar handlers
   const handleZoomIn = () => {
@@ -130,123 +167,158 @@ export const HeatRiskMap: React.FC<Props> = ({
 
   const handleLocateMe = () => {
     detectRealtimeLocation(true);
-    if (onSelectResolution) onSelectResolution('Hyper-Local Ward GIS Risk');
+    if (onSelectResolution) onSelectResolution('District / City Level Risk');
   };
 
   const handleResetView = () => {
     if (mapInstance) {
-      mapInstance.flyTo([selectedLocation.lat, selectedLocation.lon], 13.5, { duration: 1.2 });
+      mapInstance.flyTo([selectedLocation.lat, selectedLocation.lon], 11.5, { duration: 1.2 });
     }
   };
 
-  // Generate 5 Real Ward Geometries dynamically with Real-Time Weather Telemetry
-  const wardDataList = useMemo(() => {
-    const liveTemp = weather?.temperature ?? 38.5;
-    const liveHumidity = weather?.humidity ?? 52;
-    const liveWind = weather?.windSpeed ?? 10.0;
-    const liveSolar = weather?.solarRadiation ?? 750;
+  const handleMapClick = async (lat: number, lon: number) => {
+    try {
+      const resolved = await resolveLocationFromCoords(lat, lon, false);
+      setIndiaLocation(
+        resolved.state,
+        resolved.district,
+        lat,
+        lon,
+        true,
+        'LIVE',
+        resolved.locality && resolved.locality.toLowerCase() !== resolved.district.toLowerCase() ? resolved.locality : undefined,
+        false,
+        true
+      );
+    } catch (err) {
+      console.warn('Failed to resolve clicked map location:', err);
+    }
+  };
 
-    return generateWardsForLocation(
-      selectedLocation.districtName || selectedLocation.name,
-      selectedLocation.stateName || 'Tamil Nadu',
-      selectedLocation.lat,
-      selectedLocation.lon,
-      liveTemp,
-      liveHumidity,
-      liveWind,
-      liveSolar,
-      selectedLocation.localityName
-    );
-  }, [selectedLocation, weather]);
+  // Fallback telemetry stations if liveDistricts is loading or empty in Low Bandwidth Mode
+  const lowBandwidthStations = useMemo(() => {
+    if (liveDistricts && liveDistricts.length > 0) {
+      return liveDistricts.slice(0, 6);
+    }
+    const stateObj =
+      INDIA_LOCATIONS.find((s) => s.name === selectedLocation.stateName) ||
+      INDIA_LOCATIONS.find((s) => s.name === 'Tamil Nadu') ||
+      INDIA_LOCATIONS[0];
+
+    return (stateObj?.districts || []).slice(0, 6).map((d) => {
+      const baseTemp = weather?.temperature ?? 34;
+      const baseRh = weather?.humidity ?? 45;
+      const baseHtss = thermal?.htss ?? 58;
+      const baseLevel = (risk?.level ?? 'Moderate').toUpperCase();
+      return {
+        name: d.name,
+        temperature: baseTemp,
+        rh: baseRh,
+        htss: baseHtss,
+        level: baseLevel,
+      };
+    });
+  }, [liveDistricts, selectedLocation, weather, thermal, risk]);
 
   if (lowBandwidthMode) {
     return (
-      <div className="w-full h-full overflow-y-auto bg-slate-950 p-4 sm:p-6 text-slate-200 space-y-6">
-        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <span className="w-3 h-3 rounded-full bg-amber-400 animate-pulse" />
-            <div>
-              <h3 className="text-sm font-bold text-white">Low Bandwidth / Battery Saver Mode Active</h3>
-              <p className="text-xs text-slate-400">Map tiles, WebGL, and high-data animations are suspended to save data.</p>
-            </div>
-          </div>
-          <button
-            onClick={() => useAppStore.getState().setLowBandwidthMode(false)}
-            className="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition-colors"
-          >
-            Switch to Interactive Map
-          </button>
-        </div>
-
-        {/* Active Location Summary Card */}
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
-            <div>
-              <span className="text-[10px] font-bold text-amber-400 uppercase tracking-wider">Active Monitoring Zone</span>
-              <h2 className="text-lg font-extrabold text-white">{selectedLocation.name}</h2>
-            </div>
-            <div className="text-right">
-              <span className="text-xs text-slate-400">Coordinates</span>
-              <p className="font-mono text-xs text-slate-300">{selectedLocation.lat.toFixed(4)}°N, {selectedLocation.lon.toFixed(4)}°E</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-[11px] text-slate-400">Temperature</span>
-              <p className="text-lg font-bold text-white mt-0.5">{weather?.temperature ?? '--'}°C</p>
-            </div>
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-[11px] text-slate-400">Relative Humidity</span>
-              <p className="text-lg font-bold text-white mt-0.5">{weather?.humidity ?? '--'}%</p>
-            </div>
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-[11px] text-slate-400">HTSS Risk Score</span>
-              <p className="text-lg font-bold text-amber-400 mt-0.5">{thermal?.htss ?? '--'} / 100</p>
-            </div>
-            <div className="p-3 rounded-xl bg-slate-950 border border-slate-800">
-              <span className="text-[11px] text-slate-400">Advisory Level</span>
-              <p className="text-lg font-bold text-orange-400 mt-0.5">{risk?.level ?? thermal?.htssCategory ?? 'Moderate'}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Hyper-Local / District Grid */}
-        <div className="space-y-3">
-          <h3 className="text-sm font-bold text-white flex items-center justify-between">
-            <span>Local Wards &amp; Sub-Districts Telemetry</span>
-            <span className="text-xs text-slate-400 font-normal">{wardDataList.length} monitoring points</span>
-          </h3>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {wardDataList.map((ward) => (
-              <div
-                key={ward.id}
-                className="p-3.5 rounded-xl bg-slate-900/80 border border-slate-800 flex items-center justify-between gap-3"
-              >
-                <div>
-                  <h4 className="text-xs font-bold text-white">{ward.wardName}</h4>
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    {ward.weather.temperature}°C • {ward.weather.humidity}% RH
-                  </p>
-                </div>
-                <div className="text-right">
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase ${
-                      ward.riskCategory === 'EXTREME'
-                        ? 'bg-red-500/20 text-red-300 border border-red-500'
-                        : ward.riskCategory === 'HIGH'
-                        ? 'bg-orange-500/20 text-orange-300 border border-orange-500'
-                        : ward.riskCategory === 'MODERATE'
-                        ? 'bg-amber-500/20 text-amber-300 border border-amber-500'
-                        : 'bg-emerald-500/20 text-emerald-300 border border-emerald-500'
-                    }`}
-                  >
-                    HTSS {ward.htssScore}
-                  </span>
-                </div>
+      <div className="w-full h-full overflow-y-auto bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] p-4 sm:p-8 text-slate-800 space-y-6 pt-20 pb-20">
+        <div className="max-w-7xl mx-auto space-y-6">
+          {/* LOW BANDWIDTH BANNER */}
+          <div className="p-4 sm:p-5 rounded-2xl bg-amber-50/95 border border-amber-300 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="w-3.5 h-3.5 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
+              <div>
+                <h3 className="text-sm font-black text-amber-950">Low Bandwidth / Battery Saver Mode Active</h3>
+                <p className="text-xs text-amber-800 font-medium">Map tiles, WebGL, and high-data animations are suspended to save data.</p>
               </div>
-            ))}
+            </div>
+            <button
+              onClick={() => useAppStore.getState().setLowBandwidthMode(false)}
+              className="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs shadow-sm hover:shadow transition-all cursor-pointer flex-shrink-0"
+            >
+              Switch to Interactive Map ➔
+            </button>
+          </div>
+
+          {/* ACTIVE LOCATION SUMMARY CARD */}
+          <div className="p-6 rounded-3xl bg-white border border-blue-100 shadow-[0_8px_24px_rgba(30,100,200,0.06)] space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div>
+                <span className="text-[10px] font-black text-amber-700 uppercase tracking-wider block mb-0.5">Active Monitoring Zone</span>
+                <h2 className="text-xl sm:text-2xl font-black text-slate-950">{selectedLocation.name}</h2>
+              </div>
+              <div className="text-right">
+                <span className="text-xs text-slate-500 font-semibold block">Coordinates</span>
+                <p className="font-mono text-xs text-slate-800 font-bold">{selectedLocation.lat.toFixed(4)}°N, {selectedLocation.lon.toFixed(4)}°E</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1">
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
+                <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">Temperature</span>
+                <p className="text-2xl font-black text-slate-950 mt-1">{weather?.temperature !== undefined ? `${weather.temperature}°C` : '--'}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
+                <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">Relative Humidity</span>
+                <p className="text-2xl font-black text-slate-950 mt-1">{weather?.humidity !== undefined ? `${weather.humidity}%` : '--'}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
+                <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">HTSS Risk Score</span>
+                <p className="text-2xl font-black text-amber-600 mt-1">{thermal?.htss !== undefined ? `${thermal.htss} / 100` : '--'}</p>
+              </div>
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 shadow-2xs">
+                <span className="text-[11px] text-slate-500 font-bold uppercase tracking-wider block">Advisory Level</span>
+                <p className="text-2xl font-black text-orange-600 mt-1">{risk?.level ?? thermal?.htssCategory ?? 'Moderate'}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* DISTRICT TELEMETRY GRID */}
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-black text-slate-950">
+                District Monitoring Telemetry Network
+              </h3>
+              <span className="text-xs text-slate-500 font-bold">
+                {lowBandwidthStations.length} stations active
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+              {lowBandwidthStations.map((dist, idx) => {
+                const levelStr = dist?.level || 'LOW';
+                const riskCategory = (levelStr.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
+                return (
+                  <div
+                    key={`${dist.name}-${idx}`}
+                    className="p-4 rounded-2xl bg-white border border-slate-200 shadow-2xs flex items-center justify-between gap-3 hover:border-blue-300 transition-colors"
+                  >
+                    <div>
+                      <h4 className="text-sm font-black text-slate-900">{dist.name} District</h4>
+                      <p className="text-xs text-slate-500 font-medium mt-0.5">
+                        {dist.temperature}°C • {dist.rh}% RH
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span
+                        className={`px-2.5 py-1 rounded-lg text-xs font-mono font-black uppercase border ${
+                          riskCategory === 'EXTREME'
+                            ? 'bg-purple-50 text-purple-800 border-purple-300'
+                            : riskCategory === 'HIGH'
+                            ? 'bg-red-50 text-red-800 border-red-300'
+                            : riskCategory === 'MODERATE'
+                            ? 'bg-amber-50 text-amber-800 border-amber-300'
+                            : 'bg-emerald-50 text-emerald-800 border-emerald-300'
+                        }`}
+                      >
+                        HTSS {dist.htss}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>
@@ -264,169 +336,91 @@ export const HeatRiskMap: React.FC<Props> = ({
         style={{ height: '100%', width: '100%', background: '#030712' }}
         zoomControl={false}
       >
-        {/* Genuine OpenStreetMap Standard Tile Layer */}
+        {/* Google Satellite Hybrid Theme (High-Resolution Satellite Imagery + Labels) */}
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          maxZoom={19}
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap</a> contributors'
+          url="https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}"
+          subdomains={['mt0', 'mt1', 'mt2', 'mt3']}
+          maxZoom={20}
+          attribution='&copy; <a href="https://www.google.com/maps" target="_blank" rel="noopener noreferrer">Google Maps Satellite</a>'
         />
 
         <MapCameraController center={targetCenter} zoom={targetZoom} />
+        <MapClickHandler onMapClick={handleMapClick} />
         <MapInstanceRegistrar setMap={setMapInstance} />
 
         {/* ========================================================================= */}
-        {/* ALL-INDIA STATE & DISTRICT HIGH-LEVEL REAL HTSS OVERLAY                  */}
+        {/* ALL-INDIA & DISTRICT LEVEL REAL HTSS TELEMETRY OVERLAY                     */}
         {/* ========================================================================= */}
-        {isAllIndiaView &&
-          liveDistricts.map((dist, i) => {
-            const riskCategory = (dist.level.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
-            const color = getRiskColorByCategory(riskCategory);
-            const radius = 8 + dist.htss / 10;
+        {(liveDistricts || []).map((dist, i) => {
+          if (!dist || typeof dist.lat !== 'number' || typeof dist.lon !== 'number') return null;
+          const levelStr = dist.level || 'Low';
+          const riskCategory = (levelStr.toUpperCase() as 'EXTREME' | 'HIGH' | 'MODERATE' | 'LOW');
+          const color = getRiskColorByCategory(riskCategory);
+          const radius = 8 + (dist.htss || 0) / 10;
 
-            return (
-              <CircleMarker
-                key={`${dist.state}-${dist.name}-${i}`}
-                center={[dist.lat, dist.lon]}
-                radius={radius}
-                pathOptions={{
-                  fillColor: color,
-                  fillOpacity: 0.85,
-                  color: '#ffffff',
-                  weight: 1.8,
-                }}
-              >
-                <Popup className="dark-popup font-sans">
-                  <div className="p-1 min-w-[220px]">
-                    <div className="flex items-center justify-between gap-2 border-b border-dark-600 pb-1 mb-1.5">
-                      <span className="text-[10px] font-black uppercase text-orange-400">{dist.state}</span>
-                      <span
-                        className="text-[10px] font-black uppercase px-2 py-0.5 rounded"
-                        style={{ color, backgroundColor: `${color}20` }}
-                      >
-                        {riskCategory}
-                      </span>
-                    </div>
-
-                    <h4 className="font-extrabold text-sm text-white">{dist.name} District</h4>
-                    <div className="text-xs text-gray-300 mt-1 space-y-0.5">
-                      <div>HTSS Risk Score: <strong style={{ color }}>{dist.htss} / 100</strong></div>
-                      <div>Live Open-Meteo Temp: <strong>{dist.temperature}°C</strong> | RH: <strong>{dist.rh}%</strong></div>
-                      <div>WBGT: <strong>{dist.wbgt}°C</strong> | UTCI: <strong>{dist.utci}°C</strong></div>
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        setIndiaLocation(dist.state, dist.name, dist.lat, dist.lon, true, 'LIVE', undefined, false, true);
-                        if (onSelectResolution) onSelectResolution('Hyper-Local Ward GIS Risk');
-                      }}
-                      className="mt-3 w-full py-1.5 px-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black text-xs rounded-lg shadow-md transition-all cursor-pointer text-center"
+          return (
+            <CircleMarker
+              key={`${dist.state || 'IN'}-${dist.name || i}-${i}`}
+              center={[dist.lat, dist.lon]}
+              radius={radius}
+              pathOptions={{
+                fillColor: color,
+                fillOpacity: 0.85,
+                color: '#ffffff',
+                weight: 1.8,
+              }}
+              eventHandlers={{
+                click: () => {
+                  setIndiaLocation(dist.state, dist.name, dist.lat, dist.lon, true, 'LIVE', undefined, false, true);
+                  if (onSelectResolution) onSelectResolution('District / City Level Risk');
+                },
+              }}
+            >
+              <Popup className="dark-popup font-sans">
+                <div className="p-1 min-w-[220px]">
+                  <div className="flex items-center justify-between gap-2 border-b border-dark-600 pb-1 mb-1.5">
+                    <span className="text-[10px] font-black uppercase text-orange-400">{dist.state}</span>
+                    <span
+                      className="text-[10px] font-black uppercase px-2 py-0.5 rounded"
+                      style={{ color, backgroundColor: `${color}20` }}
                     >
-                      🎯 Select & View Ward GIS Risk
-                    </button>
+                      {riskCategory}
+                    </span>
                   </div>
-                </Popup>
-              </CircleMarker>
-            );
-          })}
 
-        {/* ========================================================================= */}
-        {/* HYPER-LOCAL WARD POLYGON BOUNDARIES & HEAT RISK OVERLAY FOR ACTIVE CITY   */}
-        {/* ========================================================================= */}
-        {!isAllIndiaView &&
-          mapLayers.wardBoundaries &&
-          wardDataList.map((ward) => {
-            const isSelected = selectedWard?.id === ward.id;
-            const isHovered = hoveredWard?.id === ward.id;
-            const color = getRiskColorByCategory(ward.riskCategory);
+                  <h4 className="font-extrabold text-sm text-white">{dist.name} District</h4>
+                  <div className="text-xs text-gray-300 mt-1 space-y-0.5">
+                    <div>HTSS Risk Score: <strong style={{ color }}>{dist.htss} / 100</strong></div>
+                    <div>Live Open-Meteo Temp: <strong>{dist.temperature}°C</strong> | RH: <strong>{dist.rh}%</strong></div>
+                    <div>WBGT: <strong>{dist.wbgt}°C</strong> | UTCI: <strong>{dist.utci}°C</strong></div>
+                  </div>
 
-            return (
-              <React.Fragment key={ward.id}>
-                {/* WARD POLYGON */}
-                <Polygon
-                  positions={ward.polygon}
-                  pathOptions={{
-                    fillColor: color,
-                    fillOpacity: isSelected ? 0.75 : isHovered ? 0.65 : activeLayer === 'risk' ? 0.65 : 0.45,
-                    color: isSelected ? '#ffffff' : isHovered ? '#fbbf24' : color,
-                    weight: isSelected ? 3.5 : isHovered ? 2.5 : 1.8,
-                    dashArray: isSelected ? '4 4' : undefined,
-                  }}
-                  eventHandlers={{
-                    mouseover: () => setHoveredWard(ward),
-                    mouseout: () => setHoveredWard(null),
-                    click: () => {
-                      setSelectedWard(ward);
-                    },
-                  }}
-                />
-
-                {/* ANIMATED PULSE CENTER CIRCLE FOR HIGH & EXTREME RISK WARDS */}
-                {(mapLayers.heatPulseGradient || activeLayer === 'risk') && (ward.riskCategory === 'HIGH' || ward.riskCategory === 'EXTREME') && (
-                  <CircleMarker
-                    center={[ward.lat, ward.lon]}
-                    radius={ward.htssScore >= 75 ? 24 : 16}
-                    pathOptions={{
-                      fillColor: color,
-                      fillOpacity: 0.35,
-                      color,
-                      weight: 1.5,
+                  <button
+                    onClick={() => {
+                      setIndiaLocation(dist.state, dist.name, dist.lat, dist.lon, true, 'LIVE', undefined, false, true);
+                      if (onSelectResolution) onSelectResolution('District / City Level Risk');
                     }}
-                  />
-                )}
-
-                {/* TEMPERATURE LAYER TELEMETRY BADGE */}
-                {(activeLayer === 'temp' || mapLayers.temperature) && (
-                  <CircleMarker
-                    center={[ward.lat, ward.lon]}
-                    radius={14}
-                    pathOptions={{ fillColor: '#f97316', fillOpacity: 0.9, color: '#ffffff', weight: 2 }}
+                    className="mt-3 w-full py-1.5 px-3 bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-black text-xs rounded-lg shadow-md transition-all cursor-pointer text-center"
                   >
-                    <Popup className="dark-popup font-bold text-xs">
-                      🔴 {ward.wardName}: {ward.weather.temperature}°C (Live Telemetry)
-                    </Popup>
-                  </CircleMarker>
-                )}
-
-                {/* WBGT INDEX LAYER BADGE */}
-                {(activeLayer === 'wbgt' || mapLayers.wbgt) && (
-                  <CircleMarker
-                    center={[ward.lat, ward.lon]}
-                    radius={14}
-                    pathOptions={{ fillColor: '#a855f7', fillOpacity: 0.9, color: '#ffffff', weight: 2 }}
-                  >
-                    <Popup className="dark-popup font-bold text-xs">
-                      🟣 {ward.wardName}: WBGT {ward.indices.wbgt}°C (Occupational Strain)
-                    </Popup>
-                  </CircleMarker>
-                )}
-
-                {/* HEAT INDEX LAYER BADGE */}
-                {(activeLayer === 'hi' || mapLayers.heatIndex) && (
-                  <CircleMarker
-                    center={[ward.lat, ward.lon]}
-                    radius={14}
-                    pathOptions={{ fillColor: '#ef4444', fillOpacity: 0.9, color: '#ffffff', weight: 2 }}
-                  >
-                    <Popup className="dark-popup font-bold text-xs">
-                      🔥 {ward.wardName}: Heat Index {ward.indices.heatIndex}°C (Apparent Temperature)
-                    </Popup>
-                  </CircleMarker>
-                )}
-              </React.Fragment>
-            );
-          })}
+                    🎯 Monitor This District
+                  </button>
+                </div>
+              </Popup>
+            </CircleMarker>
+          );
+        })}
 
         {/* ========================================================================= */}
-        {/* LIVE REAL-TIME LOCATION BEACON & HIGH-PRECISION GPS PULSE MARKER          */}
+        {/* LIVE REAL-TIME LOCATION BEACON & HTSS RISK LEVEL PULSE MARKER             */}
         {/* ========================================================================= */}
         <CircleMarker
           center={[selectedLocation.lat, selectedLocation.lon]}
           radius={30}
           pathOptions={{
-            fillColor: '#3b82f6',
-            fillOpacity: 0.2,
-            color: '#2563eb',
-            weight: 2,
+            fillColor: currentLocationHtss.color,
+            fillOpacity: 0.22,
+            color: currentLocationHtss.color,
+            weight: 2.5,
             dashArray: '4 4',
           }}
         />
@@ -434,7 +428,7 @@ export const HeatRiskMap: React.FC<Props> = ({
           center={[selectedLocation.lat, selectedLocation.lon]}
           radius={11}
           pathOptions={{
-            fillColor: '#2563eb',
+            fillColor: currentLocationHtss.color,
             fillOpacity: 1,
             color: '#ffffff',
             weight: 3.5,
@@ -442,16 +436,37 @@ export const HeatRiskMap: React.FC<Props> = ({
         >
           <Popup className="dark-popup font-sans" autoPan={true}>
             <div className="p-2 min-w-[240px]">
-              <div className="flex items-center gap-1.5 text-blue-400 font-black text-[11px] mb-1">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
-                📍 REAL-TIME LOCATION (OPENSTREETMAP)
+              <div className="flex items-center justify-between gap-2 border-b border-dark-600 pb-1.5 mb-1.5">
+                <div className="flex items-center gap-1.5 font-black text-[11px]" style={{ color: currentLocationHtss.color }}>
+                  <span
+                    className="w-2.5 h-2.5 rounded-full animate-ping"
+                    style={{ backgroundColor: currentLocationHtss.color }}
+                  />
+                  📍 ACTIVE LOCATION
+                </div>
+                <span
+                  className="text-[10px] font-black uppercase px-2 py-0.5 rounded"
+                  style={{
+                    color: currentLocationHtss.color,
+                    backgroundColor: `${currentLocationHtss.color}20`,
+                    border: `1px solid ${currentLocationHtss.color}40`,
+                  }}
+                >
+                  {currentLocationHtss.category}
+                </span>
               </div>
               <div className="font-extrabold text-sm text-white font-sans leading-tight">
                 {selectedLocation.name}
               </div>
-              <div className="text-[11px] text-gray-300 font-mono mt-1.5 bg-dark-800/80 p-1.5 rounded border border-dark-600">
+              <div className="text-[11px] text-gray-300 font-mono mt-1.5 bg-dark-800/80 p-1.5 rounded border border-dark-600 space-y-0.5">
                 <div>Latitude: <strong>{selectedLocation.lat.toFixed(5)}°N</strong></div>
                 <div>Longitude: <strong>{selectedLocation.lon.toFixed(5)}°E</strong></div>
+                {currentLocationHtss.score !== null && (
+                  <div className="pt-1 mt-1 border-t border-dark-700/60 flex items-center justify-between">
+                    <span>HTSS Risk Score:</span>
+                    <strong style={{ color: currentLocationHtss.color }}>{currentLocationHtss.score} / 100</strong>
+                  </div>
+                )}
               </div>
               {weather && (
                 <div className="mt-2 text-xs text-gray-200 border-t border-dark-600 pt-1.5 space-y-0.5">
@@ -469,60 +484,20 @@ export const HeatRiskMap: React.FC<Props> = ({
                   </div>
                 </div>
               )}
-              <div className="mt-2.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/40 bg-emerald-500/10 px-2 py-1 rounded text-center">
-                ✅ 100% GENUINE OPENSTREETMAP POSITION
+              <div
+                className="mt-2.5 text-[10px] font-bold px-2 py-1 rounded text-center border"
+                style={{
+                  color: currentLocationHtss.color,
+                  backgroundColor: `${currentLocationHtss.color}15`,
+                  borderColor: `${currentLocationHtss.color}40`,
+                }}
+              >
+                ● {currentLocationHtss.category} RISK LEVEL ({currentLocationHtss.score !== null ? `HTSS ${currentLocationHtss.score}` : 'ACTIVE'})
               </div>
             </div>
           </Popup>
         </CircleMarker>
-
-        {/* CAMERA CONTROLLER */}
-        <MapCameraController center={targetCenter} zoom={targetZoom} />
       </MapContainer>
-
-      {/* HOVER GLASS TOOLTIP CARD FOR WARD VIEW */}
-      {!isAllIndiaView && hoveredWard && !selectedWard && (
-        <div className="absolute top-[68px] left-4 z-[420] pointer-events-none glass-card p-3.5 bg-dark-900/95 backdrop-blur-xl border border-dark-600 shadow-2xl rounded-2xl w-72 animate-fadeIn">
-          <div className="flex items-center justify-between border-b border-dark-700 pb-2 mb-2">
-            <span className="text-[10px] font-black uppercase text-orange-400 tracking-wider">
-              {hoveredWard.wardCode}
-            </span>
-            <span
-              className="text-[10px] font-black uppercase px-2 py-0.5 rounded border"
-              style={{
-                color: getRiskColorByCategory(hoveredWard.riskCategory),
-                borderColor: `${getRiskColorByCategory(hoveredWard.riskCategory)}60`,
-                backgroundColor: `${getRiskColorByCategory(hoveredWard.riskCategory)}15`,
-              }}
-            >
-              {hoveredWard.riskCategory}
-            </span>
-          </div>
-
-          <h4 className="font-black text-sm text-white">{hoveredWard.wardName}</h4>
-          <p className="text-[11px] text-gray-400">{hoveredWard.district}, {hoveredWard.state}</p>
-
-          <div className="grid grid-cols-2 gap-2 mt-3 pt-2 border-t border-dark-700/60 text-xs">
-            <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-bold">HTSS Risk</span>
-              <span className="font-mono font-black text-sm text-white">{hoveredWard.htssScore} / 100</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-bold">WBGT</span>
-              <span className="font-mono font-black text-sm text-orange-400">{hoveredWard.indices.wbgt}°C</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-bold">Temperature</span>
-              <span className="font-mono font-bold text-gray-200">{hoveredWard.weather.temperature}°C</span>
-            </div>
-            <div>
-              <span className="text-[10px] text-gray-400 block uppercase font-bold">Humidity</span>
-              <span className="font-mono font-bold text-gray-200">{hoveredWard.weather.humidity}%</span>
-            </div>
-          </div>
-          <p className="text-[9px] text-orange-400 italic mt-2 text-center">Click ward to open detailed risk command center</p>
-        </div>
-      )}
 
       {/* FLOATING MAP CONTROLS TOOLBAR */}
       <MapControls
@@ -530,40 +505,35 @@ export const HeatRiskMap: React.FC<Props> = ({
         onZoomOut={handleZoomOut}
         onLocateMe={handleLocateMe}
         onResetView={handleResetView}
-        onToggleLayers={() => setIsLayerModalOpen(!isLayerModalOpen)}
         onToggleSearch={() => setIsSearchOpen(!isSearchOpen)}
         onOpenGuide={onOpenGuide || (() => {})}
       />
 
-      {/* SEARCH LOCATION MODAL OVERLAY */}
-      {isSearchOpen && (
-        <div className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn pointer-events-auto">
-          <div className="relative w-full max-w-lg bg-dark-900 border border-orange-500/30 rounded-2xl p-2 shadow-2xl">
-            <div className="flex justify-end p-2 pb-0">
-              <button
-                onClick={() => setIsSearchOpen(false)}
-                className="px-2.5 py-1 text-xs font-bold rounded-lg bg-dark-800 text-gray-400 hover:text-white border border-dark-600 transition cursor-pointer"
-              >
-                Close ✕
-              </button>
+      {/* SEARCH LOCATION MODAL OVERLAY (PORTALED TO DOCUMENT.BODY) */}
+      {isSearchOpen &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-fadeIn pointer-events-auto"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setIsSearchOpen(false);
+            }}
+          >
+            <div className="relative w-full max-w-lg bg-white border border-blue-100 rounded-3xl p-3 shadow-2xl my-auto max-h-[92vh] overflow-y-auto">
+              <div className="flex justify-end p-2 pb-0">
+                <button
+                  onClick={() => setIsSearchOpen(false)}
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 hover:text-slate-900 border border-slate-200 transition cursor-pointer"
+                >
+                  Close ✕
+                </button>
+              </div>
+              <div>
+                <LocationSelector onClose={() => setIsSearchOpen(false)} />
+              </div>
             </div>
-            <div onClick={() => setIsSearchOpen(false)}>
-              <LocationSelector />
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MAP LAYER SWITCHER MODAL */}
-      <MapLayerSwitcherModal
-        isOpen={isLayerModalOpen}
-        onClose={() => setIsLayerModalOpen(false)}
-        layers={mapLayers}
-        onToggleLayer={handleToggleLayer}
-      />
-
-      {/* SLIDING WARD RISK COMMAND CENTER PANEL */}
-      <WardDetailPanel ward={selectedWard} onClose={() => setSelectedWard(null)} />
+          </div>,
+          document.body
+        )}
     </div>
   );
 };

@@ -1,0 +1,21 @@
+{
+  "name": "ThermoSafe — AI Heat Early Warning",
+  "short_name": "ThermoSafe",
+  "description": "AI-powered extreme heat early warning system with real-time biometeorological monitoring across all 788 Indian districts.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#A5D2FC",
+  "theme_color": "#2563EB",
+  "categories": ["weather", "health", "government"],
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌡️</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

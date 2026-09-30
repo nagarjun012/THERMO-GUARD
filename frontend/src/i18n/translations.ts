@@ -225,6 +225,7 @@ export const translations = {
       accessibilityStatement: 'Accessibility Statement',
       aiTransparency: 'AI Transparency',
       governanceContact: 'Governance & Contact',
+      developers: "DEVELOPER'S",
       dataSources: 'Data Sources',
       disclaimer: 'This tool supplements but does not replace official government advisories or medical advice.',
     },
@@ -353,6 +354,7 @@ export const translations = {
     footer: {
       lastUpdated: 'கடைசி புதுப்பிப்பு', privacyPolicy: 'தனியுரிமைக் கொள்கை', termsOfUse: 'பயன்பாட்டு விதிமுறைகள்',
       accessibilityStatement: 'அணுகல் அறிக்கை', aiTransparency: 'AI வெளிப்படைத்தன்மை', governanceContact: 'நிர்வாகம் & தொடர்பு',
+      developers: "DEVELOPER'S",
       dataSources: 'தரவு ஆதாரங்கள்', disclaimer: 'இந்தக் கருவி அரசு ஆலோசனைகள் அல்லது மருத்துவ ஆலோசனையை மாற்றாது.',
     },
     threshold: {
@@ -449,6 +451,7 @@ export const translations = {
     footer: {
       lastUpdated: 'अंतिम अपडेट', privacyPolicy: 'गोपनीयता नीति', termsOfUse: 'उपयोग की शर्तें',
       accessibilityStatement: 'पहुँच विवरण', aiTransparency: 'AI पारदर्शिता', governanceContact: 'शासन और संपर्क',
+      developers: "DEVELOPER'S",
       dataSources: 'डेटा स्रोत', disclaimer: 'यह उपकरण आधिकारिक सलाह या चिकित्सा सलाह का विकल्प नहीं है।',
     },
     threshold: {

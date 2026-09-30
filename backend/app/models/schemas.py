@@ -106,7 +106,7 @@ class MLPrediction(BaseModel):
     risk_level: str
     confidence: float
     feature_importance: Dict[str, float]
-    model_metrics: Dict[str, float]
+    model_metrics: Dict[str, Any]
 
 class GovernmentDashboard(BaseModel):
     total_states_affected: int
@@ -120,3 +120,53 @@ class GovernmentDashboard(BaseModel):
 class HistoricalData(BaseModel):
     location: str
     years: List[Dict[str, Any]]
+
+# --- Heat-Health Risk Prediction & Decision Support Schemas ---
+
+class VulnerableGroupAlertSchema(BaseModel):
+    group_name: str
+    target_risk_level: str
+    vulnerability_description: str
+    recommended_interventions: List[str]
+    urgency: str
+
+class DayPredictionSchema(BaseModel):
+    day_offset: int
+    target_date: str
+    warning_stage: str
+    predicted_temperature_max: float
+    predicted_temperature_min: float
+    predicted_humidity: float
+    predicted_heat_index: float
+    predicted_htss: float
+    risk_level: str
+    heat_health_risk_score: float
+    hospitalization_risk_index: float
+    mortality_risk_index: float
+    confidence_score: float
+    requires_human_review: bool
+    autonomous_action_allowed: bool
+    primary_contributing_factors: List[Dict[str, Any]]
+    action_checklist: List[str]
+
+class MultiDayHealthRiskForecastSchema(BaseModel):
+    location: str
+    generated_at: str
+    model_version: str
+    threshold_version: str
+    health_outcome_status: str
+    decision_support_notice: str
+    operating_threshold: float
+    daily_predictions: List[DayPredictionSchema]
+    localized_vulnerable_alerts: List[VulnerableGroupAlertSchema]
+    human_in_the_loop_protocol: Dict[str, Any]
+
+class ModelBenchmarkSchema(BaseModel):
+    model_name: str
+    validation_type: str
+    n_splits: int
+    optimal_threshold: float
+    metrics_at_default_threshold: Dict[str, Any]
+    metrics_at_optimized_threshold: Dict[str, Any]
+    decision_threshold_gain: Dict[str, Any]
+

@@ -1,4 +1,14 @@
 export type FreshnessLevel = 'LIVE' | 'RECENT' | 'STALE' | 'UNKNOWN';
+export type FacilityOperationalStatus = 'OPERATIONAL' | 'DATA_UNAVAILABLE' | 'SERVICE_UNAVAILABLE' | 'LAST_KNOWN';
+
+export interface DataProvenance {
+  source: string;
+  sourceUrl?: string;
+  sourceType: string;
+  verifiedBy: string;
+  verifiedYear?: number;
+  isSimulated: boolean;
+}
 
 export interface Facility {
   facilityId: string;
@@ -26,6 +36,8 @@ export interface Facility {
   lastUpdated?: string;
   dataAgeMinutes?: number;
   freshness: FreshnessLevel;
+  operationalStatus?: FacilityOperationalStatus;
+  provenance?: DataProvenance;
   distanceKm?: number;
 }
 

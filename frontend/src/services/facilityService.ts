@@ -78,12 +78,17 @@ export const facilityService = {
     ambulanceAvailable?: boolean;
   }): Promise<boolean> {
     try {
+<<<<<<< HEAD
       // Auth token is handled automatically via HttpOnly cookies
+=======
+      // Pass credentials via HttpOnly cookie. Server verifies ADMIN session.
+>>>>>>> 0f7431d75c8dfbfc53db3247a8734202bca74627
       const res = await fetch(`${API_BASE}/admin/hospital/update`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'same-origin',
         body: JSON.stringify(payload),
       });
       return res.ok;

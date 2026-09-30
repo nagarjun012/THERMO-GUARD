@@ -8,17 +8,36 @@ import { HeatRiskMap } from '../components/map/HeatRiskMap';
 import { MapLegend } from '../components/map/MapLegend';
 import { StateRiskBar } from '../components/charts/StateRiskBar';
 import { VulnerabilityRadar } from '../components/charts/VulnerabilityRadar';
-import { DataProvenancePanel } from '../components/dashboard/DataProvenancePanel';
 import { HTSSAuditView } from '../components/dashboard/HTSSAuditView';
-import { buildWeatherProvenance } from '../lib/dataProvenance';
+import { HeatHealthPredictionPanel } from '../components/dashboard/HeatHealthPredictionPanel';
 import { computeFullAudit } from '../lib/htssEngine';
-import { Siren, Calculator } from 'lucide-react';
+import { generateSitrepPdf } from '../utils/sitrepPdfGenerator';
+import { Siren, Calculator, FileDown } from 'lucide-react';
 
 export const GovernmentDashboard: React.FC = () => {
-  const { selectedLocation } = useAppStore();
+  const { selectedLocation, currentUser } = useAppStore();
   const { data: apiData } = useGovernmentDashboard();
-  const { districts, counters, isLoading, progress, lastFetchedIso } = useGovPortalData();
+  const { districts, counters, isLoading, progress } = useGovPortalData();
   const [isAuditOpen, setIsAuditOpen] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExportSitrep = () => {
+    setIsExporting(true);
+    try {
+      generateSitrepPdf(
+        { districts, counters },
+        {
+          officerName: currentUser?.name || 'Authorized Disaster Management Officer',
+          department: currentUser?.department || 'Disaster Risk Reduction Directorate',
+          role: currentUser?.role || 'OFFICER',
+        }
+      );
+    } catch (err) {
+      console.error('SITREP PDF generation error:', err);
+    } finally {
+      setTimeout(() => setIsExporting(false), 500);
+    }
+  };
 
   // Socioeconomic vulnerability baseline reference data (Census / NITI Aayog Index)
   const baselineVulnerability = {
@@ -41,19 +60,6 @@ export const GovernmentDashboard: React.FC = () => {
     }))
     .slice(0, 5);
 
-  // Provenance for government command center
-  const provenance = useMemo(() => {
-    const isSuccess = counters.successfulCount > 0;
-    return buildWeatherProvenance({
-      source: 'Open-Meteo Batch Telemetry',
-      lastUpdated: lastFetchedIso,
-      location: 'National / 788 Administrative Districts',
-      apiStatus: isSuccess ? 'SUCCESS' : isLoading ? 'PARTIAL' : 'FAILED',
-      calculationTime: lastFetchedIso || new Date().toISOString(),
-      dataType: 'LIVE_WEATHER',
-    });
-  }, [lastFetchedIso, counters.successfulCount, isLoading]);
-
   // Compute HTSS audit data for highest-risk district or first verified district
   const auditTarget = useMemo(() => {
     return districts.find((d) => d.temperature !== null && d.humidity !== null && d.htss !== null) || null;
@@ -71,51 +77,56 @@ export const GovernmentDashboard: React.FC = () => {
   }, [auditTarget]);
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+    <div className="gov-page-root max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
       {/* COMMAND CENTER HEADER & TACTILE CONTROLS */}
       <div className="flex flex-wrap justify-between items-center gap-4 mb-2">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight font-mono">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight font-mono">
             Government Command Center
           </h1>
-          <p className="text-xs sm:text-sm text-gray-400 mt-1 font-mono">
+          <p className="text-xs sm:text-sm text-slate-700 mt-1 font-semibold font-mono">
             National Heat Risk Intelligence — Verified Real-Time Biometeorological Telemetry
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <button
+            onClick={handleExportSitrep}
+            disabled={isExporting}
+            className="skeuo-btn px-3.5 py-2 text-xs font-mono font-bold text-slate-800 bg-white border border-blue-200/80 rounded-lg flex items-center gap-2 hover:bg-blue-50/70 shadow-xs transition-all active:scale-95 disabled:opacity-60 cursor-pointer"
+            title="Download Official NDMA Heat Action Plan Daily Situation Report (PDF)"
+          >
+            <FileDown className="w-3.5 h-3.5 text-blue-600" />
+            <span>{isExporting ? 'Generating PDF...' : 'Daily SITREP (PDF)'}</span>
+          </button>
+
           {auditData && (
             <button
               onClick={() => setIsAuditOpen(true)}
-              className="skeuo-btn px-4 py-2.5 text-xs font-mono font-bold text-gray-300 rounded-xl flex items-center gap-2 hover:text-white transition-colors"
+              className="skeuo-btn px-3.5 py-2 text-xs font-mono font-bold text-slate-800 bg-white border border-slate-300 rounded-lg flex items-center gap-2 hover:bg-slate-50 shadow-xs transition-colors cursor-pointer"
               title="Inspect authoritative HTSS calculation formula breakdown"
             >
-              <Calculator className="w-4 h-4 text-emerald-400" />
+              <Calculator className="w-3.5 h-3.5 text-emerald-600" />
               <span>HTSS Audit View</span>
             </button>
           )}
 
           <button
             onClick={() => alert('Emergency Heatwave Protocol Broadcast Triggered to State Authorities.')}
-            className="skeuo-btn skeuo-btn-danger btn-shimmer px-5 py-2.5 text-xs font-black uppercase tracking-wider rounded-xl shadow-[0_4px_16px_rgba(220,38,38,0.55)] flex items-center gap-2"
+            className="skeuo-btn skeuo-btn-danger px-4 py-2 text-xs font-bold uppercase tracking-wider rounded-lg flex items-center gap-2 cursor-pointer"
           >
-            <Siren className="w-4 h-4 animate-bounce" />
+            <Siren className="w-3.5 h-3.5 text-white" />
             <span>Broadcast Emergency Alert</span>
           </button>
         </div>
-      </div>
-
-      {/* DATA PROVENANCE ACCORDION */}
-      <div className="mb-4">
-        <DataProvenancePanel provenance={provenance} compact={true} />
       </div>
 
       {/* DYNAMIC LIVE OVERVIEW CARDS */}
       <OverviewCards counters={counters} isLoading={isLoading} progress={progress} />
 
       {/* MAP & PEAK LOCATIONS ROW */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[500px]">
-        <div className="lg:col-span-2 relative rounded-2xl overflow-hidden neu-card border border-white/10 shadow-2xl">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[460px]">
+        <div className="lg:col-span-2 relative rounded-3xl overflow-hidden bg-white/95 border border-blue-200/80 shadow-2xl h-[460px] sm:h-[520px] lg:h-auto min-h-[440px]">
           <HeatRiskMap cities={apiData?.cities || []} center={[selectedLocation.lat, selectedLocation.lon]} />
           <MapLegend />
         </div>
@@ -123,6 +134,13 @@ export const GovernmentDashboard: React.FC = () => {
           <StateRiskBar locations={topLocations} />
         </div>
       </div>
+
+      {/* 3-5 DAY HEAT-HEALTH WARNING & EPIDEMIOLOGICAL RISK INTELLIGENCE */}
+      <HeatHealthPredictionPanel
+        lat={selectedLocation.lat || 28.6139}
+        lon={selectedLocation.lon || 77.2090}
+        locationName={selectedLocation.name || 'Selected Region'}
+      />
 
       {/* ALL-INDIA RANKINGS TABLE & VULNERABILITY RADAR */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

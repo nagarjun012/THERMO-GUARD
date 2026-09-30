@@ -190,6 +190,38 @@ const GovernanceContent: React.FC = () => {
   );
 };
 
+/* ─── Developers ─────────────────────────────────────────────────────────── */
+const DevelopersContent: React.FC = () => {
+  const developers = [
+    'ABINAYA RAHINI K',
+    'ASHVITHA SHREE J S',
+    'ASHWATH P',
+    'DHARUN S J',
+    'NAGARJUN S S',
+    'PAVISHANA DEVI M',
+  ];
+
+  return (
+    <div className="py-2">
+      <ol className="divide-y divide-white/10 rounded-xl overflow-hidden bg-white/[0.03] border border-white/10">
+        {developers.map((name, index) => (
+          <li
+            key={name}
+            className="flex items-center gap-4 px-4 py-3.5 hover:bg-white/[0.04] transition-colors"
+          >
+            <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-500/15 border border-blue-400/30 text-blue-400 font-mono text-xs font-bold shrink-0">
+              {index + 1}
+            </span>
+            <span className="text-sm font-semibold tracking-wide text-white uppercase">
+              {name}
+            </span>
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+};
+
 /* ─── Master Modal Router ────────────────────────────────────────────────── */
 export const OfficialModals: React.FC = () => {
   const { activeOfficialModal, setActiveOfficialModal, language } = useAppStore();
@@ -205,6 +237,7 @@ export const OfficialModals: React.FC = () => {
     accessibility: { title: tr.accessibility.title, content: <AccessibilityContent /> },
     ai: { title: tr.ai.title, content: <AiTransparencyContent /> },
     governance: { title: tr.governance.title, content: <GovernanceContent /> },
+    developers: { title: "DEVELOPER'S", content: <DevelopersContent /> },
   };
 
   const modal = modalMap[activeOfficialModal];

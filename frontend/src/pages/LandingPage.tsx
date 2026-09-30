@@ -9,15 +9,16 @@ import {
   Smartphone,
   Globe,
   User,
-  Sparkles,
+  ShieldAlert,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAppStore, AuthRole } from '../stores/appStore';
 import { LoginModal } from '../components/auth/LoginModal';
+import { TiltCard } from '../components/common/TiltCard';
 
 export const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { setUserRole } = useAppStore();
+  const { loginCitizen } = useAppStore();
   const [modalOpen, setModalOpen] = useState(false);
   const [modalRole, setModalRole] = useState<AuthRole>('user');
 
@@ -26,11 +27,11 @@ export const LandingPage: React.FC = () => {
     setModalOpen(true);
   };
 
-  const handleQuickLogin = (role: AuthRole) => {
-    setUserRole(role);
+  const handleQuickLogin = async (role: AuthRole) => {
     if (role === 'gov') {
-      navigate('/government');
+      openLogin('gov');
     } else {
+      await loginCitizen();
       navigate('/dashboard');
     }
   };
@@ -54,7 +55,7 @@ export const LandingPage: React.FC = () => {
     {
       icon: Globe,
       title: 'Interactive GIS Mapping',
-      desc: 'Visualizing municipal wards, urban heat islands, and local thermal zones.',
+      desc: 'Visualizing district hotspots, urban heat islands, and local thermal zones.',
     },
     {
       icon: BarChart3,
@@ -69,152 +70,190 @@ export const LandingPage: React.FC = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-dark-900 text-white overflow-hidden">
-      {/* AMBIENT GRADIENTS */}
-      <div className="absolute inset-0 z-0">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-red-600/20 rounded-full blur-[120px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-600/20 rounded-full blur-[120px]" />
+    <div className="min-h-screen bg-gradient-to-b from-[#A5D2FC] via-[#CCE5FD] to-[#EBF4FE] text-slate-900 overflow-x-hidden">
+      {/* AMBIENT GRADIENTS WITH FLOATING DRIFT */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+        <motion.div
+          animate={{
+            x: [0, 20, 0],
+            y: [0, -15, 0],
+          }}
+          transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-white/45 rounded-full blur-[130px]"
+        />
+        <motion.div
+          animate={{
+            x: [0, -25, 0],
+            y: [0, 20, 0],
+          }}
+          transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
+          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-300/35 rounded-full blur-[130px]"
+        />
       </div>
 
       <div className="relative z-10">
         {/* TOP NAVBAR */}
-        <nav className="p-6 flex justify-between items-center max-w-7xl mx-auto">
-          <div className="text-2xl font-bold flex items-center gap-2">
-            <span className="text-3xl">🌡️</span>
-            <span className="font-mono tracking-tight font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-amber-300 to-yellow-400">
+        <nav className="p-3.5 sm:p-6 flex justify-between items-center gap-2 max-w-7xl mx-auto safe-top">
+          <div className="text-xl sm:text-2xl font-bold flex items-center gap-2 sm:gap-3 shrink-0">
+            <motion.div
+              whileHover={{ rotate: [0, -10, 10, 0], scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+              className="p-1.5 sm:p-2 rounded-xl bg-white border border-blue-200/80 text-blue-600 shadow-xs cursor-pointer"
+            >
+              <ShieldAlert className="w-5 h-5 sm:w-6 sm:h-6" />
+            </motion.div>
+            <span className="font-mono tracking-tight font-black text-slate-950 text-base sm:text-2xl">
               THERMOSAFE
             </span>
           </div>
 
-          {/* DUAL LOGIN BUTTONS */}
-          <div className="flex items-center gap-3">
-            <button
+          {/* DUAL LOGIN BUTTONS WITH HAPTIC PRESS */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => openLogin('user')}
               type="button"
-              className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold rounded-xl text-blue-300 border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 transition-all cursor-pointer shadow-[0_0_12px_rgba(59,130,246,0.2)]"
+              className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono font-bold rounded-xl text-blue-700 border border-blue-200 bg-white hover:bg-blue-50 shadow-xs transition-colors cursor-pointer"
             >
-              <User className="w-3.5 h-3.5 text-blue-400" />
-              <span>USER LOGIN</span>
-            </button>
+              <User className="w-3.5 h-3.5 text-blue-600" />
+              <span>CITIZEN</span>
+            </motion.button>
 
-            <button
+            <motion.button
+              whileHover={{ scale: 1.03 }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => openLogin('gov')}
               type="button"
-              className="flex items-center gap-2 px-4 py-2 text-xs font-mono font-bold rounded-xl text-amber-300 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 transition-all cursor-pointer shadow-[0_0_12px_rgba(245,158,11,0.2)]"
+              className="flex items-center gap-1 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 sm:py-2 text-[11px] sm:text-xs font-mono font-bold rounded-xl text-slate-950 border border-blue-300/80 bg-[#EDF5FD] hover:bg-blue-100 shadow-xs transition-colors cursor-pointer"
             >
-              <Shield className="w-3.5 h-3.5 text-amber-400" />
-              <span>GOV LOGIN</span>
-            </button>
+              <Shield className="w-3.5 h-3.5 text-amber-600" />
+              <span>OFFICIAL</span>
+            </motion.button>
           </div>
         </nav>
 
         {/* HERO SECTION */}
-        <main className="max-w-7xl mx-auto px-6 pt-16 pb-32">
-          <div className="text-center max-w-4xl mx-auto mb-16">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-10 sm:pt-16 pb-28">
+          <div className="text-center max-w-4xl mx-auto mb-16 sm:mb-20">
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/10 border border-orange-500/30 text-orange-300 text-xs font-mono font-bold mb-6"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white border border-blue-200/90 text-blue-900 text-[11px] font-mono font-bold mb-6 shadow-2xs"
             >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>DUAL-TIER HEAT RISK INTELLIGENCE ARCHITECTURE</span>
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <Activity className="w-3.5 h-3.5 text-blue-600" />
+              <span className="tracking-wider uppercase">OPERATIONAL HEAT DEFENSE PLATFORM • 788 DISTRICTS</span>
             </motion.div>
 
             <motion.h1
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-5xl md:text-7xl font-extrabold mb-6 leading-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 via-red-500 to-purple-600 font-mono tracking-tight"
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="text-4xl sm:text-6xl lg:text-7xl font-black mb-6 leading-[1.08] tracking-tight text-slate-950"
             >
-              AI-Powered Extreme Heat Early Warning
+              Thermal Stress Intelligence &amp; Early Warning System
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto leading-relaxed"
+              transition={{ delay: 0.1, duration: 0.6 }}
+              className="text-base sm:text-lg text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed font-medium"
             >
-              Protecting lives through intelligent thermal stress monitoring, predictive forecasting,
-              and targeted interventions for vulnerable populations across India.
+              Real-time biometeorological monitoring, physical heat index forecasting, and district-level automated mitigation protocols across all Indian states &amp; UTs.
             </motion.p>
 
-            {/* TWO DEDICATED LOGIN ACCESS GATEWAYS */}
+            {/* TWO DEDICATED 3D PHYSICS TILT LOGIN ACCESS GATEWAYS */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto mb-6"
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="grid grid-cols-1 md:grid-cols-2 gap-5 max-w-2xl mx-auto mb-6 text-left"
             >
-              {/* GATEWAY 1: USER LOGIN */}
-              <div
+              {/* GATEWAY 1: CITIZEN PORTAL */}
+              <TiltCard
                 onClick={() => handleQuickLogin('user')}
-                className="neu-card p-6 text-left rounded-3xl border border-blue-500/30 bg-blue-950/20 hover:border-blue-400 hover:bg-blue-950/40 transition-all cursor-pointer group shadow-[0_0_25px_rgba(59,130,246,0.15)]"
+                maxTilt={9}
+                depth={16}
+                className="double-bezel p-6 sm:p-7 rounded-[2rem] group flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 rounded-2xl bg-blue-500/20 text-blue-400">
-                    <User className="w-6 h-6" />
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform shadow-2xs">
+                      <User className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-blue-800 border border-blue-200 px-2.5 py-1 rounded-full bg-blue-50/80">
+                      PUBLIC ACCESS
+                    </span>
                   </div>
-                  <span className="text-[11px] font-mono font-bold text-blue-400 border border-blue-500/30 px-2.5 py-1 rounded-full bg-blue-500/10">
-                    PUBLIC / CITIZEN
-                  </span>
+                  <h3 className="text-xl font-black text-slate-950 mb-2 group-hover:text-blue-600 transition-colors">
+                    Citizen Portal
+                  </h3>
+                  <p className="text-xs text-slate-600 mb-6 leading-relaxed font-medium">
+                    Personalized strain profiles, live GIS heat risk maps, 72-hour forecast, and clinical advisories.
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold font-mono text-white mb-1 group-hover:text-blue-300 transition-colors">
-                  USER LOGIN
-                </h3>
-                <p className="text-xs text-gray-400 mb-4">
-                  Citizen Dashboard, live GIS heat risk maps, 72-hour forecast, and clinical advisories.
-                </p>
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-blue-400 group-hover:translate-x-1 transition-transform">
-                  <span>Enter User Dashboard</span>
-                  <ArrowRight className="w-4 h-4" />
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-blue-700">
+                  <span>Open Citizen Dashboard</span>
+                  <div className="w-7 h-7 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 group-hover:translate-x-1.5 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-2xs">
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
                 </div>
-              </div>
+              </TiltCard>
 
-              {/* GATEWAY 2: GOV LOGIN */}
-              <div
+              {/* GATEWAY 2: GOVERNMENT COMMAND */}
+              <TiltCard
                 onClick={() => handleQuickLogin('gov')}
-                className="neu-card p-6 text-left rounded-3xl border border-amber-500/30 bg-amber-950/20 hover:border-amber-400 hover:bg-amber-950/40 transition-all cursor-pointer group shadow-[0_0_25px_rgba(245,158,11,0.15)]"
+                maxTilt={9}
+                depth={16}
+                className="double-bezel p-6 sm:p-7 rounded-[2rem] group flex flex-col justify-between"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="p-3 rounded-2xl bg-amber-500/20 text-amber-400">
-                    <Shield className="w-6 h-6" />
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="w-11 h-11 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 group-hover:scale-110 transition-transform shadow-2xs">
+                      <Shield className="w-5 h-5" />
+                    </div>
+                    <span className="text-[10px] font-mono font-bold tracking-wider uppercase text-amber-900 border border-amber-300 px-2.5 py-1 rounded-full bg-amber-50/80">
+                      OFFICIAL AUTHORITIES
+                    </span>
                   </div>
-                  <span className="text-[11px] font-mono font-bold text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded-full bg-amber-500/10">
-                    OFFICIAL AUTHORITIES
-                  </span>
+                  <h3 className="text-xl font-black text-slate-950 mb-2 group-hover:text-amber-700 transition-colors">
+                    Government Command
+                  </h3>
+                  <p className="text-xs text-slate-600 mb-6 leading-relaxed font-medium">
+                    National heat risk intelligence across all 788 districts, Section 144 triggers, and hospital capacity.
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold font-mono text-white mb-1 group-hover:text-amber-300 transition-colors">
-                  GOV LOGIN
-                </h3>
-                <p className="text-xs text-gray-400 mb-4">
-                  National heat risk intelligence across all 788 districts, Section 144 triggers, and hospital bed monitoring.
-                </p>
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-amber-400 group-hover:translate-x-1 transition-transform">
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-amber-800">
                   <span>Access Government Portal</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <div className="w-7 h-7 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 group-hover:translate-x-1.5 group-hover:bg-amber-600 group-hover:text-white transition-all shadow-2xs">
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </div>
                 </div>
-              </div>
+              </TiltCard>
             </motion.div>
           </div>
 
-          {/* SYSTEM CAPABILITIES GRID */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* SYSTEM CAPABILITIES GRID WITH TACTILE TILT & SPRINGS */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {features.map((f, i) => {
               const Icon = f.icon;
               return (
-                <motion.div
+                <TiltCard
                   key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 + i * 0.1 }}
-                  className="glass-card p-8 hover:-translate-y-2 transition-transform duration-300 group"
+                  maxTilt={6}
+                  depth={8}
+                  className="double-bezel p-6 sm:p-7 rounded-[1.75rem] group"
                 >
-                  <div className="w-12 h-12 bg-dark-700 rounded-xl flex items-center justify-center mb-6 group-hover:bg-accent/20 transition-colors">
-                    <Icon className="w-6 h-6 text-accent group-hover:text-accent-light" />
+                  <div className="w-11 h-11 bg-blue-50 border border-blue-200 rounded-2xl flex items-center justify-center mb-4 text-blue-600 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all shadow-2xs">
+                    <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-xl font-bold mb-3">{f.title}</h3>
-                  <p className="text-gray-400 text-sm leading-relaxed">{f.desc}</p>
-                </motion.div>
+                  <h3 className="text-base font-black text-slate-950 mb-1.5 group-hover:text-blue-600 transition-colors">
+                    {f.title}
+                  </h3>
+                  <p className="text-slate-600 text-xs font-medium leading-relaxed">{f.desc}</p>
+                </TiltCard>
               );
             })}
           </div>
