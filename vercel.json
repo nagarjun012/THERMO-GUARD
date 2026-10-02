@@ -1,11 +1,12 @@
 {
+  "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm --prefix frontend run build",
   "outputDirectory": "frontend/dist",
   "installCommand": "npm install",
   "framework": null,
   "functions": {
     "api/*.ts": {
-      "maxDuration": 10
+      "maxDuration": 30
     }
   },
   "crons": [
@@ -16,20 +17,24 @@
   ],
   "rewrites": [
     {
-      "source": "/api/facilities/(.*)",
+      "source": "/api/facilities/:path*",
       "destination": "/api/facilities"
     },
     {
-      "source": "/api/health/(.*)",
+      "source": "/api/health/:path*",
       "destination": "/api/facilities"
     },
     {
-      "source": "/api/auth/(.*)",
+      "source": "/api/auth/:path*",
       "destination": "/api/auth?subpath=$1"
     },
     {
-      "source": "/api/admin/(.*)",
+      "source": "/api/admin/:path*",
       "destination": "/api/admin?subpath=$1"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
     },
     {
       "source": "/((?!api/).*)",
